@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"bufio"
 	"strconv"
 	"strings"
 	"fmt"
@@ -13,8 +12,6 @@ import (
 type Bot interface {
 	DoTurn(s *State) os.Error
 }
-
-var stdin = bufio.NewReader(os.Stdin)
 
 //State keeps track of everything we need to know about the state of the game
 type State struct {
@@ -33,28 +30,13 @@ type State struct {
 }
 
 //Start takes the initial parameters from stdin
-func (s *State) Start() os.Error {
+func (s *State) Start() {
+	s.Load()
+	s.Map = NewMap(s.Rows, s.Cols)
+}
 
-	for {
-		line, err := stdin.ReadString('\n')
-		if err != nil {
-			return err
-		}
-		line = line[:len(line)-1] //remove the delimiter
-
-		if line == "" {
-			continue
-		}
-
-		if line == "ready" {
-			break
-		}
-
-		words := strings.SplitN(line, " ", 2)
-		if len(words) != 2 {
-			panic(`"` + line + `"`)
-			return os.NewError("invalid command format: " + line)
-		}
+func (s *State) Load() {
+	for words := range(getPairs()) {
 
 		param, _ := strconv.Atoi(words[1])
 
@@ -82,13 +64,9 @@ func (s *State) Start() os.Error {
 			s.Turn = param
 
 		default:
-			log.Panicf("unknown command: %s", line)
+			log.Printf("unknown command: %v", words)
 		}
 	}
-
-	s.Map = NewMap(s.Rows, s.Cols)
-
-	return nil
 }
 
 //Loop handles the majority of communication between your bot and the server.
