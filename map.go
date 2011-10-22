@@ -252,21 +252,16 @@ const (
 	NoMovement
 )
 
+var directionstrings  = map[Direction]string{
+	North: "n",
+	South: "s",
+	West: "w",
+	East: "e",
+	NoMovement: "-",
+}
+
 func (d Direction) String() string {
-	switch d {
-	case North:
-		return "n"
-	case South:
-		return "s"
-	case West:
-		return "w"
-	case East:
-		return "e"
-	case NoMovement:
-		return "-"
-	}
-	log.Panicf("%v is not a valid direction", d)
-	return ""
+	return directionstrings[d]
 }
 
 //Move returns a new location which is one step in the specified direction from the specified location.
