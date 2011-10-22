@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 )
 
 //Item represents all the various items that may be on the map
@@ -285,4 +286,56 @@ func (m *Map) Move(loc Location, d Direction) Location {
 		log.Panicf("%v is not a valid direction", d)
 	}
 	return m.FromRowCol(Row, Col) //this will handle wrapping out-of-bounds numbers
+}
+
+func (m *Map) Update(words []string, s *State) {
+	switch words[0] {
+	case "turn":
+		turn, _ := strconv.Atoi(words[1])
+		if turn != s.Turn+1 {
+			log.Panicf("Turn number out of sync, expected %v got %v", s.Turn+1, turn)
+		}
+		s.Turn = turn
+	case "f":
+		if len(words) < 3 {
+			log.Panicf("Invalid command format (not enough parameters for food): \"%v\"", words)
+		}
+		Row, _ := strconv.Atoi(words[1])
+		Col, _ := strconv.Atoi(words[2])
+		loc := m.FromRowCol(Row, Col)
+		m.AddFood(loc)
+	case "w":
+		if len(words) < 3 {
+			log.Panicf("Invalid command format (not enough parameters for water): \"%v\"", words)
+		}
+		Row, _ := strconv.Atoi(words[1])
+		Col, _ := strconv.Atoi(words[2])
+		loc := m.FromRowCol(Row, Col)
+		m.AddWater(loc)
+	case "a":
+		if len(words) < 4 {
+			log.Panicf("Invalid command format (not enough parameters for ant): \"%v\"", words)
+		}
+		Row, _ := strconv.Atoi(words[1])
+		Col, _ := strconv.Atoi(words[2])
+		Ant, _ := strconv.Atoi(words[3])
+		loc := m.FromRowCol(Row, Col)
+		m.AddAnt(loc, Item(Ant))
+
+		//if it turns out that you don't actually use the visible radius for anything,
+		//feel free to comment this out. It's needed for the image debugging, though.
+		if Item(Ant) == MY_ANT {
+			m.AddDestination(loc)
+			m.AddLand(loc, s.ViewRadius2)
+		}
+	case "d":
+		if len(words) < 4 {
+			log.Panicf("Invalid command format (not enough parameters for dead ant): \"%v\"", words)
+		}
+		Row, _ := strconv.Atoi(words[1])
+		Col, _ := strconv.Atoi(words[2])
+		Ant, _ := strconv.Atoi(words[3])
+		loc := m.FromRowCol(Row, Col)
+		m.AddDeadAnt(loc, Item(Ant))
+	}
 }
