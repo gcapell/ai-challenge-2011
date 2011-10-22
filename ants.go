@@ -78,21 +78,7 @@ func (s *State) Loop(b Bot, BetweenTurnWork func()) os.Error {
 	//indicate we're ready
 	os.Stdout.Write([]byte("go\n"))
 
-	for {
-		line, err := stdin.ReadString('\n')
-		if err != nil {
-			if err == os.EOF {
-				return err
-			}
-			log.Panicf("ReadString returns an error: %s", err)
-			return err
-		}
-		line = line[:len(line)-1] //remove the delimiter
-
-		if line == "" {
-			continue
-		}
-
+	for line := range(getLinesUntil("end")) {
 		if line == "go" {
 			b.DoTurn(s)
 
@@ -103,10 +89,6 @@ func (s *State) Loop(b Bot, BetweenTurnWork func()) os.Error {
 
 			s.Map.Reset()
 			continue
-		}
-
-		if line == "end" {
-			break
 		}
 
 		words := strings.SplitN(line, " ", 5)
