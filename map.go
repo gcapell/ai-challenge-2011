@@ -84,7 +84,6 @@ func FromSymbol(ch byte) Item {
 	return Item(ch) + 'a'
 }
 
-
 //Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
 type Location int
 
@@ -96,6 +95,7 @@ type Map struct {
 
 	Ants         map[Location]Item
 	Dead         map[Location]Item
+	Hills         map[Location]Item
 	Water        map[Location]bool
 	Food         map[Location]bool
 	Destinations map[Location]bool
@@ -106,10 +106,10 @@ type Map struct {
 //NewMap returns a newly constructed blank map.
 func NewMap(Rows, Cols, viewradius2 int) *Map {
 	m := &Map{
-		Rows:     Rows,
-		Cols:     Cols,
-		Water:    make(map[Location]bool),
-		itemGrid: make([]Item, Rows*Cols),
+		Rows:        Rows,
+		Cols:        Cols,
+		Water:       make(map[Location]bool),
+		itemGrid:    make([]Item, Rows*Cols),
 		viewradius2: viewradius2,
 	}
 	m.Reset()
@@ -143,6 +143,7 @@ func (m *Map) Reset() {
 	m.Dead = make(map[Location]Item)
 	m.Food = make(map[Location]bool)
 	m.Destinations = make(map[Location]bool)
+	m.Hills = make(map[Location]Item)
 }
 
 //Item returns the item at a given location
@@ -155,9 +156,20 @@ func (m *Map) AddWater(loc Location) {
 	m.itemGrid[loc] = WATER
 }
 
+func (m *Map) AddHill(loc Location, ant Item) {
+	m.Hills[loc] = ant
+}
+
 func (m *Map) AddAnt(loc Location, ant Item) {
 	m.Ants[loc] = ant
 	m.itemGrid[loc] = ant
+
+	//if it turns out that you don't actually use the visible radius for anything,
+	//feel free to comment this out. It's needed for the image debugging, though.
+	if ant == MY_ANT {
+		m.AddDestination(loc)
+		m.AddLand(loc)
+	}
 }
 
 //AddLand adds a circle of land centered on the given location
@@ -236,12 +248,10 @@ func (m *Map) FromRowCol(Row, Col int) Location {
 }
 
 //FromLocation returns an (Row, Col) pair given a Location
-func (m *Map) FromLocation(loc Location) (Row, Col int) {
-	Row = int(loc) / m.Cols
-	Col = int(loc) % m.Cols
-	return
+func (m *Map) FromLocation(loc Location) (int, int) {
+	iLoc := int(loc)
+	return iLoc / m.Cols, iLoc % m.Cols
 }
-
 
 //Direction represents the direction concept for issuing orders.
 type Direction int
@@ -255,11 +265,11 @@ const (
 	NoMovement
 )
 
-var directionstrings  = map[Direction]string{
-	North: "n",
-	South: "s",
-	West: "w",
-	East: "e",
+var directionstrings = map[Direction]string{
+	North:      "n",
+	South:      "s",
+	West:       "w",
+	East:       "e",
 	NoMovement: "-",
 }
 
@@ -286,45 +296,40 @@ func (m *Map) Move(loc Location, d Direction) Location {
 	return m.FromRowCol(Row, Col) //this will handle wrapping out-of-bounds numbers
 }
 
-func (m *Map) wordsToLoc (words []string) Location {
-		if len(words) < 3 {
-			log.Panicf("Invalid command format: \"%v\"", words)
-		}
-		row, _ := strconv.Atoi(words[1])
-		col, _ := strconv.Atoi(words[2])
-		return  m.FromRowCol(row, col)
+func (m *Map) wordsToLoc(words []string) Location {
+	if len(words) < 3 {
+		log.Panicf("Invalid command format: \"%v\"", words)
+	}
+	row, _ := strconv.Atoi(words[1])
+	col, _ := strconv.Atoi(words[2])
+	return m.FromRowCol(row, col)
 }
 
-func (m *Map) wordsToAnt(words[]string) (Location, Item) {
-		if len(words) < 4 {
-			log.Panicf("Invalid command format (not enough parameters for ant): \"%v\"", words)
-		}
-		row, _ := strconv.Atoi(words[1])
-		col, _ := strconv.Atoi(words[2])
-		loc := m.FromRowCol(row, col)
-		ant, _ := strconv.Atoi(words[3])
+func (m *Map) wordsToAnt(words []string) (Location, Item) {
+	if len(words) < 4 {
+		log.Panicf("Invalid command format (not enough parameters for ant): \"%v\"", words)
+	}
+	row, _ := strconv.Atoi(words[1])
+	col, _ := strconv.Atoi(words[2])
+	loc := m.FromRowCol(row, col)
+	ant, _ := strconv.Atoi(words[3])
 
-		return loc, Item(ant)
+	return loc, Item(ant)
 }
 
 func (m *Map) Update(words []string) {
 	switch words[0] {
-	case "f": 
-		m.AddFood(m.wordsToLoc(words))
 	case "w":
 		m.AddWater(m.wordsToLoc(words))
-	case "a": 
-		loc, ant := m.wordsToAnt(words)
-
-		m.AddAnt(loc, ant)
-
-		//if it turns out that you don't actually use the visible radius for anything,
-		//feel free to comment this out. It's needed for the image debugging, though.
-		if ant == MY_ANT {
-			m.AddDestination(loc)
-			m.AddLand(loc)
-		}
+	case "f":
+		m.AddFood(m.wordsToLoc(words))
+	case "h":
+		m.AddHill(m.wordsToAnt(words))
+	case "a":
+		m.AddAnt(m.wordsToAnt(words))
 	case "d":
 		m.AddDeadAnt(m.wordsToAnt(words))
+	default:
+		log.Panicf("unknown command: %v\n", words)
 	}
 }

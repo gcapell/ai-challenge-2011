@@ -96,14 +96,15 @@ func (s *State) Loop(b Bot, BetweenTurnWork func()) os.Error {
 			log.Panicf("Invalid command format: \"%s\"", line)
 		}
 
-		if words[0] == "turn" {
-		turn, _ := strconv.Atoi(words[1])
-		if turn != s.Turn+1 {
-			log.Panicf("Turn number out of sync, expected %v got %v", s.Turn+1, turn)
+		if words[0] == "turn" {		
+			turn, _ := strconv.Atoi(words[1])
+			if turn != s.Turn+1 {
+				log.Panicf("Turn number out of sync, expected %v got %v", s.Turn+1, turn)
+			}
+			s.Turn = turn
+		} else {
+			s.Map.Update(words)
 		}
-		s.Turn = turn
-		}
-		s.Map.Update(words)
 	}
 
 	return nil
