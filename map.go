@@ -158,6 +158,7 @@ func (m *Map) AddWater(loc Location) {
 
 func (m *Map) AddHill(loc Location, ant Item) {
 	m.Hills[loc] = ant
+	// m.itemGrid[loc] = ???
 }
 
 func (m *Map) AddAnt(loc Location, ant Item) {
@@ -220,13 +221,7 @@ func (m *Map) RemoveDestination(loc Location) {
 //safe place to dispatch an ant. It considers water and both
 //ants that have already sent an order and those that have not.
 func (m *Map) SafeDestination(loc Location) bool {
-	if _, exists := m.Water[loc]; exists {
-		return false
-	}
-	if occupied := m.Destinations[loc]; occupied {
-		return false
-	}
-	return true
+	return !m.Water[loc] && !m.Destinations[loc]
 }
 
 //FromRowCol returns a Location given an (Row, Col) pair
