@@ -5,7 +5,7 @@ import (
 )
 
 func TestMap(t *testing.T) {
-	m := NewMap(4, 3)
+	m := NewMap(4, 3, 0)
 	m.Reset()
 	if m.String() != `. . . 
 . . . 
