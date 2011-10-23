@@ -286,48 +286,45 @@ func (m *Map) Move(loc Location, d Direction) Location {
 	return m.FromRowCol(Row, Col) //this will handle wrapping out-of-bounds numbers
 }
 
-func (m *Map) Update(words []string) {
-	switch words[0] {
-	case "f":
+func (m *Map) wordsToLoc (words []string) Location {
 		if len(words) < 3 {
-			log.Panicf("Invalid command format (not enough parameters for food): \"%v\"", words)
+			log.Panicf("Invalid command format: \"%v\"", words)
 		}
-		Row, _ := strconv.Atoi(words[1])
-		Col, _ := strconv.Atoi(words[2])
-		loc := m.FromRowCol(Row, Col)
-		m.AddFood(loc)
-	case "w":
-		if len(words) < 3 {
-			log.Panicf("Invalid command format (not enough parameters for water): \"%v\"", words)
-		}
-		Row, _ := strconv.Atoi(words[1])
-		Col, _ := strconv.Atoi(words[2])
-		loc := m.FromRowCol(Row, Col)
-		m.AddWater(loc)
-	case "a":
+		row, _ := strconv.Atoi(words[1])
+		col, _ := strconv.Atoi(words[2])
+		return  m.FromRowCol(row, col)
+}
+
+func (m *Map) wordsToAnt(words[]string) (Location, Item) {
 		if len(words) < 4 {
 			log.Panicf("Invalid command format (not enough parameters for ant): \"%v\"", words)
 		}
-		Row, _ := strconv.Atoi(words[1])
-		Col, _ := strconv.Atoi(words[2])
-		Ant, _ := strconv.Atoi(words[3])
-		loc := m.FromRowCol(Row, Col)
-		m.AddAnt(loc, Item(Ant))
+		row, _ := strconv.Atoi(words[1])
+		col, _ := strconv.Atoi(words[2])
+		loc := m.FromRowCol(row, col)
+		ant, _ := strconv.Atoi(words[3])
+
+		return loc, Item(ant)
+}
+
+func (m *Map) Update(words []string) {
+	switch words[0] {
+	case "f": 
+		m.AddFood(m.wordsToLoc(words))
+	case "w":
+		m.AddWater(m.wordsToLoc(words))
+	case "a": 
+		loc, ant := m.wordsToAnt(words)
+
+		m.AddAnt(loc, ant)
 
 		//if it turns out that you don't actually use the visible radius for anything,
 		//feel free to comment this out. It's needed for the image debugging, though.
-		if Item(Ant) == MY_ANT {
+		if ant == MY_ANT {
 			m.AddDestination(loc)
 			m.AddLand(loc)
 		}
 	case "d":
-		if len(words) < 4 {
-			log.Panicf("Invalid command format (not enough parameters for dead ant): \"%v\"", words)
-		}
-		Row, _ := strconv.Atoi(words[1])
-		Col, _ := strconv.Atoi(words[2])
-		Ant, _ := strconv.Atoi(words[3])
-		loc := m.FromRowCol(Row, Col)
-		m.AddDeadAnt(loc, Item(Ant))
+		m.AddDeadAnt(m.wordsToAnt(words))
 	}
 }
