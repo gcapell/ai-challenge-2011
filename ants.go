@@ -32,7 +32,7 @@ type State struct {
 //Start takes the initial parameters from stdin
 func (s *State) Start() {
 	s.Load()
-	s.Map = NewMap(s.Rows, s.Cols)
+	s.Map = NewMap(s.Rows, s.Cols, s.ViewRadius2)
 }
 
 func (s *State) Load() {
@@ -96,7 +96,14 @@ func (s *State) Loop(b Bot, BetweenTurnWork func()) os.Error {
 			log.Panicf("Invalid command format: \"%s\"", line)
 		}
 
-		s.Map.Update(words, s)
+		if words[0] == "turn" {
+		turn, _ := strconv.Atoi(words[1])
+		if turn != s.Turn+1 {
+			log.Panicf("Turn number out of sync, expected %v got %v", s.Turn+1, turn)
+		}
+		s.Turn = turn
+		}
+		s.Map.Update(words)
 	}
 
 	return nil

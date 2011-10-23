@@ -99,15 +99,18 @@ type Map struct {
 	Water        map[Location]bool
 	Food         map[Location]bool
 	Destinations map[Location]bool
+
+	viewradius2 int
 }
 
 //NewMap returns a newly constructed blank map.
-func NewMap(Rows, Cols int) *Map {
+func NewMap(Rows, Cols, viewradius2 int) *Map {
 	m := &Map{
 		Rows:     Rows,
 		Cols:     Cols,
 		Water:    make(map[Location]bool),
 		itemGrid: make([]Item, Rows*Cols),
+		viewradius2: viewradius2,
 	}
 	m.Reset()
 	return m
@@ -158,8 +161,8 @@ func (m *Map) AddAnt(loc Location, ant Item) {
 }
 
 //AddLand adds a circle of land centered on the given location
-func (m *Map) AddLand(center Location, viewrad2 int) {
-	m.DoInRad(center, viewrad2, func(row, col int) {
+func (m *Map) AddLand(center Location) {
+	m.DoInRad(center, m.viewradius2, func(row, col int) {
 		loc := m.FromRowCol(row, col)
 		if m.itemGrid[loc] == UNKNOWN {
 			m.itemGrid[loc] = LAND
@@ -283,14 +286,8 @@ func (m *Map) Move(loc Location, d Direction) Location {
 	return m.FromRowCol(Row, Col) //this will handle wrapping out-of-bounds numbers
 }
 
-func (m *Map) Update(words []string, s *State) {
+func (m *Map) Update(words []string) {
 	switch words[0] {
-	case "turn":
-		turn, _ := strconv.Atoi(words[1])
-		if turn != s.Turn+1 {
-			log.Panicf("Turn number out of sync, expected %v got %v", s.Turn+1, turn)
-		}
-		s.Turn = turn
 	case "f":
 		if len(words) < 3 {
 			log.Panicf("Invalid command format (not enough parameters for food): \"%v\"", words)
@@ -321,7 +318,7 @@ func (m *Map) Update(words []string, s *State) {
 		//feel free to comment this out. It's needed for the image debugging, though.
 		if Item(Ant) == MY_ANT {
 			m.AddDestination(loc)
-			m.AddLand(loc, s.ViewRadius2)
+			m.AddLand(loc)
 		}
 	case "d":
 		if len(words) < 4 {
