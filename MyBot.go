@@ -20,11 +20,7 @@ func NewBot(s *State) Bot {
 //DoTurn is where you should do your bot's actual work.
 func (mb *MyBot) DoTurn(s *State) os.Error {
 	dirs := []Direction{North, East, South, West}
-	for loc, ant := range s.Map.Ants {
-		if ant != MY_ANT {
-			continue
-		}
-
+	for _, loc := range s.Map.MyAnts {
 		//try each direction in a random order
 		p := rand.Perm(4)
 		for _, i := range p {

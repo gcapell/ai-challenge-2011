@@ -99,6 +99,7 @@ type Map struct {
 	Water        map[Location]bool
 	Food         map[Location]bool
 	Destinations map[Location]bool
+	MyAnts	[]Location
 
 	viewradius2 int
 }
@@ -144,6 +145,7 @@ func (m *Map) Reset() {
 	m.Food = make(map[Location]bool)
 	m.Destinations = make(map[Location]bool)
 	m.Hills = make(map[Location]Item)
+	m.MyAnts = make([]Location,0)
 }
 
 //Item returns the item at a given location
@@ -170,6 +172,7 @@ func (m *Map) AddAnt(loc Location, ant Item) {
 	if ant == MY_ANT {
 		m.AddDestination(loc)
 		m.AddLand(loc)
+		m.MyAnts = append(m.MyAnts, loc)
 	}
 }
 
