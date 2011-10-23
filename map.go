@@ -8,6 +8,11 @@ import (
 //Item represents all the various items that may be on the map
 type Item int8
 
+type Move struct {
+	src Location
+	d	Direction
+}
+
 const (
 	UNKNOWN Item = iota - 5
 	WATER
@@ -99,9 +104,39 @@ type Map struct {
 	Water        map[Location]bool
 	Food         map[Location]bool
 	Destinations map[Location]bool
-	MyAnts	[]Location
+	MyAnts	map[Location]bool	// ant location -> is moving?
 
 	viewradius2 int
+}
+
+// Given start location, return map of direction -> next location
+func (m *Map) NextValidMoves(loc Location) map[Direction]Location {
+	next := make(map[Direction]Location)
+
+	for _, d := range DIRS {
+
+		loc2 := m.Move(loc, d)
+		if m.SafeDestination(loc2) {
+			next[d] = loc2
+		}
+	}
+	return next
+}
+
+func (m *Map) MyStationaryAnts() (chan Location) {
+	ch := make(chan Location)
+	log.Println("I have", len(m.MyAnts), "ants")
+	go func() {
+		for loc, isMoving := range m.MyAnts {
+			if !isMoving {
+				ch <- loc
+			} else {
+				log.Println("moving!", loc)
+			}
+		}
+		close(ch)
+	}()
+	return ch
 }
 
 //NewMap returns a newly constructed blank map.
@@ -145,7 +180,7 @@ func (m *Map) Reset() {
 	m.Food = make(map[Location]bool)
 	m.Destinations = make(map[Location]bool)
 	m.Hills = make(map[Location]Item)
-	m.MyAnts = make([]Location,0)
+	m.MyAnts = make(map[Location]bool)
 }
 
 //Item returns the item at a given location
@@ -172,7 +207,7 @@ func (m *Map) AddAnt(loc Location, ant Item) {
 	if ant == MY_ANT {
 		m.AddDestination(loc)
 		m.AddLand(loc)
-		m.MyAnts = append(m.MyAnts, loc)
+		m.MyAnts[loc] = false
 	}
 }
 

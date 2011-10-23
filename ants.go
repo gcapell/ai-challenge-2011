@@ -116,16 +116,18 @@ func (s *State) IssueOrderRowCol(Row, Col int, d Direction) {
 	dest := s.Map.Move(loc, d)
 	s.Map.RemoveDestination(loc)
 	s.Map.AddDestination(dest)
+	s.Map.MyAnts[loc] = true
 	fmt.Fprintf(os.Stdout, "o %d %d %s\n", Row, Col, d)
 }
 
 //Call IssueOrderLoc to issue an order for an ant at loc
 func (s *State) IssueOrderLoc(loc Location, d Direction) {
-	Row, Col := s.Map.FromLocation(loc)
 	dest := s.Map.Move(loc, d)
 	s.Map.RemoveDestination(loc)
 	s.Map.AddDestination(dest)
-	fmt.Fprintf(os.Stdout, "o %d %d %s\n", Row, Col, d)
+	s.Map.MyAnts[loc] = true
+	row, col := s.Map.FromLocation(loc)
+	fmt.Fprintf(os.Stdout, "o %d %d %s\n", row, col, d)
 }
 
 //endTurn is called by Loop, you don't need to call it.
