@@ -125,13 +125,10 @@ func (m *Map) NextValidMoves(loc Location) map[Direction]Location {
 
 func (m *Map) MyStationaryAnts() (chan Location) {
 	ch := make(chan Location)
-	log.Println("I have", len(m.MyAnts), "ants")
 	go func() {
 		for loc, isMoving := range m.MyAnts {
 			if !isMoving {
 				ch <- loc
-			} else {
-				log.Println("moving!", loc)
 			}
 		}
 		close(ch)

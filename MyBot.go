@@ -32,6 +32,16 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
 	// Grab nearby food
 	mb.moveToTarget(s, s.Map, "food", FOOD_DEPTH, func(loc Location) bool { return s.Map.Food[loc]})
 
+	// Attack enemy hill
+	mb.moveToTarget(s, s.Map, "enemy hill", EXPLORE_DEPTH, func(loc Location) bool {
+		if item, found := s.Map.Hills[loc]; found {
+			if item != MY_ANT {
+				return true
+			}
+		}
+		 return false
+	})
+
 	// Explore the unknown
 	mb.moveToTarget(s, s.Map, "explore", EXPLORE_DEPTH, func(loc Location) bool { return s.Map.itemGrid[loc] == UNKNOWN})
 
