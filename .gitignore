@@ -1,2 +1,5 @@
 MyBot
 *.8
+*.zip
+*.out
+_test
