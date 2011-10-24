@@ -19,7 +19,7 @@ func (o Item) Symbol() byte {
 		return '!'
 	}
 
-	if o < MY_ANT || o > PLAYER25 {
+	if o < MY_ANT || o > MAXPLAYER {
 		log.Panicf("invalid item: %v", o)
 	}
 

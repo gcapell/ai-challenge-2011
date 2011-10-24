@@ -42,31 +42,8 @@ const (
 	LAND
 	DEAD
 	MY_ANT //= 0
-	PLAYER1
-	PLAYER2
-	PLAYER3
-	PLAYER4
-	PLAYER5
-	PLAYER6
-	PLAYER7
-	PLAYER8
-	PLAYER9
-	PLAYER10
-	PLAYER11
-	PLAYER12
-	PLAYER13
-	PLAYER14
-	PLAYER15
-	PLAYER16
-	PLAYER17
-	PLAYER18
-	PLAYER19
-	PLAYER20
-	PLAYER21
-	PLAYER22
-	PLAYER23
-	PLAYER24
-	PLAYER25
+
+	MAXPLAYER = 24
 )
 
 const (
@@ -271,9 +248,7 @@ func (m *Map) wordsToLoc(words []string) Location {
 	if len(words) < 3 {
 		log.Panicf("Invalid command format: \"%v\"", words)
 	}
-	row := atoi(words[1])
-	col := atoi(words[2])
-	return m.FromRowCol(row, col)
+	return m.FromRowCol(atoi(words[1]), atoi(words[2]))
 }
 
 func (m *Map) wordsToAnt(words []string) (Location, Item) {
