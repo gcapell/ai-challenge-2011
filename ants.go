@@ -23,12 +23,6 @@ type Game struct {
 	Map *Map
 }
 
-//Start takes the initial parameters from stdin
-func (s *Game) Start() {
-	s.Load()
-	s.Map = NewMap(s.Rows, s.Cols, s.ViewRadius2)
-}
-
 func (s *Game) Load() {
 	for words := range getPairs() {
 
@@ -69,7 +63,8 @@ func main() {
 		g Game
 		bot MyBot
 	)
-	g.Start()
+	g.Load()
+	g.Map = NewMap(g.Rows, g.Cols, g.ViewRadius2)
 
 	//indicate we're ready
 	fmt.Println("go")
