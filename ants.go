@@ -63,23 +63,25 @@ func (s *Game) Load() {
 	}
 }
 
-//Loop handles the majority of communication between your bot and the server.
-//b's DoWork function gets called each turn after the map has been setup
-//BetweenTurnWork gets called after a turn but before the map is reset. It is
-//meant to do debugging work.
-func (s *Game) Loop(b *MyBot)  {
+//main initializes the state and starts the processing loop
+func main() {
+	var (
+		g Game
+		bot MyBot
+	)
+	g.Start()
 
 	//indicate we're ready
 	fmt.Println("go")
 
 	for line := range getLinesUntil("end") {
 		if line == "go" {
-			b.DoTurn(s)
+			bot.DoTurn(&g)
 
 			//end turn
 			fmt.Println("go")
 
-			s.Map.Reset()
+			g.Map.Reset()
 			continue
 		}
 
@@ -90,22 +92,12 @@ func (s *Game) Loop(b *MyBot)  {
 
 		if words[0] == "turn" {
 			turn, _ := strconv.Atoi(words[1])
-			if turn != s.Turn+1 {
-				log.Panicf("Turn number out of sync, expected %v got %v", s.Turn+1, turn)
+			if turn != g.Turn+1 {
+				log.Panicf("Turn number out of sync, expected %v got %v", g.Turn+1, turn)
 			}
-			s.Turn = turn
+			g.Turn = turn
 		} else {
-			s.Map.Update(words)
+			g.Map.Update(words)
 		}
 	}
-}
-
-//main initializes the state and starts the processing loop
-func main() {
-	var (
-		g Game
-		bot MyBot
-	)
-	g.Start()
-	g.Loop(&bot)
 }
