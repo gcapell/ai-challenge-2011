@@ -73,7 +73,7 @@ func (s *Game) Load() {
 //b's DoWork function gets called each turn after the map has been setup
 //BetweenTurnWork gets called after a turn but before the map is reset. It is
 //meant to do debugging work.
-func (s *Game) Loop(b Bot) os.Error {
+func (s *Game) Loop(b Bot)  {
 
 	//indicate we're ready
 	os.Stdout.Write([]byte("go\n"))
@@ -104,8 +104,6 @@ func (s *Game) Loop(b Bot) os.Error {
 			s.Map.Update(words)
 		}
 	}
-
-	return nil
 }
 
 //Call IssueOrderRowCol to issue an order for an ant at (Row, Col)
@@ -131,4 +129,12 @@ func (s *Game) IssueOrderLoc(loc Location, d Direction) {
 //endTurn is called by Loop, you don't need to call it.
 func (s *Game) endTurn() {
 	os.Stdout.Write([]byte("go\n"))
+}
+
+//main initializes the state and starts the processing loop
+func main() {
+	var s Game
+	s.Start()
+	mb := NewBot(&s)
+	s.Loop(mb)
 }
