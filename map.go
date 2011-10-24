@@ -71,6 +71,11 @@ const (
 	PLAYER25
 )
 
+var (
+	DIRS = []Direction{North, East, South, West}
+)
+
+
 //Symbol returns the symbol for the ascii diagram
 func (o Item) Symbol() byte {
 	switch o {

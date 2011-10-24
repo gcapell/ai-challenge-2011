@@ -6,7 +6,6 @@ import (
 )
 
 type MyBot struct {
-
 }
 
 const (
@@ -14,16 +13,9 @@ const (
 	EXPLORE_DEPTH = 10
 )
 
-var (
-	DIRS = []Direction{North, East, South, West}
-)
-
 //NewBot creates a new instance of your bot
 func NewBot(s *Game) Bot {
-	mb := &MyBot{
-	//do any necessary initialization here
-	}
-	return mb
+	return &MyBot{}
 }
 
 //DoTurn is where you should do your bot's actual work.
@@ -49,6 +41,7 @@ func (mb *MyBot) DoTurn(s *Game) os.Error {
 	//returning an error will halt the whole program!
 	return nil
 }
+
 // If there's some useful target nearby an ant, move towards it
 // Breadth first search
 func (mb *MyBot) moveToTarget(s *Game, m *Map, reason string, depth int, isTarget func(Location) bool) {
