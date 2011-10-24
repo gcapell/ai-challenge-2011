@@ -13,6 +13,29 @@ type Move struct {
 	d	Direction
 }
 
+//Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
+type Location int
+
+//Direction represents the direction concept for issuing orders.
+type Direction int
+
+type Map struct {
+	Rows int
+	Cols int
+
+	itemGrid []Item
+
+	Ants         map[Location]Item
+	Dead         map[Location]Item
+	Hills         map[Location]Item
+	Water        map[Location]bool
+	Food         map[Location]bool
+	Destinations map[Location]bool
+	MyAnts	map[Location]bool	// ant location -> is moving?
+
+	viewradius2 int
+}
+
 const (
 	UNKNOWN Item = iota - 5
 	WATER
@@ -87,26 +110,6 @@ func FromSymbol(ch byte) Item {
 		log.Panicf("invalid item symbol: %v", ch)
 	}
 	return Item(ch) + 'a'
-}
-
-//Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
-type Location int
-
-type Map struct {
-	Rows int
-	Cols int
-
-	itemGrid []Item
-
-	Ants         map[Location]Item
-	Dead         map[Location]Item
-	Hills         map[Location]Item
-	Water        map[Location]bool
-	Food         map[Location]bool
-	Destinations map[Location]bool
-	MyAnts	map[Location]bool	// ant location -> is moving?
-
-	viewradius2 int
 }
 
 // Given start location, return map of direction -> next location
@@ -282,9 +285,6 @@ func (m *Map) FromLocation(loc Location) (int, int) {
 	iLoc := int(loc)
 	return iLoc / m.Cols, iLoc % m.Cols
 }
-
-//Direction represents the direction concept for issuing orders.
-type Direction int
 
 const (
 	North Direction = iota

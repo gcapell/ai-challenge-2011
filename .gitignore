@@ -3,3 +3,4 @@ MyBot
 *.zip
 *.out
 _test
+_testmain.go
