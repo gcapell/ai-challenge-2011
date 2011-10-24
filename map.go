@@ -71,52 +71,26 @@ const (
 	PLAYER25
 )
 
-var (
-	DIRS = []Direction{North, East, South, West}
+const (
+	North Direction = iota
+	East
+	South
+	West
+
+	NoMovement
 )
 
-
-//Symbol returns the symbol for the ascii diagram
-func (o Item) Symbol() byte {
-	switch o {
-	case UNKNOWN:
-		return '.'
-	case WATER:
-		return '%'
-	case FOOD:
-		return '*'
-	case LAND:
-		return ' '
-	case DEAD:
-		return '!'
+var (
+	DIRS = []Direction{North, East, South, West}
+	directionstrings = map[Direction]string{
+		North:      "n",
+		South:      "s",
+		West:       "w",
+		East:       "e",
+		NoMovement: "-",
 	}
+)
 
-	if o < MY_ANT || o > PLAYER25 {
-		log.Panicf("invalid item: %v", o)
-	}
-
-	return byte(o) + 'a'
-}
-
-//FromSymbol reverses Symbol
-func FromSymbol(ch byte) Item {
-	switch ch {
-	case '.':
-		return UNKNOWN
-	case '%':
-		return WATER
-	case '*':
-		return FOOD
-	case ' ':
-		return LAND
-	case '!':
-		return DEAD
-	}
-	if ch < 'a' || ch > 'z' {
-		log.Panicf("invalid item symbol: %v", ch)
-	}
-	return Item(ch) + 'a'
-}
 
 func (m *Map) Init(g *Game) {
 	m.Rows = g.Rows
@@ -152,19 +126,6 @@ func (m *Map) MyStationaryAnts() chan Location {
 		close(ch)
 	}()
 	return ch
-}
-
-//String returns an ascii diagram of the map.
-func (m *Map) String() string {
-	str := ""
-	for row := 0; row < m.Rows; row++ {
-		for col := 0; col < m.Cols; col++ {
-			s := m.itemGrid[row*m.Cols+col].Symbol()
-			str += string([]byte{s}) + " "
-		}
-		str += "\n"
-	}
-	return str
 }
 
 //Reset clears the map (except for water) for the next turn
@@ -286,23 +247,6 @@ func (m *Map) FromRowCol(Row, Col int) Location {
 func (m *Map) FromLocation(loc Location) (int, int) {
 	iLoc := int(loc)
 	return iLoc / m.Cols, iLoc % m.Cols
-}
-
-const (
-	North Direction = iota
-	East
-	South
-	West
-
-	NoMovement
-)
-
-var directionstrings = map[Direction]string{
-	North:      "n",
-	South:      "s",
-	West:       "w",
-	East:       "e",
-	NoMovement: "-",
 }
 
 func (d Direction) String() string {
