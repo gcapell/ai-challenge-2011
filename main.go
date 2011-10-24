@@ -10,9 +10,7 @@ func main() {
 	var s Game
 	s.Start()
 	mb := NewBot(&s)
-	err := s.Loop(mb, func() {
-		//if you want to do other between-turn debugging things, you can do them here
-	})
+	err := s.Loop(mb)
 	if err != nil && err != os.EOF {
 		log.Panicf("Loop() failed (%s)", err)
 	}

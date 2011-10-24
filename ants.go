@@ -73,7 +73,7 @@ func (s *Game) Load() {
 //b's DoWork function gets called each turn after the map has been setup
 //BetweenTurnWork gets called after a turn but before the map is reset. It is
 //meant to do debugging work.
-func (s *Game) Loop(b Bot, BetweenTurnWork func()) os.Error {
+func (s *Game) Loop(b Bot) os.Error {
 
 	//indicate we're ready
 	os.Stdout.Write([]byte("go\n"))
@@ -84,8 +84,6 @@ func (s *Game) Loop(b Bot, BetweenTurnWork func()) os.Error {
 
 			//end turn
 			s.endTurn()
-
-			BetweenTurnWork()
 
 			s.Map.Reset()
 			continue
