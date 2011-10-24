@@ -107,5 +107,8 @@ func (s *Game) Loop(b *MyBot)  {
 //main initializes the state and starts the processing loop
 func main() {
 	GAME.Start()
-	GAME.Loop(&BOT)
+
+	var bot MyBot
+
+	GAME.Loop(&bot)
 }

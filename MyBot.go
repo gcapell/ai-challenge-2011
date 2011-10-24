@@ -13,10 +13,6 @@ const (
 	EXPLORE_DEPTH = 10
 )
 
-var (
-	BOT MyBot
-)
-
 //DoTurn is where you should do your bot's actual work.
 func (mb *MyBot) DoTurn(s *Game) os.Error {
 
