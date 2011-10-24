@@ -7,7 +7,7 @@ import (
 
 //main initializes the state and starts the processing loop
 func main() {
-	var s State
+	var s Game
 	s.Start()
 	mb := NewBot(&s)
 	err := s.Loop(mb, func() {

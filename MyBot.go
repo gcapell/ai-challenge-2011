@@ -10,7 +10,7 @@ type MyBot struct {
 }
 
 const (
-	FOOD_DEPTH = 7
+	FOOD_DEPTH    = 7
 	EXPLORE_DEPTH = 10
 )
 
@@ -19,7 +19,7 @@ var (
 )
 
 //NewBot creates a new instance of your bot
-func NewBot(s *State) Bot {
+func NewBot(s *Game) Bot {
 	mb := &MyBot{
 	//do any necessary initialization here
 	}
@@ -27,10 +27,10 @@ func NewBot(s *State) Bot {
 }
 
 //DoTurn is where you should do your bot's actual work.
-func (mb *MyBot) DoTurn(s *State) os.Error {
+func (mb *MyBot) DoTurn(s *Game) os.Error {
 
 	// Grab nearby food
-	mb.moveToTarget(s, s.Map, "food", FOOD_DEPTH, func(loc Location) bool { return s.Map.Food[loc]})
+	mb.moveToTarget(s, s.Map, "food", FOOD_DEPTH, func(loc Location) bool { return s.Map.Food[loc] })
 
 	// Attack enemy hill
 	mb.moveToTarget(s, s.Map, "enemy hill", EXPLORE_DEPTH, func(loc Location) bool {
@@ -39,11 +39,11 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
 				return true
 			}
 		}
-		 return false
+		return false
 	})
 
 	// Explore the unknown
-	mb.moveToTarget(s, s.Map, "explore", EXPLORE_DEPTH, func(loc Location) bool { return s.Map.itemGrid[loc] == UNKNOWN})
+	mb.moveToTarget(s, s.Map, "explore", EXPLORE_DEPTH, func(loc Location) bool { return s.Map.itemGrid[loc] == UNKNOWN })
 
 	mb.moveRandomly(s)
 	//returning an error will halt the whole program!
@@ -51,21 +51,21 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
 }
 // If there's some useful target nearby an ant, move towards it
 // Breadth first search
-func (mb *MyBot) moveToTarget(s *State, m *Map, reason string, depth int, isTarget func(Location)bool) {
+func (mb *MyBot) moveToTarget(s *Game, m *Map, reason string, depth int, isTarget func(Location) bool) {
 	seen := make(map[Location]bool)
 
-	frontier := make(map[Location]Move)	// current -> src
-	
+	frontier := make(map[Location]Move) // current -> src
+
 	for loc := range m.MyStationaryAnts() {
-		frontier[loc] = Move{src:loc, d:NoMovement}
+		frontier[loc] = Move{src: loc, d: NoMovement}
 		seen[loc] = true
 	}
 
 	moved := make(map[Location]bool)
 
-	iter:= 0
+	iter := 0
 	maxFrontier := 0
-	for ; iter<depth; iter++ {
+	for ; iter < depth; iter++ {
 
 		newFrontier := make(map[Location]Move)
 		newMoved := make(map[Location]bool)
@@ -78,7 +78,7 @@ func (mb *MyBot) moveToTarget(s *State, m *Map, reason string, depth int, isTarg
 			if moved[first.src] || newMoved[first.src] {
 				continue
 			}
-			
+
 			for d, next := range m.NextValidMoves(current) {
 				if seen[next] {
 					continue
@@ -111,7 +111,7 @@ func (mb *MyBot) moveToTarget(s *State, m *Map, reason string, depth int, isTarg
 }
 
 // Any ants not yet moving should move randomly
-func (mb *MyBot) moveRandomly(s *State) {
+func (mb *MyBot) moveRandomly(s *Game) {
 	for loc := range s.Map.MyStationaryAnts() {
 		log.Println("randomly moving", loc)
 		for d, _ := range s.Map.NextValidMoves(loc) {

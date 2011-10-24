@@ -10,7 +10,7 @@ type Item int8
 
 type Move struct {
 	src Location
-	d	Direction
+	d   Direction
 }
 
 //Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
@@ -27,11 +27,11 @@ type Map struct {
 
 	Ants         map[Location]Item
 	Dead         map[Location]Item
-	Hills         map[Location]Item
+	Hills        map[Location]Item
 	Water        map[Location]bool
 	Food         map[Location]bool
 	Destinations map[Location]bool
-	MyAnts	map[Location]bool	// ant location -> is moving?
+	MyAnts       map[Location]bool // ant location -> is moving?
 
 	viewradius2 int
 }
@@ -126,7 +126,7 @@ func (m *Map) NextValidMoves(loc Location) map[Direction]Location {
 	return next
 }
 
-func (m *Map) MyStationaryAnts() (chan Location) {
+func (m *Map) MyStationaryAnts() chan Location {
 	ch := make(chan Location)
 	go func() {
 		for loc, isMoving := range m.MyAnts {

@@ -10,11 +10,11 @@ import (
 
 //Bot interface defines what we need from a bot
 type Bot interface {
-	DoTurn(s *State) os.Error
+	DoTurn(s *Game) os.Error
 }
 
-//State keeps track of everything we need to know about the state of the game
-type State struct {
+//Game keeps track of everything we need to know about the state of the game
+type Game struct {
 	LoadTime      int   //in milliseconds
 	TurnTime      int   //in milliseconds
 	Rows          int   //number of rows in the map
@@ -30,13 +30,13 @@ type State struct {
 }
 
 //Start takes the initial parameters from stdin
-func (s *State) Start() {
+func (s *Game) Start() {
 	s.Load()
 	s.Map = NewMap(s.Rows, s.Cols, s.ViewRadius2)
 }
 
-func (s *State) Load() {
-	for words := range(getPairs()) {
+func (s *Game) Load() {
+	for words := range getPairs() {
 
 		param, _ := strconv.Atoi(words[1])
 
@@ -73,12 +73,12 @@ func (s *State) Load() {
 //b's DoWork function gets called each turn after the map has been setup
 //BetweenTurnWork gets called after a turn but before the map is reset. It is
 //meant to do debugging work.
-func (s *State) Loop(b Bot, BetweenTurnWork func()) os.Error {
+func (s *Game) Loop(b Bot, BetweenTurnWork func()) os.Error {
 
 	//indicate we're ready
 	os.Stdout.Write([]byte("go\n"))
 
-	for line := range(getLinesUntil("end")) {
+	for line := range getLinesUntil("end") {
 		if line == "go" {
 			b.DoTurn(s)
 
@@ -96,7 +96,7 @@ func (s *State) Loop(b Bot, BetweenTurnWork func()) os.Error {
 			log.Panicf("Invalid command format: \"%s\"", line)
 		}
 
-		if words[0] == "turn" {		
+		if words[0] == "turn" {
 			turn, _ := strconv.Atoi(words[1])
 			if turn != s.Turn+1 {
 				log.Panicf("Turn number out of sync, expected %v got %v", s.Turn+1, turn)
@@ -111,7 +111,7 @@ func (s *State) Loop(b Bot, BetweenTurnWork func()) os.Error {
 }
 
 //Call IssueOrderRowCol to issue an order for an ant at (Row, Col)
-func (s *State) IssueOrderRowCol(Row, Col int, d Direction) {
+func (s *Game) IssueOrderRowCol(Row, Col int, d Direction) {
 	loc := s.Map.FromRowCol(Row, Col)
 	dest := s.Map.Move(loc, d)
 	s.Map.RemoveDestination(loc)
@@ -121,7 +121,7 @@ func (s *State) IssueOrderRowCol(Row, Col int, d Direction) {
 }
 
 //Call IssueOrderLoc to issue an order for an ant at loc
-func (s *State) IssueOrderLoc(loc Location, d Direction) {
+func (s *Game) IssueOrderLoc(loc Location, d Direction) {
 	dest := s.Map.Move(loc, d)
 	s.Map.RemoveDestination(loc)
 	s.Map.AddDestination(dest)
@@ -131,6 +131,6 @@ func (s *State) IssueOrderLoc(loc Location, d Direction) {
 }
 
 //endTurn is called by Loop, you don't need to call it.
-func (s *State) endTurn() {
+func (s *Game) endTurn() {
 	os.Stdout.Write([]byte("go\n"))
 }
