@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strconv"
 	"strings"
 	"fmt"
 	"log"
@@ -24,7 +23,7 @@ type Game struct {
 func (s *Game) Load() {
 	for words := range getPairs() {
 
-		param, _ := strconv.Atoi(words[1])
+		param := atoi(words[1])
 
 		switch words[0] {
 		case "loadtime":
@@ -44,7 +43,7 @@ func (s *Game) Load() {
 		case "spawnradius2":
 			s.SpawnRadius2 = param
 		case "player_seed":
-			param64, _ := strconv.Atoi64(words[1])
+			param64 := atoi64(words[1])
 			s.PlayerSeed = param64
 		case "turn":
 			s.Turn = param
@@ -86,7 +85,7 @@ func main() {
 		}
 
 		if words[0] == "turn" {
-			turn, _ := strconv.Atoi(words[1])
+			turn  := atoi(words[1])
 			if turn != g.Turn+1 {
 				log.Panicf("Turn number out of sync, expected %v got %v", g.Turn+1, turn)
 			}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"log"
 	"strings"
+	"strconv"
 )
 
 var stdin = bufio.NewReader(os.Stdin)
@@ -50,4 +51,13 @@ func getLinesUntil(end string) chan string {
 		close(ch)
 	}()
 	return ch
+}
+
+func atoi(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
+}
+func atoi64(s string) int64 {
+	i, _ := strconv.Atoi64(s)
+	return i
 }

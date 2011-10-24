@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"strconv"
 	"fmt"
 )
 
@@ -272,8 +271,8 @@ func (m *Map) wordsToLoc(words []string) Location {
 	if len(words) < 3 {
 		log.Panicf("Invalid command format: \"%v\"", words)
 	}
-	row, _ := strconv.Atoi(words[1])
-	col, _ := strconv.Atoi(words[2])
+	row := atoi(words[1])
+	col := atoi(words[2])
 	return m.FromRowCol(row, col)
 }
 
@@ -281,10 +280,10 @@ func (m *Map) wordsToAnt(words []string) (Location, Item) {
 	if len(words) < 4 {
 		log.Panicf("Invalid command format (not enough parameters for ant): \"%v\"", words)
 	}
-	row, _ := strconv.Atoi(words[1])
-	col, _ := strconv.Atoi(words[2])
+	row := atoi(words[1])
+	col := atoi(words[2])
 	loc := m.FromRowCol(row, col)
-	ant, _ := strconv.Atoi(words[3])
+	ant := atoi(words[3])
 
 	return loc, Item(ant)
 }
