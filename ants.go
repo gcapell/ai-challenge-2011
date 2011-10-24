@@ -87,7 +87,7 @@ func (s *Game) Loop(b Bot)  {
 			b.DoTurn(s)
 
 			//end turn
-			s.endTurn()
+			fmt.Println("go")
 
 			s.Map.Reset()
 			continue
@@ -118,11 +118,6 @@ func (s *Game) IssueOrderLoc(loc Location, d Direction) {
 	s.Map.MyAnts[loc] = true
 	row, col := s.Map.FromLocation(loc)
 	fmt.Println("o", row, col, d)
-}
-
-//endTurn is called by Loop, you don't need to call it.
-func (s *Game) endTurn() {
-	fmt.Println("go")
 }
 
 //main initializes the state and starts the processing loop
