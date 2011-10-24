@@ -1,17 +1,11 @@
 package main
 
 import (
-	"os"
 	"strconv"
 	"strings"
 	"fmt"
 	"log"
 )
-
-//Bot interface defines what we need from a bot
-type Bot interface {
-	DoTurn(s *Game) os.Error
-}
 
 //Game keeps track of everything we need to know about the state of the game
 type Game struct {
@@ -77,7 +71,7 @@ func (s *Game) Load() {
 //b's DoWork function gets called each turn after the map has been setup
 //BetweenTurnWork gets called after a turn but before the map is reset. It is
 //meant to do debugging work.
-func (s *Game) Loop(b Bot)  {
+func (s *Game) Loop(b *MyBot)  {
 
 	//indicate we're ready
 	fmt.Println("go")
@@ -113,6 +107,5 @@ func (s *Game) Loop(b Bot)  {
 //main initializes the state and starts the processing loop
 func main() {
 	GAME.Start()
-	mb := NewBot(&GAME)
-	GAME.Loop(mb)
+	GAME.Loop(&BOT)
 }

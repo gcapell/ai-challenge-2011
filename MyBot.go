@@ -13,10 +13,9 @@ const (
 	EXPLORE_DEPTH = 10
 )
 
-//NewBot creates a new instance of your bot
-func NewBot(s *Game) Bot {
-	return &MyBot{}
-}
+var (
+	BOT MyBot
+)
 
 //DoTurn is where you should do your bot's actual work.
 func (mb *MyBot) DoTurn(s *Game) os.Error {
