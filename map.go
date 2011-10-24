@@ -27,7 +27,6 @@ type Map struct {
 	itemGrid []Item
 
 	Ants         map[Location]Item
-	Dead         map[Location]Item
 	Hills        map[Location]Item
 	Water        map[Location]bool
 	Food         map[Location]bool
@@ -111,7 +110,6 @@ func (m *Map) Reset() {
 		}
 	}
 	m.Ants = make(map[Location]Item)
-	m.Dead = make(map[Location]Item)
 	m.Food = make(map[Location]bool)
 	m.Destinations = make(map[Location]bool)
 	m.Hills = make(map[Location]Item)
@@ -197,7 +195,6 @@ func (m *Map) DoInRad(center Location, rad2 int, Action func(row, col int)) {
 }
 
 func (m *Map) AddDeadAnt(loc Location, ant Item) {
-	m.Dead[loc] = ant
 	m.itemGrid[loc] = DEAD
 }
 
