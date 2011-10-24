@@ -91,7 +91,6 @@ var (
 	}
 )
 
-
 func (m *Map) Init(g *Game) {
 	m.Rows = g.Rows
 	m.Cols = g.Cols
@@ -99,6 +98,24 @@ func (m *Map) Init(g *Game) {
 	m.Water = make(map[Location]bool)
 	m.itemGrid = make([]Item, m.Rows * m.Cols)
 	m.Reset()
+}
+
+//Reset clears the map (except for water) for the next turn
+func (m *Map) Reset() {
+	for i := range m.itemGrid {
+		m.itemGrid[i] = UNKNOWN
+	}
+	for i, val := range m.Water {
+		if val {
+			m.itemGrid[i] = WATER
+		}
+	}
+	m.Ants = make(map[Location]Item)
+	m.Dead = make(map[Location]Item)
+	m.Food = make(map[Location]bool)
+	m.Destinations = make(map[Location]bool)
+	m.Hills = make(map[Location]Item)
+	m.MyAnts = make(map[Location]bool)
 }
 
 // Given start location, return map of direction -> next location
@@ -126,24 +143,6 @@ func (m *Map) MyStationaryAnts() chan Location {
 		close(ch)
 	}()
 	return ch
-}
-
-//Reset clears the map (except for water) for the next turn
-func (m *Map) Reset() {
-	for i := range m.itemGrid {
-		m.itemGrid[i] = UNKNOWN
-	}
-	for i, val := range m.Water {
-		if val {
-			m.itemGrid[i] = WATER
-		}
-	}
-	m.Ants = make(map[Location]Item)
-	m.Dead = make(map[Location]Item)
-	m.Food = make(map[Location]bool)
-	m.Destinations = make(map[Location]bool)
-	m.Hills = make(map[Location]Item)
-	m.MyAnts = make(map[Location]bool)
 }
 
 //Item returns the item at a given location
