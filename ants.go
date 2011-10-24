@@ -110,16 +110,6 @@ func (s *Game) Loop(b Bot)  {
 	}
 }
 
-//Call IssueOrderRowCol to issue an order for an ant at (Row, Col)
-func (s *Game) IssueOrderRowCol(Row, Col int, d Direction) {
-	loc := s.Map.FromRowCol(Row, Col)
-	dest := s.Map.Move(loc, d)
-	s.Map.RemoveDestination(loc)
-	s.Map.AddDestination(dest)
-	s.Map.MyAnts[loc] = true
-	fmt.Fprintf(os.Stdout, "o %d %d %s\n", Row, Col, d)
-}
-
 //Call IssueOrderLoc to issue an order for an ant at loc
 func (s *Game) IssueOrderLoc(loc Location, d Direction) {
 	dest := s.Map.Move(loc, d)
