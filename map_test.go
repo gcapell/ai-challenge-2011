@@ -56,6 +56,6 @@ func TestMap(t *testing.T) {
 . . a 
 . . . 
 ` {
-		t.Errorf("map put ants in wrong place, got `%s`", m)
+		t.Errorf("map put ants in wrong place, got `%s`", m.String())
 	}
 }
