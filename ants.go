@@ -110,16 +110,6 @@ func (s *Game) Loop(b Bot)  {
 	}
 }
 
-//Call IssueOrderLoc to issue an order for an ant at loc
-func (s *Game) IssueOrderLoc(loc Location, d Direction) {
-	dest := s.Map.Move(loc, d)
-	s.Map.RemoveDestination(loc)
-	s.Map.AddDestination(dest)
-	s.Map.MyAnts[loc] = true
-	row, col := s.Map.FromLocation(loc)
-	fmt.Println("o", row, col, d)
-}
-
 //main initializes the state and starts the processing loop
 func main() {
 	GAME.Start()

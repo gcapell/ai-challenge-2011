@@ -89,7 +89,7 @@ func (mb *MyBot) moveToTarget(s *Game, m *Map, reason string, depth int, isTarge
 				seen[next] = true
 				if isTarget(next) {
 					log.Printf("moving %v for %s\n", first, reason)
-					s.IssueOrderLoc(first.src, first.d)
+					s.Map.IssueOrderLoc(first.src, first.d)
 					newMoved[first.src] = true
 					break
 				} else {
@@ -115,7 +115,7 @@ func (mb *MyBot) moveRandomly(s *Game) {
 	for loc := range s.Map.MyStationaryAnts() {
 		log.Println("randomly moving", loc)
 		for d, _ := range s.Map.NextValidMoves(loc) {
-			s.IssueOrderLoc(loc, d)
+			s.Map.IssueOrderLoc(loc, d)
 			break
 		}
 	}

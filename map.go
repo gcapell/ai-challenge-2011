@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"strconv"
+	"fmt"
 )
 
 //Item represents all the various items that may be on the map
@@ -363,3 +364,14 @@ func (m *Map) Update(words []string) {
 		log.Panicf("unknown command: %v\n", words)
 	}
 }
+
+//Call IssueOrderLoc to issue an order for an ant at loc
+func (m *Map) IssueOrderLoc(loc Location, d Direction) {
+	dest := m.Move(loc, d)
+	m.RemoveDestination(loc)
+	m.AddDestination(dest)
+	m.MyAnts[loc] = true
+	row, col := m.FromLocation(loc)
+	fmt.Println("o", row, col, d)
+}
+
