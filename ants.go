@@ -29,6 +29,10 @@ type Game struct {
 	Map *Map
 }
 
+var (
+	GAME Game
+)
+
 //Start takes the initial parameters from stdin
 func (s *Game) Start() {
 	s.Load()
@@ -133,8 +137,7 @@ func (s *Game) endTurn() {
 
 //main initializes the state and starts the processing loop
 func main() {
-	var s Game
-	s.Start()
-	mb := NewBot(&s)
-	s.Loop(mb)
+	GAME.Start()
+	mb := NewBot(&GAME)
+	GAME.Loop(mb)
 }
