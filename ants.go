@@ -19,8 +19,6 @@ type Game struct {
 	SpawnRadius2  int   //spawn radius squared
 	PlayerSeed    int64 //random player seed
 	Turn          int   //current turn number
-
-	Map *Map
 }
 
 func (s *Game) Load() {
@@ -61,22 +59,24 @@ func (s *Game) Load() {
 func main() {
 	var (
 		g Game
-		bot MyBot
+		m Map
 	)
 	g.Load()
-	g.Map = NewMap(g.Rows, g.Cols, g.ViewRadius2)
+	m.Init(&g)
+
+	bot := &MyBot{&g, &m}
 
 	//indicate we're ready
 	fmt.Println("go")
 
 	for line := range getLinesUntil("end") {
 		if line == "go" {
-			bot.DoTurn(&g)
+			bot.DoTurn()
 
 			//end turn
 			fmt.Println("go")
 
-			g.Map.Reset()
+			m.Reset()
 			continue
 		}
 
@@ -92,7 +92,7 @@ func main() {
 			}
 			g.Turn = turn
 		} else {
-			g.Map.Update(words)
+			m.Update(words)
 		}
 	}
 }

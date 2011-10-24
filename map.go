@@ -118,6 +118,15 @@ func FromSymbol(ch byte) Item {
 	return Item(ch) + 'a'
 }
 
+func (m *Map) Init(g *Game) {
+	m.Rows = g.Rows
+	m.Cols = g.Cols
+	m.viewradius2 = g.ViewRadius2
+	m.Water = make(map[Location]bool)
+	m.itemGrid = make([]Item, m.Rows * m.Cols)
+	m.Reset()
+}
+
 // Given start location, return map of direction -> next location
 func (m *Map) NextValidMoves(loc Location) map[Direction]Location {
 	next := make(map[Direction]Location)
@@ -143,19 +152,6 @@ func (m *Map) MyStationaryAnts() chan Location {
 		close(ch)
 	}()
 	return ch
-}
-
-//NewMap returns a newly constructed blank map.
-func NewMap(Rows, Cols, viewradius2 int) *Map {
-	m := &Map{
-		Rows:        Rows,
-		Cols:        Cols,
-		Water:       make(map[Location]bool),
-		itemGrid:    make([]Item, Rows*Cols),
-		viewradius2: viewradius2,
-	}
-	m.Reset()
-	return m
 }
 
 //String returns an ascii diagram of the map.

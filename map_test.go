@@ -5,7 +5,11 @@ import (
 )
 
 func TestMap(t *testing.T) {
-	m := NewMap(4, 3, 0)
+	var m Map
+	var g Game
+	g.Rows = 4
+	g.Cols = 3
+	m.Init(&g)
 	m.Reset()
 	if m.String() != `. . . 
 . . . 
