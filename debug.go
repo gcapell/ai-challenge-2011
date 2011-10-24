@@ -31,7 +31,8 @@ func (m *Map) String() string {
 	str := ""
 	for row := 0; row < m.Rows; row++ {
 		for col := 0; col < m.Cols; col++ {
-			s := m.itemGrid[row*m.Cols+col].Symbol()
+			loc := m.FromRowCol(row, col)
+			s := m.ItemAt(loc).Symbol()
 			str += string([]byte{s}) + " "
 		}
 		str += "\n"

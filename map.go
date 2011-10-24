@@ -19,20 +19,27 @@ type Location int
 //Direction represents the direction concept for issuing orders.
 type Direction int
 
+type Square struct {
+	isWater bool
+	wasSeen bool	// Have we ever seen this square?
+	lastSeen Turn	// .. if so, when?
+}
+
 type Map struct {
 	Rows int
 	Cols int
 
-	itemGrid []Item
+	squares	[]Square
 
 	Ants         map[Location]Item
 	Hills        map[Location]Item
-	Water        map[Location]bool
-	Food         map[Location]bool
+	Food         map[Location]Turn
 	Destinations map[Location]bool
 	MyAnts       map[Location]bool // ant location -> is moving?
 
 	viewradius2 int
+
+	game	*Game
 }
 
 const (
@@ -69,27 +76,41 @@ var (
 func (m *Map) Init(g *Game) {
 	m.Rows = g.Rows
 	m.Cols = g.Cols
+	m.game = g
+
+	m.Food = make(map[Location]Turn)
+	m.Hills = make(map[Location]Item)
+
+	nSquares := m.Rows * m.Cols
+	m.squares = make([]Square, nSquares)
 	m.viewradius2 = g.ViewRadius2
-	m.Water = make(map[Location]bool)
-	m.itemGrid = make([]Item, m.Rows * m.Cols)
 	m.Reset()
 }
 
-//Reset clears the map (except for water) for the next turn
+//Reset clears the map for the next turn
 func (m *Map) Reset() {
-	for i := range m.itemGrid {
-		m.itemGrid[i] = UNKNOWN
-	}
-	for i, val := range m.Water {
-		if val {
-			m.itemGrid[i] = WATER
-		}
-	}
 	m.Ants = make(map[Location]Item)
-	m.Food = make(map[Location]bool)
 	m.Destinations = make(map[Location]bool)
-	m.Hills = make(map[Location]Item)
 	m.MyAnts = make(map[Location]bool)
+}
+
+func (m *Map) ItemAt(loc Location) Item {
+	s := &m.squares[loc]
+	if s.isWater {
+		return WATER
+	}
+	if !s.wasSeen {
+		return UNKNOWN
+	}
+	ant, found := m.Ants[loc]
+	if found {
+		return ant
+	}
+	_, found = m.Food[loc]
+	if found {
+		return FOOD
+	}
+	return LAND
 }
 
 // Given start location, return map of direction -> next location
@@ -106,6 +127,16 @@ func (m *Map) NextValidMoves(loc Location) map[Direction]Location {
 	return next
 }
 
+func (m *Map) EnemyHillAt(loc Location) bool {
+	item, found := m.Hills[loc]
+	return found && item != MY_ANT
+}
+
+func (m *Map) FoodAt(loc Location) bool {
+	_, found := m.Food[loc]
+	return found
+}
+
 func (m *Map) MyStationaryAnts() chan Location {
 	ch := make(chan Location)
 	go func() {
@@ -119,41 +150,13 @@ func (m *Map) MyStationaryAnts() chan Location {
 	return ch
 }
 
-//Item returns the item at a given location
-func (m *Map) Item(loc Location) Item {
-	return m.itemGrid[loc]
-}
-
-func (m *Map) AddWater(loc Location) {
-	m.Water[loc] = true
-	m.itemGrid[loc] = WATER
-}
-
-func (m *Map) AddHill(loc Location, ant Item) {
-	m.Hills[loc] = ant
-	// m.itemGrid[loc] = ???
-}
-
-func (m *Map) AddAnt(loc Location, ant Item) {
-	m.Ants[loc] = ant
-	m.itemGrid[loc] = ant
-
-	//if it turns out that you don't actually use the visible radius for anything,
-	//feel free to comment this out. It's needed for the image debugging, though.
-	if ant == MY_ANT {
-		m.AddDestination(loc)
-		m.AddLand(loc)
-		m.MyAnts[loc] = false
-	}
-}
-
-//AddLand adds a circle of land centered on the given location
-func (m *Map) AddLand(center Location) {
+//ViewFrom adds a circle of land centered on the given location
+func (m *Map) ViewFrom(center Location) {
 	m.DoInRad(center, m.viewradius2, func(row, col int) {
 		loc := m.FromRowCol(row, col)
-		if m.itemGrid[loc] == UNKNOWN {
-			m.itemGrid[loc] = LAND
-		}
+		s := &m.squares[loc]
+		s.wasSeen = true
+		s.lastSeen = m.game.turn
 	})
 }
 
@@ -168,15 +171,6 @@ func (m *Map) DoInRad(center Location, rad2 int, Action func(row, col int)) {
 			}
 		}
 	}
-}
-
-func (m *Map) AddDeadAnt(loc Location, ant Item) {
-	m.itemGrid[loc] = DEAD
-}
-
-func (m *Map) AddFood(loc Location) {
-	m.Food[loc] = true
-	m.itemGrid[loc] = FOOD
 }
 
 func (m *Map) AddDestination(loc Location) {
@@ -194,7 +188,7 @@ func (m *Map) RemoveDestination(loc Location) {
 //safe place to dispatch an ant. It considers water and both
 //ants that have already sent an order and those that have not.
 func (m *Map) SafeDestination(loc Location) bool {
-	return !m.Water[loc] && !m.Destinations[loc]
+	return !m.squares[loc].isWater && !m.Destinations[loc]
 }
 
 //FromRowCol returns a Location given an (Row, Col) pair
@@ -244,41 +238,41 @@ func (m *Map) Move(loc Location, d Direction) Location {
 	return m.FromRowCol(Row, Col) //this will handle wrapping out-of-bounds numbers
 }
 
-func (m *Map) wordsToLoc(words []string) Location {
-	if len(words) < 3 {
-		log.Panicf("Invalid command format: \"%v\"", words)
-	}
-	return m.FromRowCol(atoi(words[1]), atoi(words[2]))
-}
-
-func (m *Map) wordsToAnt(words []string) (Location, Item) {
-	if len(words) < 4 {
-		log.Panicf("Invalid command format (not enough parameters for ant): \"%v\"", words)
-	}
-	row := atoi(words[1])
-	col := atoi(words[2])
-	loc := m.FromRowCol(row, col)
-	ant := atoi(words[3])
-
-	return loc, Item(ant)
-}
-
 func (m *Map) Update(words []string) {
+	loc := m.FromRowCol(atoi(words[1]), atoi(words[2]))
+	var ant Item
+	if len(words) == 4 {
+		ant = Item(atoi(words[3]))
+	}
+
 	switch words[0] {
 	case "w":
-		m.AddWater(m.wordsToLoc(words))
+		m.squares[loc].isWater = true
 	case "f":
-		m.AddFood(m.wordsToLoc(words))
+		m.Food[loc] = m.game.turn
 	case "h":
-		m.AddHill(m.wordsToAnt(words))
+		m.Hills[loc] = ant
 	case "a":
-		m.AddAnt(m.wordsToAnt(words))
+		m.AddAnt(loc, ant)
 	case "d":
-		m.AddDeadAnt(m.wordsToAnt(words))
+		// Ignore dead ant
 	default:
 		log.Panicf("unknown command: %v\n", words)
 	}
 }
+
+func (m *Map) AddAnt(loc Location, ant Item) {
+	m.Ants[loc] = ant
+
+	//if it turns out that you don't actually use the visible radius for anything,
+	//feel free to comment this out. It's needed for the image debugging, though.
+	if ant == MY_ANT {
+		m.AddDestination(loc)
+		m.ViewFrom(loc)
+		m.MyAnts[loc] = false
+	}
+}
+
 
 //Call IssueOrderLoc to issue an order for an ant at loc
 func (m *Map) IssueOrderLoc(loc Location, d Direction) {

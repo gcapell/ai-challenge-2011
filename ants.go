@@ -6,6 +6,8 @@ import (
 	"log"
 )
 
+type Turn uint
+
 //Game keeps track of everything we need to know about the state of the game
 type Game struct {
 	LoadTime      int   //in milliseconds
@@ -17,7 +19,7 @@ type Game struct {
 	AttackRadius2 int   //battle radius squared
 	SpawnRadius2  int   //spawn radius squared
 	PlayerSeed    int64 //random player seed
-	Turn          int   //current turn number
+	turn          Turn   //current turn number
 }
 
 func (s *Game) Load() {
@@ -46,7 +48,7 @@ func (s *Game) Load() {
 			param64 := atoi64(words[1])
 			s.PlayerSeed = param64
 		case "turn":
-			s.Turn = param
+			s.turn = Turn(param)
 
 		default:
 			log.Printf("unknown command: %v", words)
@@ -85,11 +87,11 @@ func main() {
 		}
 
 		if words[0] == "turn" {
-			turn  := atoi(words[1])
-			if turn != g.Turn+1 {
-				log.Panicf("Turn number out of sync, expected %v got %v", g.Turn+1, turn)
+			turn  := Turn(atoi(words[1]))
+			if turn != g.turn+1 {
+				log.Panicf("Turn number out of sync, expected %v got %v", g.turn+1, turn)
 			}
-			g.Turn = turn
+			g.turn = turn
 		} else {
 			m.Update(words)
 		}

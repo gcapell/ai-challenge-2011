@@ -18,20 +18,13 @@ const (
 func (mb *MyBot) DoTurn() {
 
 	// Grab nearby food
-	mb.moveToTarget("food", FOOD_DEPTH, func(loc Location) bool { return mb.m.Food[loc] })
+	mb.moveToTarget("food", FOOD_DEPTH, func(loc Location) bool { return mb.m.FoodAt(loc) })
 
 	// Attack enemy hill
-	mb.moveToTarget("enemy hill", EXPLORE_DEPTH, func(loc Location) bool {
-		if item, found := mb.m.Hills[loc]; found {
-			if item != MY_ANT {
-				return true
-			}
-		}
-		return false
-	})
+	mb.moveToTarget("enemy hill", EXPLORE_DEPTH, func(loc Location) bool {return mb.m.EnemyHillAt(loc)})
 
 	// Explore the unknown
-	mb.moveToTarget( "explore", EXPLORE_DEPTH, func(loc Location) bool { return mb.m.itemGrid[loc] == UNKNOWN })
+	mb.moveToTarget( "explore", EXPLORE_DEPTH, func(loc Location) bool { return !mb.m.squares[loc].wasSeen })
 
 	mb.moveRandomly()
 }
