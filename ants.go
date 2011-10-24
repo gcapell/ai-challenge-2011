@@ -80,7 +80,7 @@ func (s *Game) Load() {
 func (s *Game) Loop(b Bot)  {
 
 	//indicate we're ready
-	os.Stdout.Write([]byte("go\n"))
+	fmt.Println("go")
 
 	for line := range getLinesUntil("end") {
 		if line == "go" {
@@ -117,12 +117,12 @@ func (s *Game) IssueOrderLoc(loc Location, d Direction) {
 	s.Map.AddDestination(dest)
 	s.Map.MyAnts[loc] = true
 	row, col := s.Map.FromLocation(loc)
-	fmt.Fprintf(os.Stdout, "o %d %d %s\n", row, col, d)
+	fmt.Println("o", row, col, d)
 }
 
 //endTurn is called by Loop, you don't need to call it.
 func (s *Game) endTurn() {
-	os.Stdout.Write([]byte("go\n"))
+	fmt.Println("go")
 }
 
 //main initializes the state and starts the processing loop
