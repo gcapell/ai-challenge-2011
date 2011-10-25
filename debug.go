@@ -53,7 +53,7 @@ func (m *Map) String() string {
 		for col := 0; col < m.Cols; col++ {
 			loc := m.FromRowCol(row, col)
 			s := m.ItemAt(loc).Symbol()
-			str += string([]byte{s}) + " "
+			str += string([]byte{s})
 		}
 		str += "\n"
 	}

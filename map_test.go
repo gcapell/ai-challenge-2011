@@ -19,10 +19,10 @@ func TestInitFromString(t *testing.T)  {
 		...
 		.%.
 		a.b
-	`)
+	`, 4)
 }
 
-func (m *Map) InitFromString(s string) os.Error {
+func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 	lines := strings.Fields(s)
 	rows := len(lines)
 	var cols int
@@ -36,20 +36,19 @@ func (m *Map) InitFromString(s string) os.Error {
 		}
 		fmt.Printf("line:[%s]\n", line)
 	}
-	m.Rows = rows
-	m.Cols = cols
+	m.Init(rows, cols, viewRadius2)
+	fmt.Print(m.String())
 	return nil
 }
 
 func TestPrint(t *testing.T) {
 	m := loadMap()
-	if m.String() != `. . . 
-. . . 
-. . . 
-. . . 
-` {
-		t.Errorf("map loads/prints wrong size, got `%s`", m)
-	}
+	checkMap(t, &m, "map loads/prints wrong size", `
+		...
+		...
+		...
+		...
+	`)
 }
 
 func TestLocationConversion(t *testing.T) {
@@ -97,11 +96,25 @@ func TestMap(t *testing.T) {
 	m.AddAnt(m.FromRowCol(2, 2), MY_ANT)
 	m.AddAnt(m.FromRowCol(4, 2), MY_ANT)
 
-	if m.String() != `. . a 
-. . . 
-. . a 
-. . . 
-` {
-		t.Errorf("map put ants in wrong place, got `%s`", m.String())
+	checkMap(t, &m, "ants in wrong place", `
+		..a
+		...
+		..a
+		...
+	`)
+}
+
+func checkMap(t *testing.T, m *Map, msg string, expected string) {
+	if !sameText(m.String(), expected) {
+		t.Errorf("%s, expected: %s, got:\n%s\n", msg, expected, m.String())
 	}
+}
+
+// Are a and b the same (excluding whitespace)?
+func sameText(a, b string) bool {
+	return stripWhite(a) == stripWhite(b)
+}
+
+func stripWhite(s string) string {
+	return strings.Join(strings.Fields(s), "\n")
 }
