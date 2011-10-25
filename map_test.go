@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	"strings"
+	"fmt"
 )
 
 func loadMap() Map {
@@ -69,6 +70,20 @@ func TestMove(t *testing.T) {
 	if w != m.Move(loc, West) {
 		t.Errorf("Move west is broken")
 	}
+}
+
+func TestNeighbours(t *testing.T) {
+	var m Map
+	m.Init(40,30,0)
+	row, col, radius := 10,10,3
+	src := m.FromRowCol(row, col)
+	n := m.Neighbours( src, radius)
+	fmt.Printf("(%d,%d),r:%d ->", row, col, radius)
+	for _, loc := range(n) {
+		row, col = m.FromLocation(loc)
+		fmt.Printf("(%d,%d), ", row, col)
+	}
+	fmt.Printf("\n")
 }
 
 func TestMap(t *testing.T) {

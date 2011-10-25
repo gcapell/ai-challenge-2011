@@ -133,25 +133,33 @@ func (m *Map) MyStationaryAnts() chan Location {
 
 //ViewFrom adds a circle of land centered on the given location
 func (m *Map) ViewFrom(center Location) {
-	m.DoInRad(center, m.viewradius2, func(row, col int) {
-		loc := m.FromRowCol(row, col)
+	for _, loc := range(m.Neighbours(center, m.viewradius2)) {
 		s := &m.squares[loc]
 		s.wasSeen = true
 		s.lastSeen = m.turn
-	})
+	}
 }
 
-func (m *Map) DoInRad(center Location, rad2 int, Action func(row, col int)) {
-	row1, col1 := m.FromLocation(center)
-	for row := row1 - m.Rows/2; row < row1+m.Rows/2; row++ {
-		for col := col1 - m.Cols/2; col < col1+m.Cols/2; col++ {
-			row_delta := row - row1
-			col_delta := col - col1
-			if row_delta*row_delta+col_delta*col_delta < rad2 {
-				Action(row, col)
+func (m *Map) Neighbours(center Location, rad2 int) [] Location{
+	x, y := m.FromLocation(center)
+	
+	reply := make([]Location, 0, rad2)
+
+	for dx:=0; dx*dx<= rad2; dx++ {
+		for dy := 0; dy*dy + dx  *dx <= rad2; dy++ {
+			reply = append(reply, m.FromRowCol(x+dx, y+dy))
+			if(dx != 0) {
+				reply = append(reply, m.FromRowCol(x-dx, y+dy))
+			}
+			if (dy !=0) {
+				reply = append(reply, m.FromRowCol(x+dx, y-dy))
+			}
+			if (dx !=0 && dy != 0) {
+				reply = append(reply, m.FromRowCol(x-dx, y-dy))
 			}
 		}
 	}
+	return reply
 }
 
 func (m *Map) AddDestination(loc Location) {
@@ -295,7 +303,6 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 				return fmt.Errorf("different-length lines in %v" , lines)
 			}
 		}
-		fmt.Printf("line:[%s]\n", line)
 		for col, letter := range(line) {
 			loc := m.FromRowCol(row, col)
 			switch letter {
