@@ -94,25 +94,6 @@ func (m *Map) Reset() {
 	m.MyAnts = make(map[Location]bool)
 }
 
-func (m *Map) ItemAt(loc Location) Item {
-	s := &m.squares[loc]
-	if s.isWater {
-		return WATER
-	}
-	ant, found := m.Ants[loc]
-	if found {
-		return ant
-	}
-	_, found = m.Food[loc]
-	if found {
-		return FOOD
-	}
-	if !s.wasSeen {
-		return UNKNOWN
-	}
-
-	return LAND
-}
 
 // Given start location, return map of direction -> next location
 func (m *Map) NextValidMoves(loc Location) map[Direction]Location {

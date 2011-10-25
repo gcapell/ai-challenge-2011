@@ -26,6 +26,26 @@ func (o Item) Symbol() byte {
 	return byte(o) + 'a'
 }
 
+func (m *Map) ItemAt(loc Location) Item {
+	s := &m.squares[loc]
+	if s.isWater {
+		return WATER
+	}
+	ant, found := m.Ants[loc]
+	if found {
+		return ant
+	}
+	_, found = m.Food[loc]
+	if found {
+		return FOOD
+	}
+	if !s.wasSeen {
+		return UNKNOWN
+	}
+
+	return LAND
+}
+
 //String returns an ascii diagram of the map.
 func (m *Map) String() string {
 	str := ""
