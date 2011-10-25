@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"fmt"
+	"os"
+	"strings"
 )
 
 //Item represents all the various items that may be on the map
@@ -278,5 +280,39 @@ func (m *Map) IssueOrderLoc(loc Location, d Direction) {
 	m.MyAnts[loc] = true
 	row, col := m.FromLocation(loc)
 	fmt.Println("o", row, col, d)
+}
+
+func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
+	lines := strings.Fields(s)
+	rows := len(lines)
+	var cols int
+	for row, line := range(lines) {
+		if row == 0 {
+			cols = len(line)
+			m.Init(rows, cols, viewRadius2)
+		} else {
+			if cols != len(line) {
+				return fmt.Errorf("different-length lines in %v" , lines)
+			}
+		}
+		fmt.Printf("line:[%s]\n", line)
+		for col, letter := range(line) {
+			loc := m.FromRowCol(row, col)
+			switch letter {
+			case '#':
+				// Unknown territory
+			case '%':
+				m.MarkWater(loc)
+			case '*':
+				m.MarkFood(loc)
+			case 'a':
+				m.AddAnt(loc, 0)
+			case 'b':
+				m.AddAnt(loc, 1)
+			}
+		}
+	}
+
+	return nil
 }
 
