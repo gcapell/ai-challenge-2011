@@ -4,21 +4,29 @@ import (
 	"testing"
 )
 
-func TestMap(t *testing.T) {
+func loadMap() Map {
 	var m Map
 	var g Game
 	g.Rows = 4
 	g.Cols = 3
 	m.Init(&g)
 	m.Reset()
+	return m
+}
+
+func TestPrint(t *testing.T) {
+	m := loadMap()
 	if m.String() != `. . . 
 . . . 
 . . . 
 . . . 
 ` {
-		t.Errorf("map is wrong size, got `%s`", m)
+		t.Errorf("map loads/prints wrong size, got `%s`", m)
 	}
+}
 
+func TestLocationConversion(t *testing.T) {
+	m := loadMap()
 	loc := m.FromRowCol(3, 2)
 	row, col := m.FromLocation(loc)
 	if row != 3 || col != 2 {
@@ -29,6 +37,13 @@ func TestMap(t *testing.T) {
 	if loc2 != loc {
 		t.Errorf("from xy broken, got (%v), wanted (%v)", loc2, loc)
 	}
+
+}
+
+func TestMove(t *testing.T) {
+	m := loadMap()
+
+	loc := m.FromRowCol(3, 2)
 
 	n := m.FromRowCol(2, 2)
 	s := m.FromRowCol(4, 2)
@@ -47,9 +62,13 @@ func TestMap(t *testing.T) {
 	if w != m.Move(loc, West) {
 		t.Errorf("Move west is broken")
 	}
+}
 
-	m.AddAnt(n, MY_ANT)
-	m.AddAnt(s, MY_ANT)
+func TestMap(t *testing.T) {
+	m := loadMap()
+
+	m.AddAnt(m.FromRowCol(2, 2), MY_ANT)
+	m.AddAnt(m.FromRowCol(4, 2), MY_ANT)
 
 	if m.String() != `. . a 
 . . . 
