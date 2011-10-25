@@ -99,9 +99,6 @@ func (m *Map) ItemAt(loc Location) Item {
 	if s.isWater {
 		return WATER
 	}
-	if !s.wasSeen {
-		return UNKNOWN
-	}
 	ant, found := m.Ants[loc]
 	if found {
 		return ant
@@ -110,6 +107,10 @@ func (m *Map) ItemAt(loc Location) Item {
 	if found {
 		return FOOD
 	}
+	if !s.wasSeen {
+		return UNKNOWN
+	}
+
 	return LAND
 }
 
