@@ -73,17 +73,16 @@ var (
 	}
 )
 
-func (m *Map) Init(g *Game) {
-	m.Rows = g.Rows
-	m.Cols = g.Cols
-	m.game = g
+func (m *Map) Init(rows, cols, viewRadius2 int) {
+	m.Rows = rows
+	m.Cols = cols
+	m.viewradius2 = viewRadius2
 
 	m.Food = make(map[Location]Turn)
 	m.Hills = make(map[Location]Item)
 
 	nSquares := m.Rows * m.Cols
 	m.squares = make([]Square, nSquares)
-	m.viewradius2 = g.ViewRadius2
 	m.Reset()
 }
 

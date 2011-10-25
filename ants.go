@@ -63,7 +63,7 @@ func main() {
 		m Map
 	)
 	g.Load()
-	m.Init(&g)
+	m.Init(g.Rows, g.Cols, g.ViewRadius2)
 
 	bot := &MyBot{&g, &m}
 

@@ -9,11 +9,7 @@ import (
 
 func loadMap() Map {
 	var m Map
-	var g Game
-	g.Rows = 4
-	g.Cols = 3
-	m.Init(&g)
-	m.Reset()
+	m.Init(4,3,0)
 	return m
 }
 
