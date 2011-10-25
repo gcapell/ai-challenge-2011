@@ -35,28 +35,22 @@ func TestPrint(t *testing.T) {
 
 func TestLocationConversion(t *testing.T) {
 	m := loadMap()
-	loc := m.FromRowCol(3, 2)
+	loc := toLoc(3, 2)
 	row, col := m.FromLocation(loc)
 	if row != 3 || col != 2 {
 		t.Errorf("conversion broken, got (%v, %v), wanted (3, 2)", row, col)
 	}
-
-	loc2 := m.FromRowCol(3, -1)
-	if loc2 != loc {
-		t.Errorf("from xy broken, got (%v), wanted (%v)", loc2, loc)
-	}
-
 }
 
 func TestMove(t *testing.T) {
 	m := loadMap()
 
-	loc := m.FromRowCol(3, 2)
+	loc := toLoc(3, 2)
 
-	n := m.FromRowCol(2, 2)
-	s := m.FromRowCol(4, 2)
-	e := m.FromRowCol(3, 3)
-	w := m.FromRowCol(3, 1)
+	n := toLoc(2, 2)
+	s := toLoc(4, 2)
+	e := toLoc(3, 3)
+	w := toLoc(3, 1)
 
 	if n != m.Move(loc, North) {
 		t.Errorf("Move north is broken")
@@ -76,7 +70,7 @@ func TestNeighbours(t *testing.T) {
 	var m Map
 	m.Init(40,30,0)
 	row, col, radius := 10,10,3
-	src := m.FromRowCol(row, col)
+	src := toLoc(row, col)
 	n := m.Neighbours( src, radius)
 	fmt.Printf("(%d,%d),r:%d ->", row, col, radius)
 	for _, loc := range(n) {
@@ -89,8 +83,8 @@ func TestNeighbours(t *testing.T) {
 func TestMap(t *testing.T) {
 	m := loadMap()
 
-	m.AddAnt(m.FromRowCol(2, 2), MY_ANT)
-	m.AddAnt(m.FromRowCol(4, 2), MY_ANT)
+	m.AddAnt(toLoc(2, 2), MY_ANT)
+	m.AddAnt(toLoc(4, 2), MY_ANT)
 
 	checkMap(t, &m, "ants in wrong place", `
 		##a

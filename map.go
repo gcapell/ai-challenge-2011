@@ -143,15 +143,15 @@ func (m *Map) Neighbours(center Location, rad2 int) [] Location{
 
 	for dx:=0; dx*dx<= rad2; dx++ {
 		for dy := 0; dy*dy + dx  *dx <= rad2; dy++ {
-			reply = append(reply, m.FromRowCol(x+dx, y+dy))
+			reply = append(reply, toLoc(x+dx, y+dy))
 			if(dx != 0) {
-				reply = append(reply, m.FromRowCol(x-dx, y+dy))
+				reply = append(reply, toLoc(x-dx, y+dy))
 			}
 			if (dy !=0) {
-				reply = append(reply, m.FromRowCol(x+dx, y-dy))
+				reply = append(reply, toLoc(x+dx, y-dy))
 			}
 			if (dx !=0 && dy != 0) {
-				reply = append(reply, m.FromRowCol(x-dx, y-dy))
+				reply = append(reply, toLoc(x-dx, y-dy))
 			}
 		}
 	}
@@ -176,22 +176,11 @@ func (m *Map) SafeDestination(loc Location) bool {
 	return !m.squares[loc].isWater && !m.Destinations[loc]
 }
 
-//FromRowCol returns a Location given an (Row, Col) pair
-func (m *Map) FromRowCol(Row, Col int) Location {
-	for Row < 0 {
-		Row += ROWS
+func toLoc(row, col int) Location {
+	if row<0 || row >= ROWS || col < 0 || col >= COLS {
+		log.Panicf("bad row/col %d,%d", row, col)
 	}
-	for Row >= ROWS {
-		Row -= ROWS
-	}
-	for Col < 0 {
-		Col += COLS
-	}
-	for Col >= COLS {
-		Col -= COLS
-	}
-
-	return Location(Row*COLS + Col)
+	return Location(row * COLS + col)
 }
 
 //FromLocation returns an (Row, Col) pair given a Location
@@ -220,7 +209,7 @@ func (m *Map) Move(loc Location, d Direction) Location {
 	default:
 		log.Panicf("%v is not a valid direction", d)
 	}
-	return m.FromRowCol(Row, Col) //this will handle wrapping out-of-bounds numbers
+	return toLoc(Row, Col) //this will handle wrapping out-of-bounds numbers
 }
 
 func (m *Map) MarkWater(loc Location) {
@@ -241,7 +230,7 @@ func (m *Map) Update(words []string) {
 		return
 	}
 
-	loc := m.FromRowCol(atoi(words[1]), atoi(words[2]))
+	loc := toLoc(atoi(words[1]), atoi(words[2]))
 	var ant Item
 	if len(words) == 4 {
 		ant = Item(atoi(words[3]))
@@ -300,7 +289,7 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 			}
 		}
 		for col, letter := range(line) {
-			loc := m.FromRowCol(row, col)
+			loc := toLoc(row, col)
 			switch letter {
 			case '#':
 				// Unknown territory
