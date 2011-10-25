@@ -2,6 +2,9 @@ package main
 
 import (
 	"testing"
+	"strings"
+	"fmt"
+	"os"
 )
 
 func loadMap() Map {
@@ -12,6 +15,34 @@ func loadMap() Map {
 	m.Init(&g)
 	m.Reset()
 	return m
+}
+
+func TestInitFromString(t *testing.T)  {
+	var m Map 
+	m.InitFromString(`
+		...
+		.%.
+		a.b
+	`)
+}
+
+func (m *Map) InitFromString(s string) os.Error {
+	lines := strings.Fields(s)
+	rows := len(lines)
+	var cols int
+	for i, line := range(lines) {
+		if i == 0 {
+			cols = len(line)
+		} else {
+			if cols != len(line) {
+				return fmt.Errorf("different-length lines in %v" , lines)
+			}
+		}
+		fmt.Printf("line:[%s]\n", line)
+	}
+	m.Rows = rows
+	m.Cols = cols
+	return nil
 }
 
 func TestPrint(t *testing.T) {
