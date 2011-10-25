@@ -8,13 +8,13 @@ import (
 func (o Item) Symbol() byte {
 	switch o {
 	case UNKNOWN:
-		return '.'
+		return '#'
 	case WATER:
 		return '%'
 	case FOOD:
 		return '*'
 	case LAND:
-		return ' '
+		return '.'
 	case DEAD:
 		return '!'
 	}

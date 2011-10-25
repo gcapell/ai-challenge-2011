@@ -19,7 +19,6 @@ type Game struct {
 	AttackRadius2 int   //battle radius squared
 	SpawnRadius2  int   //spawn radius squared
 	PlayerSeed    int64 //random player seed
-	turn          Turn   //current turn number
 }
 
 func (s *Game) Load() {
@@ -47,9 +46,6 @@ func (s *Game) Load() {
 		case "player_seed":
 			param64 := atoi64(words[1])
 			s.PlayerSeed = param64
-		case "turn":
-			s.turn = Turn(param)
-
 		default:
 			log.Printf("unknown command: %v", words)
 		}
@@ -86,14 +82,6 @@ func main() {
 			log.Panicf("Invalid command format: \"%s\"", line)
 		}
 
-		if words[0] == "turn" {
-			turn  := Turn(atoi(words[1]))
-			if turn != g.turn+1 {
-				log.Panicf("Turn number out of sync, expected %v got %v", g.turn+1, turn)
-			}
-			g.turn = turn
-		} else {
-			m.Update(words)
-		}
+		m.Update(words)
 	}
 }

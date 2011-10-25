@@ -15,39 +15,54 @@ func loadMap() Map {
 
 func TestInitFromString(t *testing.T)  {
 	var m Map 
-	m.InitFromString(`
-		...
-		.%.
-		a.b
-	`, 4)
+	s := `
+		###
+		#%#
+		a#b
+	`
+	m.InitFromString(s, 0)
+	checkMap(t, &m, "InitFromString", s)
 }
 
 func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 	lines := strings.Fields(s)
 	rows := len(lines)
 	var cols int
-	for i, line := range(lines) {
-		if i == 0 {
+	for row, line := range(lines) {
+		if row == 0 {
 			cols = len(line)
+			m.Init(rows, cols, viewRadius2)
 		} else {
 			if cols != len(line) {
 				return fmt.Errorf("different-length lines in %v" , lines)
 			}
 		}
 		fmt.Printf("line:[%s]\n", line)
+		for col, letter := range(line) {
+			loc := m.FromRowCol(row, col)
+			switch letter {
+			case '%':
+				m.MarkWater(loc)
+			case '*':
+				m.MarkFood(loc)
+			case 'a':
+				m.AddAnt(loc, 0)
+			case 'b':
+				m.AddAnt(loc, 1)
+			}
+		}
 	}
-	m.Init(rows, cols, viewRadius2)
-	fmt.Print(m.String())
+
 	return nil
 }
 
 func TestPrint(t *testing.T) {
 	m := loadMap()
 	checkMap(t, &m, "map loads/prints wrong size", `
-		...
-		...
-		...
-		...
+		###
+		###
+		###
+		###
 	`)
 }
 
@@ -97,10 +112,10 @@ func TestMap(t *testing.T) {
 	m.AddAnt(m.FromRowCol(4, 2), MY_ANT)
 
 	checkMap(t, &m, "ants in wrong place", `
-		..a
-		...
-		..a
-		...
+		##a
+		###
+		##a
+		###
 	`)
 }
 

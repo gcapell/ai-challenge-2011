@@ -38,8 +38,7 @@ type Map struct {
 	MyAnts       map[Location]bool // ant location -> is moving?
 
 	viewradius2 int
-
-	game	*Game
+	turn		Turn
 }
 
 const (
@@ -136,7 +135,7 @@ func (m *Map) ViewFrom(center Location) {
 		loc := m.FromRowCol(row, col)
 		s := &m.squares[loc]
 		s.wasSeen = true
-		s.lastSeen = m.game.turn
+		s.lastSeen = m.turn
 	})
 }
 
@@ -218,7 +217,24 @@ func (m *Map) Move(loc Location, d Direction) Location {
 	return m.FromRowCol(Row, Col) //this will handle wrapping out-of-bounds numbers
 }
 
+func (m *Map) MarkWater(loc Location) {
+	m.squares[loc].isWater = true
+}
+
+func (m *Map) MarkFood(loc Location) {
+	m.Food[loc] = m.turn
+}
+
 func (m *Map) Update(words []string) {
+	if words[0] == "turn" {
+		turn  := Turn(atoi(words[1]))
+		if turn != m.turn+1 {
+			log.Panicf("Turn number out of sync, expected %v got %v", m.turn+1, turn)
+		}
+		m.turn = turn
+		return
+	}
+
 	loc := m.FromRowCol(atoi(words[1]), atoi(words[2]))
 	var ant Item
 	if len(words) == 4 {
@@ -227,9 +243,9 @@ func (m *Map) Update(words []string) {
 
 	switch words[0] {
 	case "w":
-		m.squares[loc].isWater = true
+		m.MarkWater(loc)
 	case "f":
-		m.Food[loc] = m.game.turn
+		m.MarkFood(loc)
 	case "h":
 		m.Hills[loc] = ant
 	case "a":
