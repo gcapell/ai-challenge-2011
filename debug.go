@@ -49,8 +49,8 @@ func (m *Map) ItemAt(loc Location) Item {
 //String returns an ascii diagram of the map.
 func (m *Map) String() string {
 	str := ""
-	for row := 0; row < m.Rows; row++ {
-		for col := 0; col < m.Cols; col++ {
+	for row := 0; row < ROWS; row++ {
+		for col := 0; col < COLS; col++ {
 			loc := m.FromRowCol(row, col)
 			s := m.ItemAt(loc).Symbol()
 			str += string([]byte{s})

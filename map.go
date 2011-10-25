@@ -28,9 +28,6 @@ type Square struct {
 }
 
 type Map struct {
-	Rows int
-	Cols int
-
 	squares	[]Square
 
 	Ants         map[Location]Item
@@ -38,9 +35,6 @@ type Map struct {
 	Food         map[Location]Turn
 	Destinations map[Location]bool
 	MyAnts       map[Location]bool // ant location -> is moving?
-
-	viewradius2 int
-	turn		Turn
 }
 
 const (
@@ -64,6 +58,8 @@ const (
 )
 
 var (
+	ROWS, COLS, VIEWRADIUS2 int
+	TURN Turn
 	DIRS = []Direction{North, East, South, West}
 	directionstrings = map[Direction]string{
 		North:      "n",
@@ -75,14 +71,14 @@ var (
 )
 
 func (m *Map) Init(rows, cols, viewRadius2 int) {
-	m.Rows = rows
-	m.Cols = cols
-	m.viewradius2 = viewRadius2
+	ROWS = rows
+	COLS = cols
+	VIEWRADIUS2 = viewRadius2
 
 	m.Food = make(map[Location]Turn)
 	m.Hills = make(map[Location]Item)
 
-	nSquares := m.Rows * m.Cols
+	nSquares := rows * cols
 	m.squares = make([]Square, nSquares)
 	m.Reset()
 }
@@ -133,10 +129,10 @@ func (m *Map) MyStationaryAnts() chan Location {
 
 //ViewFrom adds a circle of land centered on the given location
 func (m *Map) ViewFrom(center Location) {
-	for _, loc := range(m.Neighbours(center, m.viewradius2)) {
+	for _, loc := range(m.Neighbours(center, VIEWRADIUS2)) {
 		s := &m.squares[loc]
 		s.wasSeen = true
-		s.lastSeen = m.turn
+		s.lastSeen = TURN
 	}
 }
 
@@ -183,25 +179,25 @@ func (m *Map) SafeDestination(loc Location) bool {
 //FromRowCol returns a Location given an (Row, Col) pair
 func (m *Map) FromRowCol(Row, Col int) Location {
 	for Row < 0 {
-		Row += m.Rows
+		Row += ROWS
 	}
-	for Row >= m.Rows {
-		Row -= m.Rows
+	for Row >= ROWS {
+		Row -= ROWS
 	}
 	for Col < 0 {
-		Col += m.Cols
+		Col += COLS
 	}
-	for Col >= m.Cols {
-		Col -= m.Cols
+	for Col >= COLS {
+		Col -= COLS
 	}
 
-	return Location(Row*m.Cols + Col)
+	return Location(Row*COLS + Col)
 }
 
 //FromLocation returns an (Row, Col) pair given a Location
 func (m *Map) FromLocation(loc Location) (int, int) {
 	iLoc := int(loc)
-	return iLoc / m.Cols, iLoc % m.Cols
+	return iLoc / COLS, iLoc % COLS
 }
 
 func (d Direction) String() string {
@@ -232,16 +228,16 @@ func (m *Map) MarkWater(loc Location) {
 }
 
 func (m *Map) MarkFood(loc Location) {
-	m.Food[loc] = m.turn
+	m.Food[loc] = TURN
 }
 
 func (m *Map) Update(words []string) {
 	if words[0] == "turn" {
 		turn  := Turn(atoi(words[1]))
-		if turn != m.turn+1 {
-			log.Panicf("Turn number out of sync, expected %v got %v", m.turn+1, turn)
+		if turn != TURN+1 {
+			log.Panicf("Turn number out of sync, expected %v got %v", TURN+1, turn)
 		}
-		m.turn = turn
+		TURN = turn
 		return
 	}
 
