@@ -320,3 +320,23 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 	return nil
 }
 
+func wrapDelta(a, b, wrap int) int {
+	delta := a-b
+	if delta<0 {
+		delta = -delta
+	}
+	wrapped := wrap - delta
+	// log.Printf("a: %d, b: %d, wrap: %d, delta: %d, wrapped: %d\n", a, b, wrap, delta, wrapped)
+	if delta < wrapped {
+		return delta
+	}
+	return wrapped
+}
+
+
+// Return (Manhattan) distance between two points,
+// allowing for warping across edges
+func (m *Map) Distance( a,b Point) int {
+	return wrapDelta(a.x, b.x, COLS)+
+		wrapDelta(a.y, b.y, ROWS)
+}
