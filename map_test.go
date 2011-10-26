@@ -33,6 +33,29 @@ func TestPrint(t *testing.T) {
 	`)
 }
 
+type Point struct {x,y int}
+
+func (p Point) loc() Location {
+	return toLoc(p.x, p.y)
+}
+
+func TestShortestPath(t *testing.T) {
+	var m Map
+	m.InitFromString(`
+		.....%..
+		a.%..%.b
+		..%.....
+		..%.....
+	`, 0)
+	src := Point{1,0}	// a
+	dst := Point{1,7}	// b
+	path, err := m.ShortestPath(src.loc(), dst.loc())
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("%v -> %v : %v\n", src, dst, path)
+}
+
 func TestLocationConversion(t *testing.T) {
 	loc := toLoc(3, 2)
 	row, col := toRC(loc)
