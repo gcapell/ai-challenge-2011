@@ -207,24 +207,12 @@ func (m *Map) Move(loc Location, d Direction) Location {
 	switch d {
 	case North:
 		row -= 1
-		if row <0 {
-			row += ROWS
-		}
 	case South:
 		row += 1
-		if row == ROWS{
-			row = 0
-		}
 	case West:
 		col -= 1
-		if col < 0{
-			col += COLS
-		}
 	case East:
 		col += 1
-		if col == COLS{
-			col = 0
-		}
 	case NoMovement: //do nothing
 	default:
 		log.Panicf("%v is not a valid direction", d)
