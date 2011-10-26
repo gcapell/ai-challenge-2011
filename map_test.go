@@ -48,8 +48,8 @@ func TestMove(t *testing.T) {
 	loc := toLoc(3, 2)
 
 	n := toLoc(2, 2)
-	s := toLoc(4, 2)
-	e := toLoc(3, 3)
+	s := toLoc(0, 2)
+	e := toLoc(3, 0)
 	w := toLoc(3, 1)
 
 	if n != m.Move(loc, North) {
@@ -84,7 +84,7 @@ func TestMap(t *testing.T) {
 	m := loadMap()
 
 	m.AddAnt(toLoc(2, 2), MY_ANT)
-	m.AddAnt(toLoc(4, 2), MY_ANT)
+	m.AddAnt(toLoc(0, 2), MY_ANT)
 
 	checkMap(t, &m, "ants in wrong place", `
 		##a

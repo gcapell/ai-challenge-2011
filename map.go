@@ -195,21 +195,33 @@ func (d Direction) String() string {
 
 //Move returns a new location which is one step in the specified direction from the specified location.
 func (m *Map) Move(loc Location, d Direction) Location {
-	Row, Col := m.FromLocation(loc)
+	row, col := m.FromLocation(loc)
 	switch d {
 	case North:
-		Row -= 1
+		row -= 1
+		if row <0 {
+			row += ROWS
+		}
 	case South:
-		Row += 1
+		row += 1
+		if row == ROWS{
+			row = 0
+		}
 	case West:
-		Col -= 1
+		col -= 1
+		if col < 0{
+			col += COLS
+		}
 	case East:
-		Col += 1
+		col += 1
+		if col == COLS{
+			col = 0
+		}
 	case NoMovement: //do nothing
 	default:
 		log.Panicf("%v is not a valid direction", d)
 	}
-	return toLoc(Row, Col) //this will handle wrapping out-of-bounds numbers
+	return toLoc(row, col)
 }
 
 func (m *Map) MarkWater(loc Location) {
