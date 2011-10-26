@@ -3,11 +3,13 @@ import (
 	"os"
 	"container/heap"
 	"container/vector"
+	"fmt"
 )
 type (
 	Node struct {
-		score int
-		Point
+		estimate int
+		length int
+		p Point
 	}
 
 	myHeap struct {
@@ -15,25 +17,52 @@ type (
 	}
 )
 
-func (loc Location ) point () Point {
-	iLoc := int(loc)
-	return Point{iLoc / COLS, iLoc % COLS}
+func (h *myHeap) Less(i, j int) bool { return h.At(i).(Node).estimate < h.At(j).(Node).estimate }
+
+func unravelPath(back []Location, src, dst Point) []Point {
+	// Follow breadcrumbs from 'dst' to 'src'
+	reply := make([]Point, 0, ROWS + COLS)
+	for p := dst; !p.Equals(src); p = back[p.loc()].point() {
+		fmt.Printf("backing through %v\n", p)
+		reply = append(reply, p)
+	}
+	return reply
 }
 
-func (h *myHeap) Less(i, j int) bool { return h.At(i).(Node).score < h.At(j).(Node).score }
-
-func (p Point) loc() Location {
-	return toLoc(p.x, p.y)
-}
-
-func (m *Map) ShortestPath(srcLoc, dstLoc Location) ([] Location, os.Error) {
+func (m *Map) ShortestPath(srcLoc, dstLoc Location) ([] Point, os.Error) {
 	src := srcLoc.point()
+	dst := dstLoc.point()
 
 	h := &myHeap{}
 	heap.Init(h)
 
-	n := Node {3, src}
-	h.Push(n)
+	heap.Push(h, Node{m.Distance(src, dst), 0, src})
 	
-	return []Location{1,2,4}, nil
+	// Each entry points to previous point in path
+	back := make([]Location, ROWS * COLS)
+
+	for j :=0; j<len(back); j++ {
+		back[j] = -1
+	}
+
+	for h.Len() != 0 {
+		n := heap.Pop(h).(Node)
+		pathLength := n.length + 1
+		fmt.Printf("examining %v\n", n)
+		for _, p := range(m.DryNeighbours(n.p)) {
+			// Have we already seen this point?
+			if back[p.loc()] != -1 {
+				continue
+			}
+			newNode := Node{m.Distance(p, dst) + pathLength, pathLength, p}
+			fmt.Printf("\tneighbour %v\n", newNode)
+			back[p.loc()] = n.p.loc()
+			if p.Equals(dst) {
+				return unravelPath(back, src, dst), nil
+			}
+			heap.Push(h, newNode)
+		}
+		fmt.Printf("heap: %v\n", *h)
+	}
+	return nil, fmt.Errorf("no path found")
 }

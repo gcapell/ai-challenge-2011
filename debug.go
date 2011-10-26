@@ -26,16 +26,16 @@ func (o Item) Symbol() byte {
 	return byte(o) + 'a'
 }
 
-func (m *Map) ItemAt(loc Location) Item {
-	s := &m.squares[loc]
+func (m *Map) ItemAt(p Point) Item {
+	s := &m.squares[p.r][p.c]
 	if s.isWater {
 		return WATER
 	}
-	ant, found := m.Ants[loc]
+	ant, found := m.Ants[p.loc()]
 	if found {
 		return ant
 	}
-	_, found = m.Food[loc]
+	_, found = m.Food[p.loc()]
 	if found {
 		return FOOD
 	}
@@ -51,8 +51,7 @@ func (m *Map) String() string {
 	str := ""
 	for row := 0; row < ROWS; row++ {
 		for col := 0; col < COLS; col++ {
-			loc := toLoc(row, col)
-			s := m.ItemAt(loc).Symbol()
+			s := m.ItemAt(Point{row, col}).Symbol()
 			str += string([]byte{s})
 		}
 		str += "\n"

@@ -61,13 +61,13 @@ func TestPrint(t *testing.T) {
 func TestShortestPath(t *testing.T) {
 	var m Map
 	m.InitFromString(`
-		.....%..
-		a.%..%.b
+		..%..%..
+		a.%.b%..
 		..%.....
 		..%.....
 	`, 0)
 	src := Point{1,0}	// a
-	dst := Point{1,7}	// b
+	dst := Point{1,4}	// b
 	path, err := m.ShortestPath(src.loc(), dst.loc())
 	if err != nil {
 		t.Error(err)
@@ -76,34 +76,29 @@ func TestShortestPath(t *testing.T) {
 }
 
 func TestLocationConversion(t *testing.T) {
-	loc := toLoc(3, 2)
-	row, col := toRC(loc)
-	if row != 3 || col != 2 {
-		t.Errorf("conversion broken, got (%v, %v), wanted (3, 2)", row, col)
+	loc := Point{3, 2}.loc()
+	p := loc.point()
+	if p.r != 3 || p.c != 2{
+		t.Errorf("conversion broken, got %v, wanted (3, 2)", p)
 	}
 }
 
 func TestMove(t *testing.T) {
 	m := loadMap()
 
-	loc := toLoc(3, 2)
+	src := Point{3, 2}
 
-	n := toLoc(2, 2)
-	s := toLoc(0, 2)
-	e := toLoc(3, 0)
-	w := toLoc(3, 1)
-
-	if n != m.Move(loc, North) {
-		t.Errorf("Move north is broken")
+	data := []struct{direction Direction; dst Point} {
+		{North, Point{2,2}},
+		{South, Point{0, 2}},
+		{East, Point{3, 0}},
+		{West, Point{3, 1}},
 	}
-	if s != m.Move(loc, South) {
-		t.Errorf("Move south is broken")
-	}
-	if e != m.Move(loc, East) {
-		t.Errorf("Move east is broken")
-	}
-	if w != m.Move(loc, West) {
-		t.Errorf("Move west is broken")
+	for _, d := range(data) {
+		actualDst := m.Move(src, d.direction)
+		if !actualDst.Equals(d.dst) {
+			t.Errorf("Move %v expected %v, got %v", d.direction, d.dst, actualDst)
+		}
 	}
 }
 
@@ -111,12 +106,11 @@ func TestNeighbours(t *testing.T) {
 	var m Map
 	m.Init(40,30,0)
 	row, col, radius := 10,10,3
-	src := toLoc(row, col)
+	src := Point{row, col}
 	n := m.Neighbours( src, radius)
 	fmt.Printf("(%d,%d),r:%d ->", row, col, radius)
-	for _, loc := range(n) {
-		row, col = toRC(loc)
-		fmt.Printf("(%d,%d), ", row, col)
+	for _, p := range(n) {
+		fmt.Printf("%v, ", p)
 	}
 	fmt.Printf("\n")
 }
@@ -124,8 +118,8 @@ func TestNeighbours(t *testing.T) {
 func TestMap(t *testing.T) {
 	m := loadMap()
 
-	m.AddAnt(toLoc(2, 2), MY_ANT)
-	m.AddAnt(toLoc(0, 2), MY_ANT)
+	m.AddAnt(Point{2, 2}, MY_ANT)
+	m.AddAnt(Point{0, 2}, MY_ANT)
 
 	checkMap(t, &m, "ants in wrong place", `
 		##a
