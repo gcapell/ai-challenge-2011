@@ -7,35 +7,39 @@ import (
 	"strings"
 )
 
-//Item represents all the various items that may be on the map
-type Item int8
+type (
+	//Item represents all the various items that may be on the map
+	Item int8
 
-type Move struct {
-	src Location
-	d   Direction
-}
+	Move struct {
+		src Location
+		d   Direction
+	}
 
-//Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
-type Location int
+	//Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
+	Location int
 
-//Direction represents the direction concept for issuing orders.
-type Direction int
+	//Direction represents the direction concept for issuing orders.
+	Direction int
 
-type Square struct {
-	isWater bool
-	wasSeen bool	// Have we ever seen this square?
-	lastSeen Turn	// .. if so, when?
-}
+	Point struct {x,y int}
 
-type Map struct {
-	squares	[]Square
+	Square struct {
+		isWater bool
+		wasSeen bool	// Have we ever seen this square?
+		lastSeen Turn	// .. if so, when?
+	}
 
-	Ants         map[Location]Item
-	Hills        map[Location]Item
-	Food         map[Location]Turn
-	Destinations map[Location]bool
-	MyAnts       map[Location]bool // ant location -> is moving?
-}
+	Map struct {
+		squares	[]Square
+
+		Ants         map[Location]Item
+		Hills        map[Location]Item
+		Food         map[Location]Turn
+		Destinations map[Location]bool
+		MyAnts       map[Location]bool // ant location -> is moving?
+	}
+)
 
 const (
 	UNKNOWN Item = iota - 5

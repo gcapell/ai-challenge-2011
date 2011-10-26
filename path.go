@@ -5,8 +5,6 @@ import (
 	"container/vector"
 )
 type (
-	Point struct {x,y int}
-
 	Node struct {
 		score int
 		Point
