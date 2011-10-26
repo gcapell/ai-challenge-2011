@@ -33,12 +33,6 @@ func TestPrint(t *testing.T) {
 	`)
 }
 
-type Point struct {x,y int}
-
-func (p Point) loc() Location {
-	return toLoc(p.x, p.y)
-}
-
 func TestShortestPath(t *testing.T) {
 	var m Map
 	m.InitFromString(`
