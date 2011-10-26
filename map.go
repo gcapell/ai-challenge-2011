@@ -177,8 +177,17 @@ func (m *Map) SafeDestination(loc Location) bool {
 }
 
 func toLoc(row, col int) Location {
-	if row<0 || row >= ROWS || col < 0 || col >= COLS {
-		log.Panicf("bad row/col %d,%d", row, col)
+	if row < 0 {
+		row += ROWS
+	}
+	if row >= ROWS {
+		row -= ROWS
+	}
+	if col < 0 {
+		col += COLS
+	}
+	if col >= COLS {
+		col -= COLS
 	}
 	return Location(row * COLS + col)
 }
