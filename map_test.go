@@ -34,9 +34,8 @@ func TestPrint(t *testing.T) {
 }
 
 func TestLocationConversion(t *testing.T) {
-	m := loadMap()
 	loc := toLoc(3, 2)
-	row, col := m.FromLocation(loc)
+	row, col := toRC(loc)
 	if row != 3 || col != 2 {
 		t.Errorf("conversion broken, got (%v, %v), wanted (3, 2)", row, col)
 	}
@@ -74,7 +73,7 @@ func TestNeighbours(t *testing.T) {
 	n := m.Neighbours( src, radius)
 	fmt.Printf("(%d,%d),r:%d ->", row, col, radius)
 	for _, loc := range(n) {
-		row, col = m.FromLocation(loc)
+		row, col = toRC(loc)
 		fmt.Printf("(%d,%d), ", row, col)
 	}
 	fmt.Printf("\n")

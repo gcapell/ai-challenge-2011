@@ -137,7 +137,7 @@ func (m *Map) ViewFrom(center Location) {
 }
 
 func (m *Map) Neighbours(center Location, rad2 int) [] Location{
-	x, y := m.FromLocation(center)
+	x, y := toRC(center)
 	
 	reply := make([]Location, 0, rad2)
 
@@ -183,8 +183,7 @@ func toLoc(row, col int) Location {
 	return Location(row * COLS + col)
 }
 
-//FromLocation returns an (Row, Col) pair given a Location
-func (m *Map) FromLocation(loc Location) (int, int) {
+func toRC(loc Location) (row, col int) {
 	iLoc := int(loc)
 	return iLoc / COLS, iLoc % COLS
 }
@@ -195,7 +194,7 @@ func (d Direction) String() string {
 
 //Move returns a new location which is one step in the specified direction from the specified location.
 func (m *Map) Move(loc Location, d Direction) Location {
-	row, col := m.FromLocation(loc)
+	row, col := toRC(loc)
 	switch d {
 	case North:
 		row -= 1
@@ -283,7 +282,7 @@ func (m *Map) IssueOrderLoc(loc Location, d Direction) {
 	m.RemoveDestination(loc)
 	m.AddDestination(dest)
 	m.MyAnts[loc] = true
-	row, col := m.FromLocation(loc)
+	row, col := toRC(loc)
 	fmt.Println("o", row, col, d)
 }
 
