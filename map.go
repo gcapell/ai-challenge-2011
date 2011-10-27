@@ -21,7 +21,8 @@ type (
 		p	Point		// Where are we now?
 		plan	Points	// Where will we be?
 		seen	Turn
-		isBusy	bool
+		isTasked	bool	// Has this ant been given an order this turn?
+		hasMoved	bool	// Has this ant moved already this turn?
 	}
 	
 	Map struct {
@@ -229,7 +230,8 @@ func (m *Map) UpdatesProcessed() {
 		if (ant.seen != TURN) {
 			log.Panicf("%v (@ %v) missed an update\n", ant, loc.point())
 		}
-		ant.isBusy = false	// open for business!
+		ant.isTasked = false	// open for business!
+		ant.hasMoved = false
 	}
 }
 
@@ -266,12 +268,20 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 	return nil
 }
 
-func (m *Map) FreeAnts() []*Ant {
+// Return slice of ants who aren't already assigned
+// If interrupt, include ants who already are moving
+func (m *Map) FreeAnts(interrupt bool) []*Ant {
 	reply := make([]*Ant, 0, len(m.myAnts))
 	for _, ant := range m.myAnts {
-		if !ant.isBusy {
-			reply = append(reply, ant)
+		if ant.isTasked {
+			// Already assigned this turn
+			continue
 		}
+		if len(ant.plan) > 0 && !interrupt {
+			// Ant already has a plan
+			continue
+		}
+		reply = append(reply, ant)
 	}
 	return reply
 }

@@ -49,9 +49,10 @@ func direction(src, dst Point) string{
 
 // If we can, make our move (and report success, update occupied)
 func (a *Ant)Move(m *Map, occupied map[Location]bool) bool {
-	if !a.isBusy {
+	if a.hasMoved || len(a.plan) == 0 {
 		return false
 	}
+	
 	dst := a.plan[0]
 	if occupied[dst.loc()] {
 		return false
@@ -62,7 +63,7 @@ func (a *Ant)Move(m *Map, occupied map[Location]bool) bool {
 	fmt.Println("o", src.r, src.c, direction(src, dst))
 
 	// Update our status
-	a.isBusy = false
+	a.hasMoved = true
 	a.plan = a.plan[1:]
 	a.p = dst
 
@@ -77,9 +78,8 @@ func (a *Ant)Move(m *Map, occupied map[Location]bool) bool {
 
 // Assign a to get to p
 func (a *Ant) moveTo(m *Map, p Point, reason string) {
-	a.isBusy = true
-	
 	log.Printf("Moving %v to %v for %s", a, p, reason)
+	a.isTasked  = true
 
 	// Do we already know how to get to p?
 	if len(a.plan) > 0 && a.plan[len(a.plan)-1].Equals(p) {
@@ -90,7 +90,8 @@ func (a *Ant) moveTo(m *Map, p Point, reason string) {
 	path, error := m.ShortestPath(a.p, p)
 	if error != nil {
 		log.Printf("%v cannot get to %v (%s)\n", a, p, error)
-		a.isBusy = false
+		a.isTasked = false
+		return
 	}
 	a.plan = path
 }
