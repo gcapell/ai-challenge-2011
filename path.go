@@ -35,9 +35,7 @@ func unravelPath(back []Location, src, dst Point, pathLength int) Points {
 	return reply
 }
 
-func (m *Map) ShortestPath(srcLoc, dstLoc Location) ([] Point, os.Error) {
-	src := srcLoc.point()
-	dst := dstLoc.point()
+func (m *Map) ShortestPath(src, dst Point) ([] Point, os.Error) {
 
 	h := &myHeap{}
 	heap.Init(h)

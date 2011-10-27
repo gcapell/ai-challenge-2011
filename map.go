@@ -20,7 +20,6 @@ type (
 	Ant struct {
 		p	Point		// Where are we now?
 		plan	Points	// Where will we be?
-		target	Item	// Why are we going there?
 		seen	Turn
 		isBusy	bool
 	}
@@ -236,3 +235,4 @@ func (m *Map) FreeAnts() []*Ant {
 	}
 	return reply
 }
+

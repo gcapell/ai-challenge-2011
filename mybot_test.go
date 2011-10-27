@@ -1,7 +1,6 @@
 package main
 import (
 	"testing"
-	"fmt"
 )
 
 type Pairing struct{p,q Point}
@@ -27,7 +26,6 @@ func assign1Helper(t *testing.T, antLocations []Point, targets []Point, expected
 		ants[i] = &Ant{ p:p}
 	}
 	reply := assign1(ants, targets)
-	fmt.Printf("assign1(%v, %v) => %s\n", ants, targets, reply)
 	if len(reply) != len(expected) {
 		t.Errorf("Got %s, expected %v\n", reply, expected)
 	}

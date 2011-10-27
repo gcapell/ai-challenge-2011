@@ -34,9 +34,6 @@ func assign1 (ants []*Ant, targets []Point) [] Assignment {
 	// Generate all pairings, then sort
 	as := AssignmentSlice(make([]Assignment, 0, len(ants) * len(targets)))
 	for _, a := range ants {
-		if a.isBusy {
-			continue
-		}
 		for _, p := range targets {
 			as.add( Assignment{a,p})
 		}
@@ -48,14 +45,11 @@ func assign1 (ants []*Ant, targets []Point) [] Assignment {
 	assigned := make(map[Location]bool)
 
 	for _, a := range as {
-		if a.ant.isBusy {
+		if assigned[a.p.loc()] || assigned[a.ant.p.loc()]{
 			continue
 		}
-		if assigned[a.p.loc()] {
-			continue
-		}
-		a.ant.isBusy = true
 		assigned[a.p.loc()] = true
+		assigned[a.ant.p.loc()] = true
 		reply = append(reply, a)
 	}
 	return reply
