@@ -84,6 +84,11 @@ func (p *Point) sanitise() {
 	}
 }
 
+func (p Point) sanitised() Point {
+	p.sanitise()
+	return p
+}
+
 func (p Point) loc() Location {
 	return Location(p.r * COLS + p.c)
 }
@@ -156,15 +161,15 @@ func (m *Map) Neighbours(p Point, rad2 int) [] Point{
 	}
 	for dr:=0; dr*dr<= rad2; dr++ {
 		for dc := 0; dc*dc + dr  *dr <= rad2; dc++ {
-			reply.add(Point{p.r + dr, p.c + dc})
+			reply.add(Point{p.r + dr, p.c + dc}.sanitised())
 			if(dr != 0) {
-				reply.add(Point{p.r - dr, p.c + dc})
+				reply.add(Point{p.r - dr, p.c + dc}.sanitised())
 			}
 			if (dc !=0) {
-				reply.add(Point{p.r + dr, p.c - dc})
+				reply.add(Point{p.r + dr, p.c - dc}.sanitised())
 			}
 			if (dr !=0 && dc != 0) {
-				reply.add(Point{p.r - dr, p.c - dc})
+				reply.add(Point{p.r - dr, p.c - dc}.sanitised())
 			}
 		}
 	}
@@ -186,7 +191,6 @@ func (m *Map) MarkHill(p Point, ant Item) {
 	} else {
 		(&m.enemyHills).add(p)
 	}
-	// m.items[p.loc()] = ant
 }
 
 func (m *Map) Update(words []string) {
