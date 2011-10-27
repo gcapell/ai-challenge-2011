@@ -221,7 +221,7 @@ func (m *Map) Update(words []string) {
 	case "d":
 		m.DeadAnt(p, ant)
 	default:
-		log.Panicf("unknown command: %v\n", words)
+		log.Panicf("unknown command updating map: %v\n", words)
 	}
 }
 

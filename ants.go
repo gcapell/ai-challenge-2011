@@ -37,6 +37,8 @@ func (s *Game) Load() {
 			s.Cols = param
 		case "turns":
 			s.Turns = param
+		case "turn":
+			TURN = Turn(param)
 		case "viewradius2":
 			s.ViewRadius2 = param
 		case "attackradius2":
@@ -47,7 +49,7 @@ func (s *Game) Load() {
 			param64 := atoi64(words[1])
 			s.PlayerSeed = param64
 		default:
-			log.Printf("unknown command: %v", words)
+			log.Printf("unknown command loading game: %v", words)
 		}
 	}
 }
