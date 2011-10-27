@@ -23,6 +23,7 @@ type (
 	Direction int
 
 	Point struct {r, c int}	// rows, columns
+	Points []Point
 
 	Square struct {
 		isWater bool
@@ -32,7 +33,7 @@ type (
 
 	Ant struct {
 		p	Point
-		plan	[] Point
+		plan	Points
 		target	Item	// food, enemy ant, enemy hill, ...
 	}
 	
@@ -40,13 +41,18 @@ type (
 		squares	[][]Square
 		
 		myAnts	map[Location]Ant
-		myHills []Point
+		myHills Points
+		enemyHills Points
 		
-		enemies []Point
-		enemyHills []Point
-		food	[]Point
+		enemies Points
+		food	Points
+		items	map[Location]Item
 	}
 )
+
+func (s *Points) add(p Point) {
+	*s = append(*s, p)
+}
 
 const (
 	UNKNOWN Item = iota - 5
@@ -102,7 +108,6 @@ func (p *Point) sanitise() {
 }
 
 func (p Point) loc() Location {
-	p.sanitise()
 	return Location(p.r * COLS + p.c)
 }
 
@@ -116,11 +121,10 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 	VIEWRADIUS2 = viewRadius2
 
 	m.myAnts = make(map[Location]Ant)
-	m.myHills = make([]Point)
-	n.enemies = make([]Point)
-	m.enemyHills = make([]Point)
-	m.food = make([]Point)
-
+	m.myHills = make([]Point, 0)
+	m.enemies = make([]Point, 0)
+	m.enemyHills = make([]Point, 0)
+	m.food = make([]Point, 0)
 
 	m.squares = make([][]Square, rows)
 	for row:=0; row<rows; row++ {
@@ -131,12 +135,11 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 
 //Reset clears the map for the next turn
 func (m *Map) Reset() {
-	
 	m.myHills = m.myHills[:0]
 	m.enemies = m.enemies[:0]
 	m.enemyHills = m.enemyHills[:0]
 	m.food = m.food[:0]
-	
+	m.items = make(map[Location]Item)
 }
 
 func (m *Map) isWet(p Point) bool {
@@ -169,14 +172,8 @@ func (m *Map) ViewFrom(scout Point) {
 	}
 }
 
-type PointSlice []Point
-
-func (s *PointSlice) add(p Point) {
-	*s = append(*s, p)
-}
-
 func (m *Map) Neighbours(p Point, rad2 int) [] Point{
-	reply := PointSlice(make([]Point, rad2))
+	reply := Points(make([]Point, rad2))
 	if rad2 < 1 {
 		return reply
 	}
@@ -225,7 +222,17 @@ func (m *Map) MarkWater(p Point) {
 }
 
 func (m *Map) MarkFood(p Point) {
-	m.Food[p.loc()] = TURN
+	(&m.food).add(p)
+	m.items[p.loc()] = FOOD
+}
+
+func (m *Map) MarkHill(p Point, ant Item) {
+	if ant == MY_ANT {
+		m.myHills = append(m.myHills, p)
+	} else {
+		m.enemyHills = append(m.enemyHills, p)
+	}
+	m.items[p.loc()] = ant
 }
 
 func (m *Map) Update(words []string) {
@@ -250,7 +257,7 @@ func (m *Map) Update(words []string) {
 	case "f":
 		m.MarkFood(p)
 	case "h":
-		m.Hills[p.loc()] = ant
+		m.MarkHill(p, ant)
 	case "a":
 		m.AddAnt(p, ant)
 	case "d":
@@ -262,7 +269,6 @@ func (m *Map) Update(words []string) {
 
 func (m *Map) AddAnt(p Point, ant Item) {
 	if ant == MY_ANT {
-		loc = p.loc()
 		m.ViewFrom(p)
 		// existing ant?
 		
@@ -271,6 +277,7 @@ func (m *Map) AddAnt(p Point, ant Item) {
 	} else {
 		m.enemies = append(m.enemies, p)
 	}
+	m.items[p.loc()] = ant
 }
 
 

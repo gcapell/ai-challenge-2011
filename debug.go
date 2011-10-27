@@ -31,19 +31,14 @@ func (m *Map) ItemAt(p Point) Item {
 	if s.isWater {
 		return WATER
 	}
-	ant, found := m.Ants[p.loc()]
-	if found {
-		return ant
-	}
-	_, found = m.Food[p.loc()]
-	if found {
-		return FOOD
+	if item, found := m.items[p.loc()]; found {
+		return item
 	}
 	if !s.wasSeen {
 		return UNKNOWN
 	}
-
 	return LAND
+
 }
 
 //String returns an ascii diagram of the map.
