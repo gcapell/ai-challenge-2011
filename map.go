@@ -11,13 +11,6 @@ type (
 	//Item represents all the various items that may be on the map
 	Item int8
 
-	//Location combines (Row, Col) coordinate pairs 
-	// for use as keys in maps (and in a 1d array)
-	Location int
-
-	Point struct {r, c int}	// rows, columns
-	Points []Point
-
 	Square struct {
 		isWater bool
 		wasSeen bool	// Have we ever seen this square?
@@ -44,10 +37,6 @@ type (
 	}
 )
 
-func (s *Points) add(p Point) {
-	*s = append(*s, p)
-}
-
 const (
 	UNKNOWN Item = iota - 5
 	WATER
@@ -63,39 +52,6 @@ var (
 	ROWS, COLS, VIEWRADIUS2 int
 	TURN Turn
 )
-
-func (loc Location ) point () Point {
-	iLoc := int(loc)
-	return Point{ iLoc / COLS, iLoc % COLS}
-}
-
-func (p *Point) sanitise() {
-	if p.r < 0 {
-		p.r += ROWS
-	}
-	if p.r >= ROWS {
-		p.r -= ROWS
-	}
-	if p.c < 0 {
-		p.c += COLS
-	}
-	if p.c >= COLS {
-		p.c -= COLS
-	}
-}
-
-func (p Point) sanitised() Point {
-	p.sanitise()
-	return p
-}
-
-func (p Point) loc() Location {
-	return Location(p.r * COLS + p.c)
-}
-
-func (p Point) Equals(r Point) bool {
-	return p.r == r.r && p.c == r.c
-}
 
 func (m *Map) Init(rows, cols, viewRadius2 int) {
 	ROWS = rows
@@ -147,33 +103,11 @@ func (m *Map) DryNeighbours(p Point) []Point {
 
 // A scout has reported from 'p'
 func (m *Map) ViewFrom(scout Point) {
-	for _, p := range(m.Neighbours(scout, VIEWRADIUS2)) {
+	for _, p := range(scout.Neighbours(VIEWRADIUS2)) {
 		s := &m.squares[p.r][p.c]
 		s.wasSeen = true
 		s.lastSeen = TURN
 	}
-}
-
-func (m *Map) Neighbours(p Point, rad2 int) [] Point{
-	reply := Points(make([]Point, rad2))
-	if rad2 < 1 {
-		return reply
-	}
-	for dr:=0; dr*dr<= rad2; dr++ {
-		for dc := 0; dc*dc + dr  *dr <= rad2; dc++ {
-			reply.add(Point{p.r + dr, p.c + dc}.sanitised())
-			if(dr != 0) {
-				reply.add(Point{p.r - dr, p.c + dc}.sanitised())
-			}
-			if (dc !=0) {
-				reply.add(Point{p.r + dr, p.c - dc}.sanitised())
-			}
-			if (dr !=0 && dc != 0) {
-				reply.add(Point{p.r - dr, p.c - dc}.sanitised())
-			}
-		}
-	}
-	return reply
 }
 
 func (m *Map) MarkWater(p Point) {
@@ -292,23 +226,3 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 	return nil
 }
 
-func wrapDelta(a, b, wrap int) int {
-	delta := a-b
-	if delta<0 {
-		delta = -delta
-	}
-	wrapped := wrap - delta
-	// log.Printf("a: %d, b: %d, wrap: %d, delta: %d, wrapped: %d\n", a, b, wrap, delta, wrapped)
-	if delta < wrapped {
-		return delta
-	}
-	return wrapped
-}
-
-
-// Return (Manhattan) distance between two points,
-// allowing for warping across edges
-func (m *Map) Distance( a,b Point) int {
-	return wrapDelta(a.r, b.r, ROWS)+
-		wrapDelta(a.c, b.c, COLS)
-}

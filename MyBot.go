@@ -28,8 +28,8 @@ func (a *Ant) moveTo(p Point) {
 	// FIXME
 }
 
-func (a *Ant) distance(p Point) {
-	return a.p.distance(p)
+func (a *Ant) Distance(p Point) int {
+	return a.p.Distance(p)
 }
 
 func (m *Map) forage() {
@@ -42,7 +42,7 @@ func (m *Map) forage() {
 type AssignmentSlice []Assignment
 
 func (a Assignment) distance()  int {
-	return a.ant.distance(a.p)
+	return a.ant.Distance(a.p)
 }
 
 func (as AssignmentSlice) Len() int{
@@ -53,7 +53,7 @@ func (as AssignmentSlice) Less(i,j int) bool {
 	return as[i].distance() < as[j].distance()
 }
 
-func (as AssignmentSlice) Swap(i,j int) bool {
+func (as AssignmentSlice) Swap(i,j int) {
 	as[j], as[i] = as[i], as[j]
 }
 
@@ -64,7 +64,7 @@ func (as *AssignmentSlice) add(a Assignment) {
 // Attempt to assign to each target the nearest available ant
 func (m *Map) assign1 (targets []Point) [] Assignment {
 	
-	as := make([]Assignment, 0, len(targets) * len(m.myAnts))
+	as := AssignmentSlice(make([]Assignment, 0, len(targets) * len(m.myAnts)))
 	
 	// Generate all pairings, then sort
 	for _, a := range m.myAnts {
@@ -73,4 +73,5 @@ func (m *Map) assign1 (targets []Point) [] Assignment {
 		}
 	}
 	sort.Sort(as)
+	return as
 }

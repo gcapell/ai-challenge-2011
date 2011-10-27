@@ -12,31 +12,6 @@ func loadMap() Map {
 	return m
 }
 
-func TestDistance(t *testing.T) {
-	m := loadMap()
-	o := Point{0,0}
-	data := []struct {a,b Point; d int} {
-		{o, Point{2,2}, 3},
-		{o, Point{2,3}, 2},
-		{o, Point{0,0}, 0},
-		{o, Point{0,1}, 1},
-		{o, Point{1,1}, 2},
-		{o, Point{1,0}, 1},
-	}
-	for _, d := range(data) {
-		distance := m.Distance(d.a, d.b)
-		if distance != d.d {
-			t.Errorf("expected distance from %v to %v to be %d, got %d",
-				d.a, d.b, d.d, distance)
-		}
-		distance = m.Distance(d.b, d.a)
-		if distance != d.d {
-			t.Errorf("expected distance from %v to %v to be %d, got %d",
-				d.b, d.a, d.d, distance)
-		}
-	}
-}
-
 func TestInitFromString(t *testing.T)  {
 	var m Map 
 	s := `
@@ -81,19 +56,6 @@ func TestLocationConversion(t *testing.T) {
 	if p.r != 3 || p.c != 2{
 		t.Errorf("conversion broken, got %v, wanted (3, 2)", p)
 	}
-}
-
-func TestNeighbours(t *testing.T) {
-	var m Map
-	m.Init(40,30,0)
-	row, col, radius := 10,10,3
-	src := Point{row, col}
-	n := m.Neighbours( src, radius)
-	fmt.Printf("(%d,%d),r:%d ->", row, col, radius)
-	for _, p := range(n) {
-		fmt.Printf("%v, ", p)
-	}
-	fmt.Printf("\n")
 }
 
 func TestMap(t *testing.T) {
