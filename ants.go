@@ -63,15 +63,13 @@ func main() {
 	g.Load()
 	m.Init(g.Rows, g.Cols, g.ViewRadius2)
 
-	bot := &MyBot{&g, &m}
-
 	//indicate we're ready
 	fmt.Println("go")
 
 	for line := range getLinesUntil("end") {
 		if line == "go" {
 			m.UpdatesProcessed()
-			bot.DoTurn()
+			m.DoTurn()
 
 			//end turn
 			fmt.Println("go")

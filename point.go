@@ -140,3 +140,10 @@ func linear(a,p,b int) (ratio float64, between bool) {
 
 	return float64(abs(b-p))/ float64(abs(b-a)), true
 }
+
+func intercept(defender, enemy, victim Point) Point {
+	if defender.intercepts(victim, enemy) {
+		return enemy
+	} 
+	return between(victim, enemy)
+}
