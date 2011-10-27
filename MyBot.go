@@ -7,10 +7,6 @@ func (m *Map) DoTurn() {
 	m.moveAll()
 }
 
-func (a *Ant) Distance(p Point) int {
-	return a.p.Distance(p)
-}
-
 // Grab any food we know about
 func (m *Map) forage() {
 	for _, assignment := range assign1(m.FreeAnts(), m.food) {

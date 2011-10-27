@@ -36,6 +36,9 @@ type (
 		items	map[Location]Item
 	}
 )
+func (a *Ant) Distance(p Point) int {
+	return a.p.Distance(p)
+}
 
 func (m *Map) nearestHill(p Point) Point {
 	var closest Point
