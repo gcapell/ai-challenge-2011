@@ -11,11 +11,6 @@ type (
 	//Item represents all the various items that may be on the map
 	Item int8
 
-	Move struct {
-		src Location
-		d   Direction
-	}
-
 	//Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
 	Location int
 
@@ -198,25 +193,6 @@ func (d Direction) String() string {
 	return directionstrings[d]
 }
 
-//Move returns a new location which is one step in the specified direction from the specified location.
-func (m *Map) Move(p Point, d Direction) Point {
-	switch d {
-	case North:
-		p.r -= 1
-	case South:
-		p.r += 1
-	case West:
-		p.c -= 1
-	case East:
-		p.c += 1
-	case NoMovement: //do nothing
-	default:
-		log.Panicf("%v is not a valid direction", d)
-	}
-	p.sanitise()
-	return p
-}
-
 func (m *Map) MarkWater(p Point) {
 	m.squares[p.r][p.c].isWater = true
 }
@@ -228,11 +204,11 @@ func (m *Map) MarkFood(p Point) {
 
 func (m *Map) MarkHill(p Point, ant Item) {
 	if ant == MY_ANT {
-		m.myHills = append(m.myHills, p)
+		(&m.myHills).add(p)
 	} else {
-		m.enemyHills = append(m.enemyHills, p)
+		(&m.enemyHills).add(p)
 	}
-	m.items[p.loc()] = ant
+	// m.items[p.loc()] = ant
 }
 
 func (m *Map) Update(words []string) {

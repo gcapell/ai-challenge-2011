@@ -83,25 +83,6 @@ func TestLocationConversion(t *testing.T) {
 	}
 }
 
-func TestMove(t *testing.T) {
-	m := loadMap()
-
-	src := Point{3, 2}
-
-	data := []struct{direction Direction; dst Point} {
-		{North, Point{2,2}},
-		{South, Point{0, 2}},
-		{East, Point{3, 0}},
-		{West, Point{3, 1}},
-	}
-	for _, d := range(data) {
-		actualDst := m.Move(src, d.direction)
-		if !actualDst.Equals(d.dst) {
-			t.Errorf("Move %v expected %v, got %v", d.direction, d.dst, actualDst)
-		}
-	}
-}
-
 func TestNeighbours(t *testing.T) {
 	var m Map
 	m.Init(40,30,0)
