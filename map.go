@@ -43,7 +43,7 @@ const (
 	FOOD
 	LAND
 	DEAD
-	MY_ANT //= 0
+	MY_ANT = 0
 
 	MAXPLAYER = 24
 )
@@ -163,9 +163,12 @@ func (m *Map) AddAnt(p Point, ant Item) {
 	if ant == MY_ANT {
 		m.ViewFrom(p)
 		
+		log.Printf("Updating %v(%v) at turn %d", ant, p, TURN)
+
 		antp, found := m.myAnts[p.loc()]
 		if found { // existing ant?
 			antp.seen = TURN
+			log.Printf("antp: %v, myAnts[]: %v", antp, m.myAnts[p.loc()])
 		} else { // new ant?
 			m.myAnts[p.loc()] = &Ant{p:p, seen:TURN}
 		}
@@ -190,6 +193,7 @@ func (m *Map) UpdatesProcessed() {
 		if (ant.seen != TURN) {
 			log.Panicf("%v (@ %v) missed an update\n", ant, loc.point())
 		}
+		ant.isBusy = false	// open for business!
 	}
 }
 
@@ -227,7 +231,7 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 }
 
 func (m *Map) FreeAnts() []*Ant {
-	reply := make([]*Ant, len(m.myAnts))
+	reply := make([]*Ant, 0, len(m.myAnts))
 	for _, ant := range m.myAnts {
 		if !ant.isBusy {
 			reply = append(reply, ant)

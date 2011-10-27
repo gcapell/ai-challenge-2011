@@ -2,6 +2,7 @@ package main
 import (
 	"sort"
 	"fmt"
+	"log"
 )
 
 type (
@@ -34,6 +35,9 @@ func assign1 (ants []*Ant, targets []Point) [] Assignment {
 	// Generate all pairings, then sort
 	as := AssignmentSlice(make([]Assignment, 0, len(ants) * len(targets)))
 	for _, a := range ants {
+		if a == nil {
+			log.Panicf("nil ant!")
+		}
 		for _, p := range targets {
 			as.add( Assignment{a,p})
 		}

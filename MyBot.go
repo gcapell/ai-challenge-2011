@@ -8,6 +8,7 @@ type MyBot struct {
 //DoTurn is where you should do your bot's actual work.
 func (mb *MyBot) DoTurn() {
 	mb.m.forage()
+	mb.m.moveAll()
 }
 
 func (a *Ant) Distance(p Point) int {
