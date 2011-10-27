@@ -10,5 +10,6 @@ GOFILES=\
 	path.go \
 	orders.go \
 	point.go \
+	assign.go \
 
 include $(GOROOT)/src/Make.cmd
