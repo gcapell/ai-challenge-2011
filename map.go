@@ -22,6 +22,7 @@ type (
 		plan	Points	// Where will we be?
 		target	Item	// Why are we going there?
 		seen	Turn
+		isBusy	bool
 	}
 	
 	Map struct {
@@ -226,3 +227,12 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 	return nil
 }
 
+func (m *Map) FreeAnts() []*Ant {
+	reply := make([]*Ant, len(m.myAnts))
+	for _, ant := range m.myAnts {
+		if !ant.isBusy {
+			reply = append(reply, ant)
+		}
+	}
+	return reply
+}

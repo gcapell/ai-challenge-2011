@@ -1,6 +1,7 @@
 package main
 import (
 	"sort"
+	"fmt"
 )
 
 type MyBot struct {
@@ -13,15 +14,13 @@ type Assignment struct {
 	p	Point
 }
 
-const (
-	FOOD_DEPTH    = 7
-	EXPLORE_DEPTH = 10
-)
+func (a Assignment) String()string {
+	return fmt.Sprintf("Assignment{ %v->%v}", a.ant.p, a.p)
+}
 
 //DoTurn is where you should do your bot's actual work.
 func (mb *MyBot) DoTurn() {
-	m := mb.m
-	m.forage()
+	mb.m.forage()
 }
 
 func (a *Ant) moveTo(p Point) {
@@ -34,44 +33,54 @@ func (a *Ant) Distance(p Point) int {
 
 func (m *Map) forage() {
 
-	for _, assignment := range m.assign1(m.food) {
+	for _, assignment := range assign1(m.FreeAnts(), m.food) {
 		assignment.ant.moveTo(assignment.p)
 	}
 }
 
 type AssignmentSlice []Assignment
 
-func (a Assignment) distance()  int {
-	return a.ant.Distance(a.p)
-}
-
-func (as AssignmentSlice) Len() int{
-	return len(as)
-}
-
-func (as AssignmentSlice) Less(i,j int) bool {
-	return as[i].distance() < as[j].distance()
-}
-
-func (as AssignmentSlice) Swap(i,j int) {
-	as[j], as[i] = as[i], as[j]
-}
+// Implement sort.Interface
+func (a Assignment) distance()  int {return a.ant.Distance(a.p)}
+func (as AssignmentSlice) Len() int{return len(as)}
+func (as AssignmentSlice) Less(i,j int) bool {return as[i].distance() < as[j].distance()}
+func (as AssignmentSlice) Swap(i,j int) {as[j], as[i] = as[i], as[j]}
 
 func (as *AssignmentSlice) add(a Assignment) {
 	*as = append(*as, a)
 }
 
-// Attempt to assign to each target the nearest available ant
-func (m *Map) assign1 (targets []Point) [] Assignment {
+// Return optimal slice of ant->target assignments
+// See wikipedia.org/wiki/Assignment_problem
+func assign1 (ants []*Ant, targets []Point) [] Assignment {
 	
-	as := AssignmentSlice(make([]Assignment, 0, len(targets) * len(m.myAnts)))
-	
+	// For now, we'll be greedy-stupid.
 	// Generate all pairings, then sort
-	for _, a := range m.myAnts {
+	as := AssignmentSlice(make([]Assignment, 0, len(ants) * len(targets)))
+	for _, a := range ants {
+		if a.isBusy {
+			continue
+		}
 		for _, p := range targets {
 			as.add( Assignment{a,p})
 		}
 	}
 	sort.Sort(as)
-	return as
+
+	var reply [] Assignment
+
+	assigned := make(map[Location]bool)
+
+	for _, a := range as {
+		if a.ant.isBusy {
+			continue
+		}
+		if assigned[a.p.loc()] {
+			continue
+		}
+		a.ant.isBusy = true
+		assigned[a.p.loc()] = true
+		reply = append(reply, a)
+	}
+	return reply
 }

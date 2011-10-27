@@ -5,6 +5,8 @@ import (
 )
 
 func TestDistance(t *testing.T) {
+	ROWS=3
+	COLS=4
 	o := Point{0,0}
 	data := []struct {a,b Point; d int} {
 		{o, Point{2,2}, 3},
