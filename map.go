@@ -30,14 +30,21 @@ type (
 		lastSeen Turn	// .. if so, when?
 	}
 
+	Ant struct {
+		p	Point
+		plan	[] Point
+		target	Item	// food, enemy ant, enemy hill, ...
+	}
+	
 	Map struct {
 		squares	[][]Square
-
-		Ants         map[Location]Item
-		Hills        map[Location]Item
-		Food         map[Location]Turn
-		Destinations map[Location]bool
-		MyAnts       map[Location]bool // ant location -> is moving?
+		
+		myAnts	map[Location]Ant
+		myHills []Point
+		
+		enemies []Point
+		enemyHills []Point
+		food	[]Point
 	}
 )
 
@@ -108,8 +115,12 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 	COLS = cols
 	VIEWRADIUS2 = viewRadius2
 
-	m.Food = make(map[Location]Turn)
-	m.Hills = make(map[Location]Item)
+	m.myAnts = make(map[Location]Ant)
+	m.myHills = make([]Point)
+	n.enemies = make([]Point)
+	m.enemyHills = make([]Point)
+	m.food = make([]Point)
+
 
 	m.squares = make([][]Square, rows)
 	for row:=0; row<rows; row++ {
@@ -120,22 +131,16 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 
 //Reset clears the map for the next turn
 func (m *Map) Reset() {
-	m.Ants = make(map[Location]Item)
-	m.Destinations = make(map[Location]bool)
-	m.MyAnts = make(map[Location]bool)
+	
+	m.myHills = m.myHills[:0]
+	m.enemies = m.enemies[:0]
+	m.enemyHills = m.enemyHills[:0]
+	m.food = m.food[:0]
+	
 }
 
-// Given start location, return slice of legal next points
-func (m *Map) NextValidMoves(p Point) []Point {
-	next := make([]Point, 0, 4)
-
-	for _, d := range DIRS {
-		p2 := m.Move(p, d)
-		if m.SafeDestination(p2) {
-			next = append(next, p2)
-		}
-	}
-	return next
+func (m *Map) isWet(p Point) bool {
+	return m.squares[p.r][p.c].isWater
 }
 
 func (m *Map) DryNeighbours(p Point) []Point {
@@ -148,40 +153,16 @@ func (m *Map) DryNeighbours(p Point) []Point {
 	reply := make([]Point, 0, 4)
 	for _, n := range(allNeighbours) {
 		n.sanitise()
-		if ! m.squares[n.r][n.c].isWater {
+		if ! m.isWet(n) {
 			reply = append(reply, n)
 		}
 	}
 	return reply
 }
 
-
-func (m *Map) EnemyHillAt(p Point) bool {
-	item, found := m.Hills[p.loc()]
-	return found && item != MY_ANT
-}
-
-func (m *Map) FoodAt(p Point) bool {
-	_, found := m.Food[p.loc()]
-	return found
-}
-
-func (m *Map) MyStationaryAnts() chan Location {
-	ch := make(chan Location)
-	go func() {
-		for loc, isMoving := range m.MyAnts {
-			if !isMoving {
-				ch <- loc
-			}
-		}
-		close(ch)
-	}()
-	return ch
-}
-
-//ViewFrom adds a circle of land centered on the given location
-func (m *Map) ViewFrom(center Point) {
-	for _, p := range(m.Neighbours(center, VIEWRADIUS2)) {
+// A scout has reported from 'p'
+func (m *Map) ViewFrom(scout Point) {
+	for _, p := range(m.Neighbours(scout, VIEWRADIUS2)) {
 		s := &m.squares[p.r][p.c]
 		s.wasSeen = true
 		s.lastSeen = TURN
@@ -214,24 +195,6 @@ func (m *Map) Neighbours(p Point, rad2 int) [] Point{
 		}
 	}
 	return reply
-}
-
-func (m *Map) AddDestination(p Point) {
-	if m.Destinations[p.loc()] {
-		log.Panicf("Already have something at that destination!")
-	}
-	m.Destinations[p.loc()] = true
-}
-
-func (m *Map) RemoveDestination(p Point) {
-	m.Destinations[p.loc()] = false, false
-}
-
-//SafeDestination will tell you if the given location is a 
-//safe place to dispatch an ant. It considers water and both
-//ants that have already sent an order and those that have not.
-func (m *Map) SafeDestination(p Point) bool {
-	return !m.squares[p.r][p.c].isWater && !m.Destinations[p.loc()]
 }
 
 func (d Direction) String() string {
@@ -298,23 +261,22 @@ func (m *Map) Update(words []string) {
 }
 
 func (m *Map) AddAnt(p Point, ant Item) {
-	m.Ants[p.loc()] = ant
-
-	//if it turns out that you don't actually use the visible radius for anything,
-	//feel free to comment this out. It's needed for the image debugging, though.
 	if ant == MY_ANT {
-		m.AddDestination(p)
+		loc = p.loc()
 		m.ViewFrom(p)
-		m.MyAnts[p.loc()] = false
+		// existing ant?
+		
+		// new ant?
+		
+	} else {
+		m.enemies = append(m.enemies, p)
 	}
 }
 
 
 //Call IssueOrderLoc to issue an order for an ant at loc
 func (m *Map) IssueOrderLoc(p Point, d Direction) {
-	dest := m.Move(p, d)
-	m.RemoveDestination(p)
-	m.AddDestination(dest)
+	//...
 	fmt.Println("o", p.r, p.c, d)
 }
 
