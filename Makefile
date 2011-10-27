@@ -8,5 +8,6 @@ GOFILES=\
 	io.go \
 	debug.go \
 	path.go \
+	orders.go \
 
 include $(GOROOT)/src/Make.cmd

@@ -68,6 +68,7 @@ func main() {
 
 	for line := range getLinesUntil("end") {
 		if line == "go" {
+			m.UpdatesProcessed()
 			bot.DoTurn()
 
 			//end turn

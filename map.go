@@ -11,11 +11,9 @@ type (
 	//Item represents all the various items that may be on the map
 	Item int8
 
-	//Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
+	//Location combines (Row, Col) coordinate pairs 
+	// for use as keys in maps (and in a 1d array)
 	Location int
-
-	//Direction represents the direction concept for issuing orders.
-	Direction int
 
 	Point struct {r, c int}	// rows, columns
 	Points []Point
@@ -27,15 +25,16 @@ type (
 	}
 
 	Ant struct {
-		p	Point
-		plan	Points
-		target	Item	// food, enemy ant, enemy hill, ...
+		p	Point		// Where are we now?
+		plan	Points	// Where will we be?
+		target	Item	// Why are we going there?
+		seen	Turn
 	}
 	
 	Map struct {
 		squares	[][]Square
 		
-		myAnts	map[Location]Ant
+		myAnts	map[Location]*Ant
 		myHills Points
 		enemyHills Points
 		
@@ -60,26 +59,9 @@ const (
 	MAXPLAYER = 24
 )
 
-const (
-	North Direction = iota
-	East
-	South
-	West
-
-	NoMovement
-)
-
 var (
 	ROWS, COLS, VIEWRADIUS2 int
 	TURN Turn
-	DIRS = []Direction{North, East, South, West}
-	directionstrings = map[Direction]string{
-		North:      "n",
-		South:      "s",
-		West:       "w",
-		East:       "e",
-		NoMovement: "-",
-	}
 )
 
 func (loc Location ) point () Point {
@@ -115,7 +97,7 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 	COLS = cols
 	VIEWRADIUS2 = viewRadius2
 
-	m.myAnts = make(map[Location]Ant)
+	m.myAnts = make(map[Location]*Ant)
 	m.myHills = make([]Point, 0)
 	m.enemies = make([]Point, 0)
 	m.enemyHills = make([]Point, 0)
@@ -189,10 +171,6 @@ func (m *Map) Neighbours(p Point, rad2 int) [] Point{
 	return reply
 }
 
-func (d Direction) String() string {
-	return directionstrings[d]
-}
-
 func (m *Map) MarkWater(p Point) {
 	m.squares[p.r][p.c].isWater = true
 }
@@ -237,7 +215,7 @@ func (m *Map) Update(words []string) {
 	case "a":
 		m.AddAnt(p, ant)
 	case "d":
-		// Ignore dead ant
+		m.DeadAnt(p, ant)
 	default:
 		log.Panicf("unknown command: %v\n", words)
 	}
@@ -246,21 +224,35 @@ func (m *Map) Update(words []string) {
 func (m *Map) AddAnt(p Point, ant Item) {
 	if ant == MY_ANT {
 		m.ViewFrom(p)
-		// existing ant?
 		
-		// new ant?
-		
+		antp, found := m.myAnts[p.loc()]
+		if found { // existing ant?
+			antp.seen = TURN
+		} else { // new ant?
+			m.myAnts[p.loc()] = &Ant{p:p, seen:TURN}
+		}
 	} else {
 		m.enemies = append(m.enemies, p)
 	}
 	m.items[p.loc()] = ant
 }
 
+func (m *Map) DeadAnt(p Point, ant Item) {
+	if ant != MY_ANT {
+		return
+	}
+	m.myAnts[p.loc()] = nil, false
+}
 
-//Call IssueOrderLoc to issue an order for an ant at loc
-func (m *Map) IssueOrderLoc(p Point, d Direction) {
-	//...
-	fmt.Println("o", p.r, p.c, d)
+// We have received all the updates for this turn,
+// make sure they make sense.
+func (m *Map) UpdatesProcessed() {
+	// Any ants that missed an update?
+	for loc, ant := range(m.myAnts) {
+		if (ant.seen != TURN) {
+			log.Panicf("%v (@ %v) missed an update\n", ant, loc.point())
+		}
+	}
 }
 
 func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
