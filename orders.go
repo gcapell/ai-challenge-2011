@@ -76,10 +76,10 @@ func (a *Ant)Move(m *Map, occupied map[Location]bool) bool {
 }
 
 // Assign a to get to p
-func (a *Ant) moveTo(m *Map, p Point) {
+func (a *Ant) moveTo(m *Map, p Point, reason string) {
 	a.isBusy = true
 	
-	log.Printf("Moving %s to %v", *a, p)
+	log.Printf("Moving %v to %v for %s", a, p, reason)
 
 	// Do we already know how to get to p?
 	if len(a.plan) > 0 && a.plan[len(a.plan)-1].Equals(p) {

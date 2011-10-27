@@ -37,6 +37,42 @@ type (
 	}
 )
 
+func (m *Map) nearestHill(p Point) Point {
+	var closest Point
+	for i, hill := range m.myHills {
+		if i==0 {
+			closest = hill
+		} else {
+			if p.Distance(hill) < p.Distance(closest) {
+				closest = hill
+			}
+		}
+	}
+	return closest
+}
+
+
+func (m*Map) EnemiesNearOurHill(tooClose int) []Point{
+	reply := make([]Point, 0)
+
+	enemyLoop: for _, e := range m.enemies {
+		for _, hill := range m.myHills {
+			if e.Distance(hill) <= tooClose {
+				reply = append(reply, e)
+				continue enemyLoop
+			}
+		}
+	}
+	return reply
+}
+
+func (a *Ant) String() string {
+	if len(a.plan) > 0 {
+		return fmt.Sprintf("Ant@%v->%v", a.p, a.plan[len(a.plan)-1])
+	} 
+	return fmt.Sprintf("Ant@%v", a.p)
+}
+
 const (
 	UNKNOWN Item = iota - 5
 	WATER
@@ -163,12 +199,9 @@ func (m *Map) AddAnt(p Point, ant Item) {
 	if ant == MY_ANT {
 		m.ViewFrom(p)
 		
-		log.Printf("Updating %v(%v) at turn %d", ant, p, TURN)
-
 		antp, found := m.myAnts[p.loc()]
 		if found { // existing ant?
 			antp.seen = TURN
-			log.Printf("antp: %v, myAnts[]: %v", antp, m.myAnts[p.loc()])
 		} else { // new ant?
 			m.myAnts[p.loc()] = &Ant{p:p, seen:TURN}
 		}

@@ -1,4 +1,7 @@
 package main
+import (
+	"math"
+)
 
 type(
 	//Location combines (Row, Col) coordinate pairs 
@@ -32,6 +35,20 @@ func (p *Point) sanitise() {
 	if p.c >= COLS {
 		p.c -= COLS
 	}
+}
+
+func abs(a int) int {
+	if a<0 {
+		return -a
+	}
+	return a
+}
+
+func sign(a int) int {
+	if a<0 {
+		return -1
+	}
+	return 1
 }
 
 func (p Point) sanitised() Point {
@@ -89,3 +106,37 @@ func (p Point) Neighbours(rad2 int) [] Point{
 	return reply
 }
 
+// FIXME - eventually cope with warping
+func between(a,b Point) Point {
+	return Point{(a.r + b.r)/2, (a.c + b.c)/2}
+}
+
+// Is 'p' close enough to 'between' a and b?
+func (p Point) intercepts (a, b Point) bool {
+	if p.Distance(a) < 4 || p.Distance(b) < 4 {
+		return true
+	}
+	rowRatio, rowBetween := linear(a.r, p.r, b.r)
+	columnRatio, columnBetween := linear(a.c, p.c, b.c)
+	
+	return rowBetween && columnBetween && similarRatio(rowRatio, columnRatio)
+}
+
+func similarRatio(r1, r2 float64) bool {
+	return r1 == 0 || r2 == 0 || math.Fabs(r1-r2) < .05
+}
+
+
+func linear(a,p,b int) (ratio float64, between bool) {
+	if abs(a-b) < 4 {
+		return 0, abs(p - (a+b)/2) < 2
+	}
+	if sign(b-a) != sign(b-p) {
+		return 0, false
+	}
+	if sign(b-a) != sign(p-a) {
+		return 0, false
+	}
+
+	return float64(abs(b-p))/ float64(abs(b-a)), true
+}
