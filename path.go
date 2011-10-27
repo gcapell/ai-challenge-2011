@@ -19,12 +19,19 @@ type (
 
 func (h *myHeap) Less(i, j int) bool { return h.At(i).(Node).estimate < h.At(j).(Node).estimate }
 
-func unravelPath(back []Location, src, dst Point) []Point {
-	// Follow breadcrumbs from 'dst' to 'src'
-	reply := make([]Point, 0, ROWS + COLS)
-	for p := dst; !p.Equals(src); p = back[p.loc()].point() {
-		reply = append(reply, p)
+func reverse(points[]Point) {
+	for j,k := 0, len(points)-1; j<k; j,k = j+1, k-1 {
+		points[k], points[j] = points[j], points[k]
 	}
+}
+
+func unravelPath(back []Location, src, dst Point, pathLength int) Points {
+	// Follow breadcrumbs from 'dst' to 'src'
+	reply := Points(make([]Point, 0, pathLength))
+	for p := dst; !p.Equals(src); p = back[p.loc()].point() {
+		reply.add(p)
+	}
+	reverse(reply)
 	return reply
 }
 
@@ -55,7 +62,7 @@ func (m *Map) ShortestPath(srcLoc, dstLoc Location) ([] Point, os.Error) {
 			newNode := Node{m.Distance(p, dst) + pathLength, pathLength, p}
 			back[p.loc()] = n.p.loc()
 			if p.Equals(dst) {
-				return unravelPath(back, src, dst), nil
+				return unravelPath(back, src, dst, pathLength), nil
 			}
 			heap.Push(h, newNode)
 		}
