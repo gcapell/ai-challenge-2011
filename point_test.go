@@ -1,7 +1,7 @@
 package main
 import (
 	"testing"
-	"fmt"
+	"log"
 )
 
 func TestDistance(t *testing.T) {
@@ -36,6 +36,6 @@ func TestNeighbours(t *testing.T) {
 	src := Point{10,10}
 	radius := 3
 	n := src.Neighbours( radius)
-	fmt.Printf("%v.Neighbours(%v) ->%v\n", src, radius, n)
+	log.Printf("%v.Neighbours(%v) ->%v\n", src, radius, n)
 }
 

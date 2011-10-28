@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 	"strings"
-	"fmt"
+	"log"
 )
 
 func loadMap() Map {
@@ -47,7 +47,7 @@ func TestShortestPath(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Printf("%v -> %v : %v\n", src, dst, path)
+	log.Printf("%v -> %v : %v\n", src, dst, path)
 }
 
 func TestLocationConversion(t *testing.T) {

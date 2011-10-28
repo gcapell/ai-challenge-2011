@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+import "log"
 
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn() {
@@ -32,5 +32,5 @@ func (m *Map) defend() {
 // explore, farm, ...
 func (m *Map) scout() {
 	scouts := m.FreeAnts(false)
-	fmt.Print(scouts)
+	log.Println(scouts)
 }
