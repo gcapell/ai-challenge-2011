@@ -32,5 +32,5 @@ func (m *Map) defend() {
 // explore, farm, ...
 func (m *Map) scout() {
 	scouts := m.FreeAnts(false)
-	log.Println(scouts)
+	log.Println("scouts:", scouts)
 }
