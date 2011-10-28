@@ -1,5 +1,10 @@
 package main
 
+import (
+	"log"
+	"rand"
+)
+
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn() {
 	m.defend()
@@ -37,21 +42,32 @@ func min(a, b int) int {
 // explore, farm, ...
 func (m *Map) scout() {
 	scouts := m.FreeAnts(false)
+	size := min(ROWS, COLS)
+	step := 5
 
 	for _, a := range scouts {
-		size := min(ROWS, COLS)
-		step := 10
-		a.Scout(m, step, size/3)
+		a.Scout(m, step, size/2)
 	}
 }
 
 func (a *Ant) Scout(m *Map, step, maxRadius int) {
-	for _, p := range spiral(a.p, step, maxRadius) {
+	
+	targets := spiral(a.p, step, maxRadius)
+	for _, p := range  targets {
 		if m.ShouldExplore(p) {
-			a.moveTo(m, p, "explore")
-			m.MarkExploreTarget(p)
+			a.Explore(m, p)
+			log.Printf("%s scouting %v", a, p)
+			return
 		}
 	}
+	p := targets[rand.Intn(len(targets))]
+	log.Printf("%s randomly scouting %v", a, p)
+	a.Explore(m,p)
+}
+
+func (a *Ant) Explore(m *Map, p Point) {
+	a.moveTo(m, p, "explore")
+	m.MarkExploreTarget(p)
 }
 
 func (m *Map) ShouldExplore(p Point) bool {
@@ -71,15 +87,15 @@ func (m *Map) MarkExploreTarget(p Point) {
 }
 
 func spiral(p Point, step, maxDistance int) []Point {
-	r := make([]Point, maxDistance/step*maxDistance/step)
+	r := make([]Point, 0, maxDistance/step*maxDistance/step)
 	for radius := step; radius < maxDistance; radius += step {
 		for off := 0; off < radius; off += step {
-			r = append(r,
-				Point{p.r + radius - off, p.c - radius}.sanitised(),
-				Point{p.r - radius, p.c - radius + off}.sanitised(),
-				Point{p.r - radius + off, p.c + radius}.sanitised(),
-				Point{p.r + radius, p.c + radius - step}.sanitised(),
-			)
+			r1 := Point{p.r + radius - off, p.c - radius}.sanitised()
+			r2 := Point{p.r - radius, p.c - radius + off}.sanitised()
+			r3 := Point{p.r - radius + off, p.c + radius}.sanitised()
+			r4 := Point{p.r + radius, p.c + radius - step}.sanitised()
+
+			r = append(r, r1, r2, r3, r4)
 		}
 	}
 	return r

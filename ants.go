@@ -52,6 +52,7 @@ func (s *Game) Load() {
 			log.Printf("unknown command loading game: %v", words)
 		}
 	}
+	log.Printf("Game stats: %+v", *s)
 }
 
 //main initializes the state and starts the processing loop

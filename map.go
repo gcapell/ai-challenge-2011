@@ -22,6 +22,7 @@ type (
 		plan     Points // Where will we be?
 		seen     Turn
 		isTasked bool // Has this ant been given an order this turn?
+		reason	string	// why are we moving?
 		hasMoved bool // Has this ant moved already this turn?
 	}
 
@@ -76,7 +77,7 @@ enemyLoop:
 
 func (a *Ant) String() string {
 	if len(a.plan) > 0 {
-		return fmt.Sprintf("Ant@%v->%v", a.p, a.plan[len(a.plan)-1])
+		return fmt.Sprintf("Ant@%v->%v(%s)", a.p, a.plan[len(a.plan)-1], a.reason)
 	}
 	return fmt.Sprintf("Ant@%v", a.p)
 }
@@ -233,6 +234,10 @@ func (m *Map) UpdatesProcessed() {
 	// Any ants that missed an update?
 	for loc, ant := range m.myAnts {
 		if ant.seen != TURN {
+			for p, a2 := range m.myAnts {
+				log.Printf("ALL ANTS: %v -> %s", p.point(), a2)
+			}
+			log.Printf("ROWS: %d", ROWS)
 			log.Panicf("%v (@ %v) missed an update\n", ant, loc.point())
 		}
 		ant.isTasked = false // open for business!
