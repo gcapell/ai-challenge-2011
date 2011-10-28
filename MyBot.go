@@ -27,8 +27,8 @@ func (m *Map) defend() {
 	}
 }
 
-func min(a,b int) int {
-	if a<b {
+func min(a, b int) int {
+	if a < b {
 		return a
 	}
 	return b
@@ -39,13 +39,13 @@ func (m *Map) scout() {
 	scouts := m.FreeAnts(false)
 
 	for _, a := range scouts {
-		size :=min(ROWS, COLS)
+		size := min(ROWS, COLS)
 		step := 10
 		a.Scout(m, step, size/3)
 	}
 }
 
-func (a *Ant) Scout (m *Map, step, maxRadius int) {
+func (a *Ant) Scout(m *Map, step, maxRadius int) {
 	for _, p := range spiral(a.p, step, maxRadius) {
 		if m.ShouldExplore(p) {
 			a.moveTo(m, p, "explore")
@@ -66,19 +66,19 @@ func (m *Map) ShouldExplore(p Point) bool {
 	return true
 }
 
-func (m *Map) MarkExploreTarget (p Point)  {
+func (m *Map) MarkExploreTarget(p Point) {
 	m.exploreTargets[p.loc()] = true
 }
 
-func spiral(p  Point, step, maxDistance int) []Point {
-	r := make ([]Point, maxDistance/step *maxDistance/step)
+func spiral(p Point, step, maxDistance int) []Point {
+	r := make([]Point, maxDistance/step*maxDistance/step)
 	for radius := step; radius < maxDistance; radius += step {
 		for off := 0; off < radius; off += step {
-			r = append(r, 
-				Point{p.r + radius -off, p.c - radius}.sanitised(),
-				Point{p.r - radius, p.c - radius + off }.sanitised(),
-				Point{p.r - radius + off , p.c + radius}.sanitised(),
-				Point{p.r + radius , p.c + radius - step}.sanitised(),
+			r = append(r,
+				Point{p.r + radius - off, p.c - radius}.sanitised(),
+				Point{p.r - radius, p.c - radius + off}.sanitised(),
+				Point{p.r - radius + off, p.c + radius}.sanitised(),
+				Point{p.r + radius, p.c + radius - step}.sanitised(),
 			)
 		}
 	}

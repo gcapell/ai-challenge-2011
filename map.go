@@ -12,34 +12,35 @@ type (
 	Item int8
 
 	Square struct {
-		isWater bool
-		wasSeen bool	// Have we ever seen this square?
-		lastSeen Turn	// .. if so, when?
+		isWater  bool
+		wasSeen  bool // Have we ever seen this square?
+		lastSeen Turn // .. if so, when?
 	}
 
 	Ant struct {
-		p	Point		// Where are we now?
-		plan	Points	// Where will we be?
-		seen	Turn
-		isTasked	bool	// Has this ant been given an order this turn?
-		hasMoved	bool	// Has this ant moved already this turn?
+		p        Point  // Where are we now?
+		plan     Points // Where will we be?
+		seen     Turn
+		isTasked bool // Has this ant been given an order this turn?
+		hasMoved bool // Has this ant moved already this turn?
 	}
-	
+
 	Map struct {
-		squares	[][]Square
-		
-		myAnts	map[Location]*Ant
-		myHills Points
+		squares [][]Square
+
+		myAnts     map[Location]*Ant
+		myHills    Points
 		enemyHills Points
-		
+
 		enemies Points
-		food	Points
-		items	map[Location]Item
+		food    Points
+		items   map[Location]Item
 
 		// Places that we're sending ants to already
 		exploreTargets map[Location]bool
 	}
 )
+
 func (a *Ant) Distance(p Point) (int, int) {
 	return a.p.Distance(p)
 }
@@ -47,7 +48,7 @@ func (a *Ant) Distance(p Point) (int, int) {
 func (m *Map) nearestHill(p Point) Point {
 	var closest Point
 	for i, hill := range m.myHills {
-		if i==0 {
+		if i == 0 {
 			closest = hill
 		} else {
 			if p.CrowDistance2(hill) < p.CrowDistance2(closest) {
@@ -58,11 +59,11 @@ func (m *Map) nearestHill(p Point) Point {
 	return closest
 }
 
-
-func (m*Map) EnemiesNearOurHill(tooClose int) []Point{
+func (m *Map) EnemiesNearOurHill(tooClose int) []Point {
 	reply := make([]Point, 0)
 
-	enemyLoop: for _, e := range m.enemies {
+enemyLoop:
+	for _, e := range m.enemies {
 		for _, hill := range m.myHills {
 			if e.CrowDistance2(hill) <= tooClose {
 				reply = append(reply, e)
@@ -76,7 +77,7 @@ func (m*Map) EnemiesNearOurHill(tooClose int) []Point{
 func (a *Ant) String() string {
 	if len(a.plan) > 0 {
 		return fmt.Sprintf("Ant@%v->%v", a.p, a.plan[len(a.plan)-1])
-	} 
+	}
 	return fmt.Sprintf("Ant@%v", a.p)
 }
 
@@ -93,7 +94,7 @@ const (
 
 var (
 	ROWS, COLS, VIEWRADIUS2 int
-	TURN Turn
+	TURN                    Turn
 )
 
 func (m *Map) Init(rows, cols, viewRadius2 int) {
@@ -109,7 +110,7 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 	m.exploreTargets = make(map[Location]bool)
 
 	m.squares = make([][]Square, rows)
-	for row:=0; row<rows; row++ {
+	for row := 0; row < rows; row++ {
 		m.squares[row] = make([]Square, cols)
 	}
 	m.Reset()
@@ -129,16 +130,16 @@ func (m *Map) isWet(p Point) bool {
 }
 
 func (m *Map) DryNeighbours(p Point) []Point {
-	allNeighbours := []Point {
-		Point{p.r +1, p.c},
-		Point{p.r -1, p.c},
-		Point{p.r , p.c + 1},
-		Point{p.r , p.c -1},
+	allNeighbours := []Point{
+		Point{p.r + 1, p.c},
+		Point{p.r - 1, p.c},
+		Point{p.r, p.c + 1},
+		Point{p.r, p.c - 1},
 	}
 	reply := make([]Point, 0, 4)
-	for _, n := range(allNeighbours) {
+	for _, n := range allNeighbours {
 		n.sanitise()
-		if ! m.isWet(n) {
+		if !m.isWet(n) {
 			reply = append(reply, n)
 		}
 	}
@@ -147,7 +148,7 @@ func (m *Map) DryNeighbours(p Point) []Point {
 
 // A scout has reported from 'p'
 func (m *Map) ViewFrom(scout Point) {
-	for _, p := range(scout.Neighbours(VIEWRADIUS2)) {
+	for _, p := range scout.Neighbours(VIEWRADIUS2) {
 		s := &m.squares[p.r][p.c]
 		s.wasSeen = true
 		s.lastSeen = TURN
@@ -173,7 +174,7 @@ func (m *Map) MarkHill(p Point, ant Item) {
 
 func (m *Map) Update(words []string) {
 	if words[0] == "turn" {
-		turn  := Turn(atoi(words[1]))
+		turn := Turn(atoi(words[1]))
 		if turn != TURN+1 {
 			log.Panicf("Turn number out of sync, expected %v got %v", TURN+1, turn)
 		}
@@ -206,12 +207,12 @@ func (m *Map) Update(words []string) {
 func (m *Map) AddAnt(p Point, ant Item) {
 	if ant == MY_ANT {
 		m.ViewFrom(p)
-		
+
 		antp, found := m.myAnts[p.loc()]
 		if found { // existing ant?
 			antp.seen = TURN
 		} else { // new ant?
-			m.myAnts[p.loc()] = &Ant{p:p, seen:TURN}
+			m.myAnts[p.loc()] = &Ant{p: p, seen: TURN}
 		}
 	} else {
 		m.enemies = append(m.enemies, p)
@@ -230,11 +231,11 @@ func (m *Map) DeadAnt(p Point, ant Item) {
 // make sure they make sense.
 func (m *Map) UpdatesProcessed() {
 	// Any ants that missed an update?
-	for loc, ant := range(m.myAnts) {
-		if (ant.seen != TURN) {
+	for loc, ant := range m.myAnts {
+		if ant.seen != TURN {
 			log.Panicf("%v (@ %v) missed an update\n", ant, loc.point())
 		}
-		ant.isTasked = false	// open for business!
+		ant.isTasked = false // open for business!
 		ant.hasMoved = false
 	}
 }
@@ -243,16 +244,16 @@ func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
 	lines := strings.Fields(s)
 	rows := len(lines)
 	var cols int
-	for row, line := range(lines) {
+	for row, line := range lines {
 		if row == 0 {
 			cols = len(line)
 			m.Init(rows, cols, viewRadius2)
 		} else {
 			if cols != len(line) {
-				return fmt.Errorf("different-length lines in %v" , lines)
+				return fmt.Errorf("different-length lines in %v", lines)
 			}
 		}
-		for col, letter := range(line) {
+		for col, letter := range line {
 			p := Point{row, col}
 			switch letter {
 			case '#':
@@ -289,4 +290,3 @@ func (m *Map) FreeAnts(interrupt bool) []*Ant {
 	}
 	return reply
 }
-

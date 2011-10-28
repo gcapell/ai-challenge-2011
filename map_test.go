@@ -8,12 +8,12 @@ import (
 
 func loadMap() Map {
 	var m Map
-	m.Init(4,3,0)
+	m.Init(4, 3, 0)
 	return m
 }
 
-func TestInitFromString(t *testing.T)  {
-	var m Map 
+func TestInitFromString(t *testing.T) {
+	var m Map
 	s := `
 		###
 		#%#
@@ -41,8 +41,8 @@ func TestShortestPath(t *testing.T) {
 		..%.....
 		..%.....
 	`, 0)
-	src := Point{1,0}	// a
-	dst := Point{1,4}	// b
+	src := Point{1, 0} // a
+	dst := Point{1, 4} // b
 	path, err := m.ShortestPath(src, dst)
 	if err != nil {
 		t.Error(err)
@@ -53,7 +53,7 @@ func TestShortestPath(t *testing.T) {
 func TestLocationConversion(t *testing.T) {
 	loc := Point{3, 2}.loc()
 	p := loc.point()
-	if p.r != 3 || p.c != 2{
+	if p.r != 3 || p.c != 2 {
 		t.Errorf("conversion broken, got %v, wanted (3, 2)", p)
 	}
 }

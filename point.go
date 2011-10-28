@@ -1,25 +1,25 @@
 package main
+
 import (
 	"math"
 )
 
-type(
+type (
 	//Location combines (Row, Col) coordinate pairs 
 	// for use as keys in maps (and in a 1d array)
 	Location int
 
-	Point struct {r, c int}	// rows, columns
+	Point  struct{ r, c int } // rows, columns
 	Points []Point
-
 )
 
 func (s *Points) add(p Point) {
 	*s = append(*s, p)
 }
 
-func (loc Location ) point () Point {
+func (loc Location) point() Point {
 	iLoc := int(loc)
-	return Point{ iLoc / COLS, iLoc % COLS}
+	return Point{iLoc / COLS, iLoc % COLS}
 }
 
 func (p *Point) sanitise() {
@@ -38,14 +38,14 @@ func (p *Point) sanitise() {
 }
 
 func abs(a int) int {
-	if a<0 {
+	if a < 0 {
 		return -a
 	}
 	return a
 }
 
 func sign(a int) int {
-	if a<0 {
+	if a < 0 {
 		return -1
 	}
 	return 1
@@ -57,7 +57,7 @@ func (p Point) sanitised() Point {
 }
 
 func (p Point) loc() Location {
-	return Location(p.r * COLS + p.c)
+	return Location(p.r*COLS + p.c)
 }
 
 func (p Point) Equals(r Point) bool {
@@ -65,13 +65,13 @@ func (p Point) Equals(r Point) bool {
 }
 
 func wrapDelta(a, b, wrap int) int {
-	delta := abs(a-b)
+	delta := abs(a - b)
 	return min(delta, wrap-delta)
 }
 
 // Return (Manhattan) distance between two points,
 // allowing for warping across edges
-func (a Point) Distance( b Point) (int, int) {
+func (a Point) Distance(b Point) (int, int) {
 	return wrapDelta(a.r, b.r, ROWS), wrapDelta(a.c, b.c, COLS)
 }
 
@@ -84,21 +84,21 @@ func (a Point) CrowDistance(b Point) float64 {
 	return math.Sqrt(float64(a.CrowDistance2(b)))
 }
 
-func (p Point) Neighbours(rad2 int) [] Point{
+func (p Point) Neighbours(rad2 int) []Point {
 	reply := Points(make([]Point, rad2))
 	if rad2 < 1 {
 		return reply
 	}
-	for dr:=0; dr*dr<= rad2; dr++ {
-		for dc := 0; dc*dc + dr  *dr <= rad2; dc++ {
+	for dr := 0; dr*dr <= rad2; dr++ {
+		for dc := 0; dc*dc+dr*dr <= rad2; dc++ {
 			reply.add(Point{p.r + dr, p.c + dc}.sanitised())
-			if(dr != 0) {
+			if dr != 0 {
 				reply.add(Point{p.r - dr, p.c + dc}.sanitised())
 			}
-			if (dc !=0) {
+			if dc != 0 {
 				reply.add(Point{p.r + dr, p.c - dc}.sanitised())
 			}
-			if (dr !=0 && dc != 0) {
+			if dr != 0 && dc != 0 {
 				reply.add(Point{p.r - dr, p.c - dc}.sanitised())
 			}
 		}
@@ -107,18 +107,18 @@ func (p Point) Neighbours(rad2 int) [] Point{
 }
 
 // FIXME - eventually cope with warping
-func between(a,b Point) Point {
-	return Point{(a.r + b.r)/2, (a.c + b.c)/2}
+func between(a, b Point) Point {
+	return Point{(a.r + b.r) / 2, (a.c + b.c) / 2}
 }
 
 // Is 'p' close enough to 'between' a and b?
-func (p Point) intercepts (a, b Point) bool {
+func (p Point) intercepts(a, b Point) bool {
 	if p.CrowDistance(a) < 4 || p.CrowDistance(b) < 4 {
 		return true
 	}
 	rowRatio, rowBetween := linear(a.r, p.r, b.r)
 	columnRatio, columnBetween := linear(a.c, p.c, b.c)
-	
+
 	return rowBetween && columnBetween && similarRatio(rowRatio, columnRatio)
 }
 
@@ -126,10 +126,9 @@ func similarRatio(r1, r2 float64) bool {
 	return r1 == 0 || r2 == 0 || math.Fabs(r1-r2) < .05
 }
 
-
-func linear(a,p,b int) (ratio float64, between bool) {
+func linear(a, p, b int) (ratio float64, between bool) {
 	if abs(a-b) < 4 {
-		return 0, abs(p - (a+b)/2) < 2
+		return 0, abs(p-(a+b)/2) < 2
 	}
 	if sign(b-a) != sign(b-p) {
 		return 0, false
@@ -138,12 +137,12 @@ func linear(a,p,b int) (ratio float64, between bool) {
 		return 0, false
 	}
 
-	return float64(abs(b-p))/ float64(abs(b-a)), true
+	return float64(abs(b-p)) / float64(abs(b-a)), true
 }
 
 func intercept(defender, enemy, victim Point) Point {
 	if defender.intercepts(victim, enemy) {
 		return enemy
-	} 
+	}
 	return between(victim, enemy)
 }
