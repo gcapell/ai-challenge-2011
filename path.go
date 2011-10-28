@@ -7,7 +7,7 @@ import (
 )
 type (
 	Node struct {
-		estimate int
+		estimate float64
 		length int
 		p Point
 	}
@@ -40,7 +40,7 @@ func (m *Map) ShortestPath(src, dst Point) ([] Point, os.Error) {
 	h := &myHeap{}
 	heap.Init(h)
 
-	heap.Push(h, Node{src.Distance(dst), 0, src})
+	heap.Push(h, Node{src.CrowDistance(dst), 0, src})
 	
 	// Each entry points to previous point in path
 	back := make([]Location, ROWS * COLS)
@@ -57,7 +57,7 @@ func (m *Map) ShortestPath(src, dst Point) ([] Point, os.Error) {
 			if back[p.loc()] != -1 {
 				continue
 			}
-			newNode := Node{p.Distance(dst) + pathLength, pathLength, p}
+			newNode := Node{p.CrowDistance(dst) + float64(pathLength), pathLength, p}
 			back[p.loc()] = n.p.loc()
 			if p.Equals(dst) {
 				return unravelPath(back, src, dst, pathLength), nil

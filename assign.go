@@ -18,7 +18,7 @@ func (a Assignment) String()string {
 }
 
 // Implement sort.Interface
-func (a Assignment) distance()  int {return a.ant.Distance(a.p)}
+func (a Assignment) distance()  int {return a.ant.p.CrowDistance2(a.p)}
 func (as AssignmentSlice) Len() int{return len(as)}
 func (as AssignmentSlice) Less(i,j int) bool {return as[i].distance() < as[j].distance()}
 func (as AssignmentSlice) Swap(i,j int) {as[j], as[i] = as[i], as[j]}

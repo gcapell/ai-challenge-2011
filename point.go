@@ -65,23 +65,23 @@ func (p Point) Equals(r Point) bool {
 }
 
 func wrapDelta(a, b, wrap int) int {
-	delta := a-b
-	if delta<0 {
-		delta = -delta
-	}
-	wrapped := wrap - delta
-	// log.Printf("a: %d, b: %d, wrap: %d, delta: %d, wrapped: %d\n", a, b, wrap, delta, wrapped)
-	if delta < wrapped {
-		return delta
-	}
-	return wrapped
+	delta := abs(a-b)
+	return min(delta, wrap-delta)
 }
 
 // Return (Manhattan) distance between two points,
 // allowing for warping across edges
-func (a Point) Distance( b Point) int {
-	return wrapDelta(a.r, b.r, ROWS)+
-		wrapDelta(a.c, b.c, COLS)
+func (a Point) Distance( b Point) (int, int) {
+	return wrapDelta(a.r, b.r, ROWS), wrapDelta(a.c, b.c, COLS)
+}
+
+func (a Point) CrowDistance2(b Point) int {
+	dx, dy := a.Distance(b)
+	return dx*dx + dy*dy
+}
+
+func (a Point) CrowDistance(b Point) float64 {
+	return math.Sqrt(float64(a.CrowDistance2(b)))
 }
 
 func (p Point) Neighbours(rad2 int) [] Point{
@@ -113,7 +113,7 @@ func between(a,b Point) Point {
 
 // Is 'p' close enough to 'between' a and b?
 func (p Point) intercepts (a, b Point) bool {
-	if p.Distance(a) < 4 || p.Distance(b) < 4 {
+	if p.CrowDistance(a) < 4 || p.CrowDistance(b) < 4 {
 		return true
 	}
 	rowRatio, rowBetween := linear(a.r, p.r, b.r)

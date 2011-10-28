@@ -35,9 +35,12 @@ type (
 		enemies Points
 		food	Points
 		items	map[Location]Item
+
+		// Places that we're sending ants to already
+		exploreTargets map[Location]bool
 	}
 )
-func (a *Ant) Distance(p Point) int {
+func (a *Ant) Distance(p Point) (int, int) {
 	return a.p.Distance(p)
 }
 
@@ -47,7 +50,7 @@ func (m *Map) nearestHill(p Point) Point {
 		if i==0 {
 			closest = hill
 		} else {
-			if p.Distance(hill) < p.Distance(closest) {
+			if p.CrowDistance2(hill) < p.CrowDistance2(closest) {
 				closest = hill
 			}
 		}
@@ -61,7 +64,7 @@ func (m*Map) EnemiesNearOurHill(tooClose int) []Point{
 
 	enemyLoop: for _, e := range m.enemies {
 		for _, hill := range m.myHills {
-			if e.Distance(hill) <= tooClose {
+			if e.CrowDistance2(hill) <= tooClose {
 				reply = append(reply, e)
 				continue enemyLoop
 			}
@@ -103,6 +106,7 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 	m.enemies = make([]Point, 0)
 	m.enemyHills = make([]Point, 0)
 	m.food = make([]Point, 0)
+	m.exploreTargets = make(map[Location]bool)
 
 	m.squares = make([][]Square, rows)
 	for row:=0; row<rows; row++ {
