@@ -9,6 +9,7 @@ import (
 func (m *Map) DoTurn() {
 	m.defend()
 	m.forage()
+	m.enemyHill()
 	m.scout()
 	m.moveAll()
 }
@@ -47,6 +48,16 @@ func (m *Map) scout() {
 
 	for _, a := range scouts {
 		a.Scout(m, step, size/2)
+	}
+}
+
+// Attack enemy hill
+func (m *Map) enemyHill() {
+	if len(m.enemyHills) == 0 {
+		return
+	}
+	for _, soldier := range m.FreeAnts(true) {
+		soldier.moveTo(m, m.enemyHills[0], "enemy hill")
 	}
 }
 

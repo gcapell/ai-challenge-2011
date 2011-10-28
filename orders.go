@@ -28,7 +28,14 @@ func (m *Map) moveAll() {
 			break
 		}
 	}
-	log.Printf("Moved %d in %d iterations", totalMoved, iterations)
+	
+	aborted := 0
+	for _, a := range m.myAnts {
+		if a.AbortMove() {
+			aborted += 1
+		}
+	}
+	log.Printf("Moved %d in %d iterations, aborted %d", totalMoved, iterations, aborted)
 }
 
 func direction(src, dst Point) string {
@@ -49,6 +56,15 @@ func direction(src, dst Point) string {
 	}
 	log.Panicf("Cannot move from %v to %v\n", src, dst)
 	return ""
+}
+
+// We weren't able to move.  Give up
+func (a *Ant) AbortMove() bool {
+	if len(a.plan) > 0 && ! a.hasMoved {
+		a.plan = a.plan[:0]
+		return true
+	}
+	return false
 }
 
 // If we can, make our move (and report success, update occupied)
