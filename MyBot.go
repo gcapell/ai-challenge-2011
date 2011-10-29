@@ -14,7 +14,7 @@ func (m *Map) DoTurn(t *Timer) {
 	m.forage()
 
 	t.Split("enemyHill")
-	m.enemyHill()
+	m.attackEnemyHill()
 
 	t.Split("scout")
 	m.scout()
@@ -38,7 +38,7 @@ func (m *Map) defend() {
 	defenders := m.FreeAnts(true)
 	for _, assignment := range assign1(defenders, m.EnemiesNearOurHill(VIEWRADIUS2*2)) {
 		a, enemy := assignment.ant, assignment.p
-		hill := m.nearestHill(enemy)
+		hill := m.nearestHillToDefend(enemy)
 		dst := intercept(a.p, enemy, hill)
 		assignment.ant.moveTo(m, dst, "intercept")
 	}
@@ -63,12 +63,12 @@ func (m *Map) scout() {
 }
 
 // Attack enemy hill
-func (m *Map) enemyHill() {
-	if len(m.enemyHills) == 0 {
+func (m *Map) attackEnemyHill() {
+	if m.targetHill == nil {
 		return
 	}
 	for _, soldier := range m.FreeAnts(true) {
-		soldier.moveTo(m, m.enemyHills[0], "enemy hill")
+		soldier.moveTo(m, *m.targetHill, "enemy hill")
 	}
 }
 

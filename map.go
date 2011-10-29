@@ -37,6 +37,8 @@ type (
 		food    Points
 		items   map[Location]Item
 
+		targetHill	*Point	// Remember hill we're attacking
+
 		// Places that we're sending ants to already
 		exploreTargets map[Location]bool
 	}
@@ -46,7 +48,7 @@ func (a *Ant) Distance(p Point) (int, int) {
 	return a.p.Distance(p)
 }
 
-func (m *Map) nearestHill(p Point) Point {
+func (m *Map) nearestHillToDefend(p Point) Point {
 	var closest Point
 	for i, hill := range m.myHills {
 		if i == 0 {
@@ -260,6 +262,33 @@ func (m *Map) UpdatesProcessed() {
 		}
 		ant.isTasked = false // open for business!
 	}
+
+	// targetHill destroyed?
+	if m.targetHill != nil {
+		if m.squares[m.targetHill.r][m.targetHill.c].lastSeen == TURN {
+			found := false
+			for _, p := range m.enemyHills {
+				if p.Equals(*m.targetHill) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				log.Printf("enemy hill at %v destroyed", *m.targetHill)
+				m.targetHill = nil
+			}
+		} else {
+			log.Printf("Assuming enemy hill still at %v", *m.targetHill)
+		}
+	}
+
+	// Acquire target?
+	if m.targetHill == nil && len(m.enemyHills) != 0 {
+		p := m.enemyHills[0]
+		m.targetHill = &p
+		log.Printf("Acquired enemy hill at %v", p)
+	}
+	
 }
 
 func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
