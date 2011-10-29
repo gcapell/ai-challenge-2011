@@ -15,4 +15,5 @@ GOFILES=\
 include $(GOROOT)/src/Make.cmd
 
 zip:
-	zip MyBot.zip *go Makefile
+	rm MyBot.zip
+	zip MyBot.zip $(GOFILES) Makefile
