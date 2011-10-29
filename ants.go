@@ -56,7 +56,7 @@ func (s *Game) Load() {
 	log.Printf("Game stats: %+v", *s)
 }
 
-func nsec() int64{
+func nsec() int64 {
 	s, ns, _ := os.Time()
 	return s*1e9 + ns
 }
@@ -66,7 +66,7 @@ type Timer struct {
 	split int64
 }
 
-func (t *Timer) Reset()  {
+func (t *Timer) Reset() {
 	now := nsec()
 	t.start = now
 	t.split = now
@@ -74,11 +74,11 @@ func (t *Timer) Reset()  {
 
 func (t *Timer) Split(s string) {
 	now := nsec()
-	
-	deltaSplit := float64(now - t.split) / 1e9
-	delta := float64(now - t.start) / 1e9
+
+	deltaSplit := float64(now-t.split) / 1e9
+	delta := float64(now-t.start) / 1e9
 	t.split = now
-	
+
 	log.Printf("%s: %.3f %.3f", s, deltaSplit, delta)
 }
 

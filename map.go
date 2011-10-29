@@ -13,7 +13,7 @@ type (
 
 	Square struct {
 		isWater  bool
-		hasFood	bool
+		hasFood  bool
 		wasSeen  bool // Have we ever seen this square?
 		lastSeen Turn // .. if so, when?
 	}
@@ -22,8 +22,8 @@ type (
 		p        Point  // Where are we now?
 		plan     Points // Where will we be?
 		seen     Turn
-		isTasked bool // Has this ant been given an order this turn?
-		reason	string	// why are we moving?
+		isTasked bool   // Has this ant been given an order this turn?
+		reason   string // why are we moving?
 	}
 
 	Map struct {
@@ -37,7 +37,7 @@ type (
 		food    Points
 		items   map[Location]Item
 
-		targetHill	*Point	// Remember hill we're attacking
+		targetHill *Point // Remember hill we're attacking
 
 		// Places that we're sending ants to already
 		exploreTargets map[Location]bool
@@ -128,8 +128,8 @@ func (m *Map) Reset() {
 	m.items = make(map[Location]Item)
 
 	// reset squares
-	for r := 0; r<ROWS; r++ {
-		for c:=0; c<COLS; c++ {
+	for r := 0; r < ROWS; r++ {
+		for c := 0; c < COLS; c++ {
 			s := &m.squares[r][c]
 			s.hasFood = false
 		}
@@ -141,7 +141,7 @@ func (m *Map) isWet(p Point) bool {
 }
 
 func (m *Map) isBlocked(p Point) bool {
-	s := & m.squares[p.r][p.c]
+	s := &m.squares[p.r][p.c]
 	return s.isWater || s.hasFood
 }
 
@@ -288,7 +288,7 @@ func (m *Map) UpdatesProcessed() {
 		m.targetHill = &p
 		log.Printf("Acquired enemy hill at %v", p)
 	}
-	
+
 }
 
 func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {

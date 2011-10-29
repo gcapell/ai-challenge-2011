@@ -73,9 +73,9 @@ func (m *Map) attackEnemyHill() {
 }
 
 func (a *Ant) Scout(m *Map, step, maxRadius int) {
-	
+
 	targets := spiral(a.p, step, maxRadius)
-	for _, p := range  targets {
+	for _, p := range targets {
 		if m.ShouldExplore(p) {
 			a.Explore(m, p)
 			log.Printf("%s scouting %v", a, p)
@@ -84,7 +84,7 @@ func (a *Ant) Scout(m *Map, step, maxRadius int) {
 	}
 	p := targets[rand.Intn(len(targets))]
 	log.Printf("%s randomly scouting %v", a, p)
-	a.Explore(m,p)
+	a.Explore(m, p)
 }
 
 func (a *Ant) Explore(m *Map, p Point) {
