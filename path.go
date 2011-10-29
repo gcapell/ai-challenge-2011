@@ -54,7 +54,7 @@ func (m *Map) ShortestPath(src, dst Point) ([]Point, os.Error) {
 	for h.Len() != 0 {
 		n := heap.Pop(h).(Node)
 		pathLength := n.length + 1
-		for _, p := range m.DryNeighbours(n.p) {
+		for _, p := range m.AccessibleNeighbours(n.p) {
 			// Have we already seen this point?
 			if back[p.loc()] != -1 {
 				continue

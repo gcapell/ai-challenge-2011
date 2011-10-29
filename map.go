@@ -143,7 +143,7 @@ func (m *Map) isBlocked(p Point) bool {
 	return s.isWater || s.hasFood
 }
 
-func (m *Map) DryNeighbours(p Point) []Point {
+func (m *Map) AccessibleNeighbours(p Point) []Point {
 	allNeighbours := []Point{
 		Point{p.r + 1, p.c},
 		Point{p.r - 1, p.c},
@@ -153,9 +153,13 @@ func (m *Map) DryNeighbours(p Point) []Point {
 	reply := make([]Point, 0, 4)
 	for _, n := range allNeighbours {
 		n.sanitise()
-		if !m.isWet(n) {
-			reply = append(reply, n)
+		if m.isWet(n) {
+			continue
 		}
+		if _, ok := m.myAnts[n.loc()]; ok {
+			continue
+		}
+		reply = append(reply, n)
 	}
 	return reply
 }
