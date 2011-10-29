@@ -50,6 +50,7 @@ func (s *Game) Load() {
 		case "attackradius2":
 			ATTACKRADIUS2 = param
 			INFLUENCERADIUS2 = int( math.Sqrt(float64(ATTACKRADIUS2)) +1) *2
+			INFLUENCERADIUS2 = INFLUENCERADIUS2 * INFLUENCERADIUS2
 		case "spawnradius2":
 			s.SpawnRadius2 = param
 		case "player_seed":

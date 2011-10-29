@@ -9,6 +9,19 @@ func (a Point) CouldInfluence (b Point ) bool {
 	return a.CrowDistance2(b) <= INFLUENCERADIUS2
 }
 
+func (m *Map) nearbyEnemies(friendlies []*Ant) []Point {
+	reply := make([]Point, 0)
+	for _, e := range m.enemies {
+		for _, a := range friendlies {
+			if e.CouldInfluence(a.p) {
+				reply = append(reply, e)
+				break
+			}
+		}
+	}
+	return reply
+}
+
 // Partition all friendly ants into spheres of influence
 func (m *Map) partitionFriendlies() [][]*Ant {
 	assigned := make([]PartRecord, 0,  len(m.myAnts))
