@@ -13,3 +13,6 @@ GOFILES=\
 	assign.go \
 
 include $(GOROOT)/src/Make.cmd
+
+zip:
+	zip MyBot.zip *go Makefile
