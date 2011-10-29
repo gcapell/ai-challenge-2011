@@ -7,3 +7,4 @@ _testmain.go
 *.6
 textmate.tmproj
 play.sh
+play_bot.sh

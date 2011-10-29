@@ -13,6 +13,7 @@ type (
 
 	Square struct {
 		isWater  bool
+		hasFood	bool
 		wasSeen  bool // Have we ever seen this square?
 		lastSeen Turn // .. if so, when?
 	}
@@ -23,7 +24,6 @@ type (
 		seen     Turn
 		isTasked bool // Has this ant been given an order this turn?
 		reason	string	// why are we moving?
-		hasMoved bool // Has this ant moved already this turn?
 	}
 
 	Map struct {
@@ -124,10 +124,23 @@ func (m *Map) Reset() {
 	m.enemyHills = m.enemyHills[:0]
 	m.food = m.food[:0]
 	m.items = make(map[Location]Item)
+
+	// reset squares
+	for r := 0; r<ROWS; r++ {
+		for c:=0; c<COLS; c++ {
+			s := &m.squares[r][c]
+			s.hasFood = false
+		}
+	}
 }
 
 func (m *Map) isWet(p Point) bool {
 	return m.squares[p.r][p.c].isWater
+}
+
+func (m *Map) isBlocked(p Point) bool {
+	s := & m.squares[p.r][p.c]
+	return s.isWater || s.hasFood
 }
 
 func (m *Map) DryNeighbours(p Point) []Point {
@@ -163,6 +176,7 @@ func (m *Map) MarkWater(p Point) {
 func (m *Map) MarkFood(p Point) {
 	(&m.food).add(p)
 	m.items[p.loc()] = FOOD
+	m.squares[p.r][p.c].hasFood = true
 }
 
 func (m *Map) MarkHill(p Point, ant Item) {
@@ -241,7 +255,6 @@ func (m *Map) UpdatesProcessed() {
 			log.Panicf("%v (@ %v) missed an update\n", ant, loc.point())
 		}
 		ant.isTasked = false // open for business!
-		ant.hasMoved = false
 	}
 }
 
