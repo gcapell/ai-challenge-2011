@@ -6,12 +6,23 @@ import (
 )
 
 //DoTurn is where you should do your bot's actual work.
-func (m *Map) DoTurn() {
+func (m *Map) DoTurn(t *Timer) {
+	t.Split("defend")
 	m.defend()
+
+	t.Split("forage")
 	m.forage()
+
+	t.Split("enemyHill")
 	m.enemyHill()
+
+	t.Split("scout")
 	m.scout()
+
+	t.Split("moveAll")
 	m.moveAll()
+
+	t.Split("doneTurn")
 }
 
 // Grab any food we know about

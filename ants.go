@@ -4,6 +4,7 @@ import (
 	"strings"
 	"fmt"
 	"log"
+	"os"
 )
 
 type Turn uint
@@ -55,6 +56,32 @@ func (s *Game) Load() {
 	log.Printf("Game stats: %+v", *s)
 }
 
+func nsec() int64{
+	s, ns, _ := os.Time()
+	return s*1e9 + ns
+}
+
+type Timer struct {
+	start int64
+	split int64
+}
+
+func (t *Timer) Reset()  {
+	now := nsec()
+	t.start = now
+	t.split = now
+}
+
+func (t *Timer) Split(s string) {
+	now := nsec()
+	
+	deltaSplit := float64(now - t.split) / 1e9
+	delta := float64(now - t.start) / 1e9
+	t.split = now
+	
+	log.Printf("%s: %.3f %.3f", s, deltaSplit, delta)
+}
+
 //main initializes the state and starts the processing loop
 func main() {
 	var (
@@ -67,15 +94,20 @@ func main() {
 	//indicate we're ready
 	fmt.Println("go")
 
+	var t Timer
 	for line := range getLinesUntil("end") {
 		if line == "go" {
+			t.Reset()
 			m.UpdatesProcessed()
-			m.DoTurn()
+			t.Split("updates")
+			m.DoTurn(&t)
+			t.Split("turn")
 
 			//end turn
 			fmt.Println("go")
 
 			m.Reset()
+			t.Split("reset")
 			continue
 		}
 

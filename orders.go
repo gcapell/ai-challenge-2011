@@ -45,16 +45,19 @@ func (m *Map) moveAll() {
 			nMoved +=  1
 		}
 
+		log.Printf("len(toMove) %d, len(nextMove) %d", len(toMove), len(nextMove))
+
 		// If we couldn't move any ants at all, we're deadlocked
 		if len(toMove) == len(nextMove) {
 			// deadlock
-			for _, a := range(toMove) {
+			for _, a := range toMove {
 				a.AbortMove()
 				deadlocked += 1
 			}
 			nextMove = toMove[:0]
 		}
-		toMove = nextMove
+		toMove, nextMove = nextMove[:], toMove[:0]
+		log.Printf("PostDeadlock: len(toMove) %d, len(nextMove) %d", len(toMove), len(nextMove))
 	}
 	report := fmt.Sprintf("Moved %d in %d iterations", nMoved, iterations)
 	if deadlocked >0 {
