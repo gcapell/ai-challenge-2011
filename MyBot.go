@@ -7,6 +7,9 @@ import (
 
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn(t *Timer) {
+	t.Split("tactics")
+	m.closeCombat()
+
 	t.Split("defend")
 	m.defend()
 
@@ -23,6 +26,28 @@ func (m *Map) DoTurn(t *Timer) {
 	m.moveAll()
 
 	t.Split("doneTurn")
+}
+
+// Minimax for close combat
+func (m *Map) closeCombat() {
+	partitions := m.partitionFriendlies()
+	log.Printf("closeCombat partitions: %v", partitions)
+
+	for _, partition := range partitions {
+		enemies := m.nearbyEnemies(partition)
+		if len(enemies) != 0 {
+			m.groupCombat(partition, enemies)
+		}
+	}
+}
+
+func (m *Map) groupCombat(friends []*Ant, enemies []Point) {
+
+}
+
+// List any enemies in near-range of friendlies
+func (m *Map) nearbyEnemies(friendlies []*Ant) []Point {
+	return make([]Point, 0)
 }
 
 // Grab any food we know about

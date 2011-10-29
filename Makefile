@@ -11,6 +11,7 @@ GOFILES=\
 	orders.go \
 	point.go \
 	assign.go \
+	partition.go \
 
 include $(GOROOT)/src/Make.cmd
 
