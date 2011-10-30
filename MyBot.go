@@ -5,11 +5,6 @@ import (
 	"rand"
 )
 
-const (
-	DEAD_ENEMY_WEIGHT    = 11
-	DEAD_FRIENDLY_WEIGHT = -10
-)
-
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn(t *Timer) {
 	m.closeCombat()

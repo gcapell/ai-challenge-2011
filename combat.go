@@ -17,6 +17,12 @@ type (
 		evaluated   int
 	}
 )
+
+const (
+	DEAD_ENEMY_WEIGHT    = 11
+	DEAD_FRIENDLY_WEIGHT = -10
+)
+
 // Minimax for close combat
 func (m *Map) closeCombat() {
 	for _, cz := range m.FindCombatZones() {
@@ -85,7 +91,16 @@ func (m *Map) FriendliesInRangeOf(p Point) []Point {
 }
 
 func (a Point) CouldInfluence(b Point) bool {
-	return a.CrowDistance2(b) <= INFLUENCERADIUS2
+	dr, dc := a.Distance(b)
+	// Move two steps closer
+	for j:=0; j<2; j++ {
+		if dr>dc {
+			dr -= 1
+		} else {
+			dc -= 1
+		}
+	}
+	return dr*dr + dc*dc <= ATTACKRADIUS2
 }
 
 var zoneNum int
@@ -97,9 +112,8 @@ func NewZone(e Point) *CombatZone {
 
 func (cz *CombatZone) GroupCombat(m *Map) {
 
-	log.Printf("groupCombat friends: %v, enemies: %v", cz.friendly, cz.enemy)
 
-	if len(cz.friendly)+len(cz.enemy) > 5 {
+	if len(cz.friendly)+len(cz.enemy) > 7 {
 		log.Printf("group combat too hard, giving up")
 		return
 	}
@@ -114,7 +128,7 @@ func (cz *CombatZone) GroupCombat(m *Map) {
 		}
 		(&bestMove).update(friendMove)
 	}
-	log.Printf("Best Move: %v", bestMove)
+	log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
 	if len(bestMove.dst) == 0 {
 		return
 	}
@@ -122,7 +136,6 @@ func (cz *CombatZone) GroupCombat(m *Map) {
 	for i, p := range cz.friendly {
 		dst := bestMove.dst[i]
 		ant := m.myAnts[p.loc()]
-		log.Printf("Combat order: %v -> %v", p, dst)
 		ant.moveToPoint(m, dst, "combat")
 	}
 }

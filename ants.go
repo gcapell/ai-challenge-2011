@@ -86,7 +86,9 @@ func (t *Timer) Split(s string) {
 	delta := float64(now-t.start) / 1e9
 	t.split = now
 
-	log.Printf("%s: %.3f %.3f", s, deltaSplit, delta)
+	if false {
+		log.Printf("%s: %.3f %.3f", s, deltaSplit, delta)
+	}
 }
 
 //main initializes the state and starts the processing loop
