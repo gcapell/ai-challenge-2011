@@ -5,6 +5,11 @@ import (
 	"rand"
 )
 
+const (
+	DEAD_ENEMY_WEIGHT = 11
+	DEAD_FRIENDLY_WEIGHT = -10
+)
+
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn(t *Timer) {
 	m.closeCombat()
@@ -28,101 +33,6 @@ func (m *Map) DoTurn(t *Timer) {
 	t.Split("doneTurn")
 }
 
-// Minimax for close combat
-func (m *Map) closeCombat() {
-	partitions := m.partitionFriendlies()
-
-	for _, partition := range partitions {
-		enemies := m.nearbyEnemies(partition)
-		if len(enemies) != 0 {
-			m.groupCombat(partition, enemies)
-		}
-	}
-}
-
-type GroupMove struct {
-	dst []Point
-	first bool
-	worst, best	int
-}
-
-// Update my best/worst scores based on enemy moves
-func (gm GroupMove) score(em GroupMove) {
-}
-
-func (gm GroupMove) update(om GroupMove) {
-}
-
-func (m *Map) legalMoves(orig []Point) chan GroupMove {
-	ch := make (chan GroupMove)
-	func() {
-		defer close(ch)
-		legal2(m, orig, make([]Point, 0, len(orig)), ch)
-	}()
-	return ch
-}
-
-func legal2(m *Map, orig, dst []Point, ch chan GroupMove) {
-	src, orig := orig[0], orig[1:]
-	allNeighbours := []Point{
-		src,
-		Point{src.r + 1, src.c},
-		Point{src.r - 1, src.c},
-		Point{src.r, src.c + 1},
-		Point{src.r, src.c - 1},
-	}
-	for i, p := range allNeighbours {
-		if i == 0 {
-			dst = append(dst, p)
-		} else {
-			dst[len(dst)-1] = p
-		}
-		p.sanitise()
-		if m.isWet(p) || p.In(dst) {
-			continue
-		}
-		if len(orig) == 0 {
-			ch <- GroupMove{dst:dst}
-		} else {
-			legal2(m, orig, dst, ch)
-		}
-	}
-		
-}
-
-func (p Point) In (other []Point) bool  {
-	for _, o := range other {
-		if p.Equals(o) {
-			return true
-		}
-	}
-	return false
-}
-
-func positions(ants []*Ant) []Point {
-	reply := make ([]Point, len(ants))
-	for i, ant := range ants {
-		reply[i] = ant.p
-	}
-	return reply
-}
-
-func (m *Map) groupCombat(friends []*Ant, enemies []Point) {
-	log.Printf("groupCombat friends: %v, enemies: %v", friends, enemies)
-	
-	// For each of my possible moves, what could enemies do?
-
-	var bestMove GroupMove
-
-	for friendMove := range m.legalMoves(positions(friends)) {
-		for enemyMove := range  m.legalMoves(enemies) {
-			friendMove.score(enemyMove)
-		}
-		bestMove.update(friendMove)
-	}
-	log.Printf("Best Move: %v", bestMove)
-}
-
 // Grab any food we know about
 func (m *Map) forage() {
 	foragers := m.FreeAnts(true)
@@ -140,13 +50,6 @@ func (m *Map) defend() {
 		dst := intercept(a.p, enemy, hill)
 		assignment.ant.moveTo(m, dst, "intercept")
 	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 // explore, farm, ...

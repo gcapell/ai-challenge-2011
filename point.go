@@ -37,6 +37,39 @@ func (p *Point) sanitise() {
 	}
 }
 
+func countBool(slice []bool) int {
+	count := 0
+	for _, b := range slice {
+		if b {
+			count += 1
+		}
+	}
+	return count
+}
+
+func (p Point) In (other []Point) bool  {
+	for _, o := range other {
+		if p.Equals(o) {
+			return true
+		}
+	}
+	return false
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a,b int) int {
+	if a>b {
+		return a
+	}
+	return b
+}
+
 func abs(a int) int {
 	if a < 0 {
 		return -a

@@ -19,7 +19,8 @@ func (m *Map) moveAll() {
 
 	iterations, nMoved, deadlocked, blocked := 0, 0, 0, 0
 
-	for len(toMove) > 0 {
+
+	for len(toMove)>0 {
 		iterations += 1
 		for _, a := range toMove {
 			wantsMove, dst := a.WantsMove()
@@ -41,7 +42,7 @@ func (m *Map) moveAll() {
 			occupied[dst.loc()] = true
 			occupied[src.loc()] = false
 			m.Moved(a, src, dst)
-			nMoved += 1
+			nMoved +=  1
 		}
 
 		log.Printf("len(toMove) %d, len(nextMove) %d", len(toMove), len(nextMove))
@@ -59,7 +60,7 @@ func (m *Map) moveAll() {
 		log.Printf("PostDeadlock: len(toMove) %d, len(nextMove) %d", len(toMove), len(nextMove))
 	}
 	report := fmt.Sprintf("Moved %d in %d iterations", nMoved, iterations)
-	if deadlocked > 0 {
+	if deadlocked >0 {
 		report += fmt.Sprintf(" %d deadlocked", deadlocked)
 	}
 	if blocked > 0 {
@@ -102,7 +103,7 @@ func (a *Ant) WantsMove() (bool, Point) {
 }
 
 // If we can, make our move (and report success, update occupied)
-func (a *Ant) Move(dst Point) {
+func (a *Ant) Move(dst Point)  {
 	assert(dst.Equals(a.plan[0]), "dst: %v, a.plan: %v", dst, a.plan)
 
 	fmt.Println("o", a.p.r, a.p.c, direction(a.p, dst))
@@ -111,16 +112,16 @@ func (a *Ant) Move(dst Point) {
 	a.p = dst
 }
 
-func (m *Map) Moved(a *Ant, src, dst Point) {
-	assert(m.myAnts[src.loc()] == a, "%v, %v", m.myAnts, src)
-	assert(m.myAnts[dst.loc()] == nil, "%v, %v", m.myAnts, dst)
+func (m *Map) Moved (a *Ant, src, dst Point) {
+	assert( m.myAnts[src.loc()] == a, "%v, %v", m.myAnts, src)
+	assert( m.myAnts[dst.loc()] == nil, "%v, %v", m.myAnts, dst)
 
 	m.myAnts[src.loc()] = nil, false
 	m.myAnts[dst.loc()] = a
 }
 
 func assert(assertion bool, fmt string, fmtArgs ...interface{}) {
-	if !assertion {
+	if (!assertion){
 		log.Printf(fmt, fmtArgs...)
 	}
 }
@@ -142,4 +143,10 @@ func (a *Ant) moveTo(m *Map, p Point, reason string) {
 		return
 	}
 	a.plan = path
+}
+
+func (a *Ant) moveToPoint(m *Map, p Point, reason string) {
+	a.isTasked = true
+	a.reason = reason
+	a.plan = []Point{p}
 }
