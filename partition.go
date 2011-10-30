@@ -4,17 +4,17 @@ import (
 	"log"
 )
 
-type (	
+type (
 	CombatZone struct {
-		zone		int
-		friendly	[]Point
-		enemy	[]Point
+		zone     int
+		friendly []Point
+		enemy    []Point
 	}
 	GroupMove struct {
-		dst []Point
-		updated bool
-		worst, best	int
-		evaluated int
+		dst         []Point
+		updated     bool
+		worst, best int
+		evaluated   int
 	}
 )
 // Minimax for close combat
@@ -51,13 +51,13 @@ func (m *Map) FindCombatZones() []*CombatZone {
 			}
 
 		}
-		if !merging && len(myZone.friendly)!=0 {
+		if !merging && len(myZone.friendly) != 0 {
 			zones = append(zones, myZone)
 		}
 	}
 	// Final merge
 	seen := make(map[int]bool)
-	reply := make([]*CombatZone,0, len(zones))
+	reply := make([]*CombatZone, 0, len(zones))
 	for i, cz := range zones {
 		if seen[cz.zone] {
 			continue
@@ -84,7 +84,7 @@ func (m *Map) FriendliesInRangeOf(p Point) []Point {
 	return reply
 }
 
-func (a Point) CouldInfluence (b Point ) bool {
+func (a Point) CouldInfluence(b Point) bool {
 	return a.CrowDistance2(b) <= INFLUENCERADIUS2
 }
 
@@ -92,24 +92,24 @@ var zoneNum int
 
 func NewZone(e Point) *CombatZone {
 	zoneNum += 1
-	return  &CombatZone{zone:zoneNum, enemy: []Point{e}}
+	return &CombatZone{zone: zoneNum, enemy: []Point{e}}
 }
 
 func (cz *CombatZone) GroupCombat(m *Map) {
-	
+
 	log.Printf("groupCombat friends: %v, enemies: %v", cz.friendly, cz.enemy)
 
-	if len(cz.friendly) + len(cz.enemy) > 5 {
+	if len(cz.friendly)+len(cz.enemy) > 5 {
 		log.Printf("group combat too hard, giving up")
 		return
 	}
-	
+
 	// For each of my possible moves, what could enemies do?
 
 	var bestMove GroupMove
 
 	for friendMove := range m.legalMoves(cz.friendly) {
-		for enemyMove := range  m.legalMoves(cz.enemy) {
+		for enemyMove := range m.legalMoves(cz.enemy) {
 			friendMove.score(enemyMove)
 		}
 		(&bestMove).update(friendMove)
@@ -128,7 +128,7 @@ func (cz *CombatZone) GroupCombat(m *Map) {
 }
 
 func (m *Map) legalMoves(orig []Point) chan GroupMove {
-	ch := make (chan GroupMove)
+	ch := make(chan GroupMove)
 	go func() {
 		legal2(m, orig, make([]Point, len(orig)), 0, ch)
 		close(ch)
@@ -147,14 +147,14 @@ func legal2(m *Map, orig, dst []Point, pos int, ch chan GroupMove) {
 	}
 	for _, p := range allNeighbours {
 		p.sanitise()
-		if m.isWet(p)  || p.In(dst) {
+		if m.isWet(p) || p.In(dst) {
 			continue
 		}
 		dst[pos] = p
 		if len(orig) == 0 {
-			ch <- GroupMove{dst:dst}
+			ch <- GroupMove{dst: dst}
 		} else {
-			legal2(m, orig, dst, pos + 1, ch)
+			legal2(m, orig, dst, pos+1, ch)
 		}
 	}
 }
@@ -172,8 +172,8 @@ func (gm *GroupMove) score(em GroupMove) {
 	friendlyFocus := make([]int, len(gm.dst))
 
 	// Count focus
-	for f, fp := range(gm.dst) {
-		for e, ep := range(em.dst) {
+	for f, fp := range gm.dst {
+		for e, ep := range em.dst {
 			if fp.CrowDistance2(ep) <= ATTACKRADIUS2 {
 				enemyFocus[e] += 1
 				friendlyFocus[f] += 1
@@ -185,8 +185,8 @@ func (gm *GroupMove) score(em GroupMove) {
 	enemyDead := make([]bool, len(em.dst))
 	friendlyDead := make([]bool, len(gm.dst))
 
-	for f, fp := range(gm.dst) {
-		for e, ep := range(em.dst) {
+	for f, fp := range gm.dst {
+		for e, ep := range em.dst {
 			if fp.CrowDistance2(ep) <= ATTACKRADIUS2 {
 				if enemyFocus[e] >= friendlyFocus[f] {
 					enemyDead[e] = true
@@ -201,7 +201,7 @@ func (gm *GroupMove) score(em GroupMove) {
 	// Count bodies
 	nEnemyDead, nFriendlyDead := countBool(enemyDead), countBool(friendlyDead)
 
-	score := nEnemyDead * DEAD_ENEMY_WEIGHT + nFriendlyDead * DEAD_FRIENDLY_WEIGHT
+	score := nEnemyDead*DEAD_ENEMY_WEIGHT + nFriendlyDead*DEAD_FRIENDLY_WEIGHT
 	if !gm.updated {
 		gm.updated = true
 		gm.worst = score

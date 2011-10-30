@@ -47,7 +47,7 @@ func countBool(slice []bool) int {
 	return count
 }
 
-func (p Point) In (other []Point) bool  {
+func (p Point) In(other []Point) bool {
 	for _, o := range other {
 		if p.Equals(o) {
 			return true
@@ -63,8 +63,8 @@ func min(a, b int) int {
 	return b
 }
 
-func max(a,b int) int {
-	if a>b {
+func max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b

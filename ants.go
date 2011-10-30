@@ -11,20 +11,20 @@ import (
 type Turn uint
 
 var (
-	ATTACKRADIUS2 int
+	ATTACKRADIUS2    int
 	INFLUENCERADIUS2 int
 )
 
 //Game keeps track of everything we need to know about the state of the game
 type Game struct {
-	LoadTime      int   //in milliseconds
-	TurnTime      int   //in milliseconds
-	Rows          int   //number of rows in the map
-	Cols          int   //number of columns in the map
-	Turns         int   //maximum number of turns in the game
-	ViewRadius2   int   //view radius squared
-	SpawnRadius2  int   //spawn radius squared
-	PlayerSeed    int64 //random player seed
+	LoadTime     int   //in milliseconds
+	TurnTime     int   //in milliseconds
+	Rows         int   //number of rows in the map
+	Cols         int   //number of columns in the map
+	Turns        int   //maximum number of turns in the game
+	ViewRadius2  int   //view radius squared
+	SpawnRadius2 int   //spawn radius squared
+	PlayerSeed   int64 //random player seed
 }
 
 func (s *Game) Load() {
@@ -49,7 +49,7 @@ func (s *Game) Load() {
 			s.ViewRadius2 = param
 		case "attackradius2":
 			ATTACKRADIUS2 = param
-			INFLUENCERADIUS2 = int( math.Sqrt(float64(ATTACKRADIUS2)) +1) *2
+			INFLUENCERADIUS2 = int(math.Sqrt(float64(ATTACKRADIUS2))+1) * 2
 			INFLUENCERADIUS2 = INFLUENCERADIUS2 * INFLUENCERADIUS2
 		case "spawnradius2":
 			s.SpawnRadius2 = param
@@ -63,7 +63,7 @@ func (s *Game) Load() {
 	log.Printf("Game stats: %+v", *s)
 }
 
-func nsec() int64{
+func nsec() int64 {
 	s, ns, _ := os.Time()
 	return s*1e9 + ns
 }
@@ -73,7 +73,7 @@ type Timer struct {
 	split int64
 }
 
-func (t *Timer) Reset()  {
+func (t *Timer) Reset() {
 	now := nsec()
 	t.start = now
 	t.split = now
@@ -81,11 +81,11 @@ func (t *Timer) Reset()  {
 
 func (t *Timer) Split(s string) {
 	now := nsec()
-	
-	deltaSplit := float64(now - t.split) / 1e9
-	delta := float64(now - t.start) / 1e9
+
+	deltaSplit := float64(now-t.split) / 1e9
+	delta := float64(now-t.start) / 1e9
 	t.split = now
-	
+
 	log.Printf("%s: %.3f %.3f", s, deltaSplit, delta)
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	DEAD_ENEMY_WEIGHT = 11
+	DEAD_ENEMY_WEIGHT    = 11
 	DEAD_FRIENDLY_WEIGHT = -10
 )
 
