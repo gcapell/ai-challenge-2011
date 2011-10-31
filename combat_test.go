@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"log"
 )
 
 func (m *Map) MovesFromMap() (gm, em GroupMove) {
@@ -14,16 +15,20 @@ func (m *Map) MovesFromMap() (gm, em GroupMove) {
 	return gm, em
 }
 
-func ScoreFromMap(s string, expected int) {
+func ScoreFromMap(t *testing.T, s string, expected int) {
 	
 	m := new(Map)
 	m.InitFromString(0,  s)
 
 	gm, em := m.MovesFromMap()
 	gm.score(em)
-	assert (gm.evaluated == 1, "")
+	if gm.evaluated != 1 {
+		t.Error("gm.evaluated", gm.evaluated, "!=1")
+	}
 
-	assert (gm.best == expected, "got %d, expected %d from map:\n%s\n", gm.best, expected, m)
+	if gm.best != expected {
+		t.Errorf("got %d, expected %d from map:\n%s\n", gm.best, expected, m)
+	}
 }
 
 func TestScore(t *testing.T) {
@@ -53,6 +58,41 @@ func TestScore(t *testing.T) {
 		  ......`, 1},
 	}
 	for _, s := range tests {
-		ScoreFromMap(s.s, s.score)
+		ScoreFromMap(t, s.s, s.score)
 	}
+}
+
+func verifyGroupCombat(t *testing.T, reason, initial, final string) {
+	m := new(Map)
+	m.InitFromString(0, initial)
+
+	combatZones := m.FindCombatZones()
+	assert (len(combatZones) == 1, "%v", combatZones)
+	cz := combatZones[0]
+	log.Printf("cz: %+v", cz)
+	bestMove := cz.GroupCombat(m)
+	log.Printf("bestMove: %v", bestMove)
+
+	cz.MakeMove(m, bestMove)
+	log.Printf("m.myAnts: %+v", m.myAnts)
+	m.moveAll()
+	log.Printf("after move: %+v", m.myAnts)
+
+	log.Printf("post combat:\n%s", m)
+
+	checkMap(t, m, reason, final)
+}
+
+func TestGroupCombat(t *testing.T) {
+	ATTACKRADIUS2 = 5
+	DEAD_ENEMY_WEIGHT    = 11
+	DEAD_FRIENDLY_WEIGHT = -10
+
+	verifyGroupCombat(t,
+		"run away when outnumbered",
+		`...a..b
+		 ......b`, 
+		`..a...b
+		 ......b`, 
+ 	)
 }

@@ -110,9 +110,19 @@ func TestMap(t *testing.T) {
 }
 
 func checkMap(t *testing.T, m *Map, msg string, expected string) {
-	if !sameText(m.String(), expected) {
-		t.Errorf("%s, expected: %s, got:\n%s\n", msg, expected, m.String())
+	ms := canon(m.String())
+	expected  = canon(expected)
+	if ms != expected {
+		t.Errorf("%s, expected:\n%s,\ngot:\n%s\n", msg, expected, ms)
 	}
+}
+
+// Return s with internal spaces/tabs and leading/trailing whitespace removed
+func canon(s string) string {
+	s = strings.Replace(s, " ", "", -1)
+	s = strings.Replace(s, "\t", "", -1)
+	s = strings.TrimSpace(s)
+	return s
 }
 
 // Are a and b the same (excluding whitespace)?

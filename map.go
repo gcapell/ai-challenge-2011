@@ -33,7 +33,6 @@ type (
 
 		enemies Points
 		food    Points
-		items   map[Location]Item
 
 		targetHill *Point // Remember hill we're attacking
 
@@ -89,6 +88,7 @@ const (
 	LAND
 	DEAD
 	MY_ANT = 0
+	ENEMY_ANT = 1
 
 	MAXPLAYER = 24
 )
@@ -123,7 +123,6 @@ func (m *Map) Reset() {
 	m.enemies = m.enemies[:0]
 	m.enemyHills = m.enemyHills[:0]
 	m.food = m.food[:0]
-	m.items = make(map[Location]Item)
 
 	// reset squares
 	for r := 0; r < ROWS; r++ {
@@ -179,7 +178,6 @@ func (m *Map) MarkWater(p Point) {
 
 func (m *Map) MarkFood(p Point) {
 	(&m.food).add(p)
-	m.items[p.loc()] = FOOD
 	m.squares[p.r][p.c].hasFood = true
 }
 
@@ -236,7 +234,6 @@ func (m *Map) AddAnt(p Point, ant Item) {
 	} else {
 		m.enemies = append(m.enemies, p)
 	}
-	m.items[p.loc()] = ant
 }
 
 func (m *Map) DeadAnt(p Point, ant Item) {

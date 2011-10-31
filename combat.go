@@ -26,8 +26,21 @@ var (
 // Minimax for close combat
 func (m *Map) closeCombat() {
 	for _, cz := range m.FindCombatZones() {
-		cz.GroupCombat(m)
+		bestMove := cz.GroupCombat(m)
+		if bestMove != nil {
+			cz.MakeMove(m, bestMove)
+		}
 	}
+}
+
+func (cz *CombatZone) MakeMove(m *Map, bestMove *GroupMove ) {
+		log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
+	
+		for i, p := range cz.friendly {
+			dst := bestMove.dst[i]
+			ant := m.myAnts[p.loc()]
+			ant.moveToPoint(m, dst, "combat")
+		}
 }
 
 func (m *Map) FindCombatZones() []*CombatZone {
@@ -110,34 +123,24 @@ func NewZone(e Point) *CombatZone {
 	return &CombatZone{zone: zoneNum, enemy: []Point{e}}
 }
 
-func (cz *CombatZone) GroupCombat(m *Map) {
-
+func (cz *CombatZone) GroupCombat(m *Map) * GroupMove {
 
 	if len(cz.friendly)+len(cz.enemy) > 7 {
 		log.Printf("group combat too hard, giving up")
-		return
+		return nil
 	}
 
 	// For each of my possible moves, what could enemies do?
 
-	var bestMove GroupMove
+	bestMove := new(GroupMove)
 
 	for friendMove := range m.legalMoves(cz.friendly) {
 		for enemyMove := range m.legalMoves(cz.enemy) {
 			friendMove.score(enemyMove)
 		}
-		(&bestMove).update(friendMove)
+		bestMove.update(friendMove)
 	}
-	log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
-	if len(bestMove.dst) == 0 {
-		return
-	}
-
-	for i, p := range cz.friendly {
-		dst := bestMove.dst[i]
-		ant := m.myAnts[p.loc()]
-		ant.moveToPoint(m, dst, "combat")
-	}
+	return bestMove
 }
 
 func (m *Map) legalMoves(orig []Point) chan GroupMove {

@@ -29,8 +29,13 @@ func (m *Map) ItemAt(p Point) Item {
 	if s.isWater {
 		return WATER
 	}
-	if item, found := m.items[p.loc()]; found {
-		return item
+	if _, ok := m.myAnts[p.loc()]; ok {
+		return MY_ANT
+	}
+	for _, e := range m.enemies {
+		if e.Equals(p) {
+			return ENEMY_ANT
+		}
 	}
 	if !s.wasSeen {
 		return UNKNOWN
