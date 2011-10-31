@@ -2,7 +2,6 @@ package main
 
 import (
 	"testing"
-	"log"
 )
 
 func TestGroupCombat(t *testing.T) {
@@ -10,13 +9,28 @@ func TestGroupCombat(t *testing.T) {
 	DEAD_ENEMY_WEIGHT    = 11
 	DEAD_FRIENDLY_WEIGHT = -10
 
-	log.Printf("Testing Group Combat")
 	verifyGroupCombat(t,
 		"run away when outnumbered",
 		`....a..b
 		 .......b`, 
 		`...a...b
 		 .......b`, 
+ 	)
+
+	verifyGroupCombat(t,
+		"Attack when we outnumber",
+		`....b..a
+		 .......a`, 
+		`....b.a.
+		 ......a.`, 
+ 	)
+
+	verifyGroupCombat(t,
+		"Accept a swap",
+		`....b..a
+		 ........`, 
+		`....b.a.
+		 ........`, 
  	)
 }
 func (m *Map) MovesFromMap() (gm, em GroupMove) {
@@ -83,16 +97,10 @@ func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	combatZones := m.FindCombatZones()
 	assert (len(combatZones) == 1, "%v", combatZones)
 	cz := combatZones[0]
-	log.Printf("cz: %+v", cz)
 	bestMove := cz.GroupCombat(m)
-	log.Printf("bestMove: %+v", bestMove)
 
 	cz.MakeMove(m, bestMove)
-	log.Printf("m.myAnts: %+v", m.myAnts)
 	m.moveAll()
-	log.Printf("after move: %+v", m.myAnts)
-
-	log.Printf("post combat:\n%s", m)
 
 	checkMap(t, m, reason, final)
 }

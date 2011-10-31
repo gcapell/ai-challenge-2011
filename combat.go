@@ -45,7 +45,7 @@ func (m *Map) closeCombat() {
 }
 
 func (cz *CombatZone) MakeMove(m *Map, bestMove *GroupMove ) {
-		log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
+		// log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
 	
 		for i, p := range cz.friendly {
 			dst := bestMove.dst[i]
@@ -241,5 +241,5 @@ func (gm *GroupMove) score(em GroupMove) {
 		gm.best = max(score, gm.best)
 	}
 	gm.evaluated += 1
-	log.Printf("%s.score(%s) => %d", gm, &em, score)
+	// log.Printf("%s.score(%s) => %d", gm, &em, score)
 }
