@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 	"fmt"
-	"os"
-	"strings"
 )
 
 type (
@@ -289,39 +287,6 @@ func (m *Map) UpdatesProcessed() {
 		log.Printf("Acquired enemy hill at %v", p)
 	}
 
-}
-
-func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
-	lines := strings.Fields(s)
-	rows := len(lines)
-	var cols int
-	for row, line := range lines {
-		if row == 0 {
-			cols = len(line)
-			m.Init(rows, cols, viewRadius2)
-		} else {
-			if cols != len(line) {
-				return fmt.Errorf("different-length lines in %v", lines)
-			}
-		}
-		for col, letter := range line {
-			p := Point{row, col}
-			switch letter {
-			case '#':
-				// Unknown territory
-			case '%':
-				m.MarkWater(p)
-			case '*':
-				m.MarkFood(p)
-			case 'a':
-				m.AddAnt(p, 0)
-			case 'b':
-				m.AddAnt(p, 1)
-			}
-		}
-	}
-
-	return nil
 }
 
 // Return slice of ants who aren't already assigned
