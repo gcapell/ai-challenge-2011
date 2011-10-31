@@ -5,6 +5,20 @@ import (
 	"log"
 )
 
+func TestGroupCombat(t *testing.T) {
+	ATTACKRADIUS2 = 5
+	DEAD_ENEMY_WEIGHT    = 11
+	DEAD_FRIENDLY_WEIGHT = -10
+
+	log.Printf("Testing Group Combat")
+	verifyGroupCombat(t,
+		"run away when outnumbered",
+		`....a..b
+		 .......b`, 
+		`...a...b
+		 .......b`, 
+ 	)
+}
 func (m *Map) MovesFromMap() (gm, em GroupMove) {
 	for _, a := range m.myAnts {
 		gm.dst = append(gm.dst, a.p)
@@ -71,7 +85,7 @@ func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	cz := combatZones[0]
 	log.Printf("cz: %+v", cz)
 	bestMove := cz.GroupCombat(m)
-	log.Printf("bestMove: %v", bestMove)
+	log.Printf("bestMove: %+v", bestMove)
 
 	cz.MakeMove(m, bestMove)
 	log.Printf("m.myAnts: %+v", m.myAnts)
@@ -83,16 +97,3 @@ func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	checkMap(t, m, reason, final)
 }
 
-func TestGroupCombat(t *testing.T) {
-	ATTACKRADIUS2 = 5
-	DEAD_ENEMY_WEIGHT    = 11
-	DEAD_FRIENDLY_WEIGHT = -10
-
-	verifyGroupCombat(t,
-		"run away when outnumbered",
-		`...a..b
-		 ......b`, 
-		`..a...b
-		 ......b`, 
- 	)
-}

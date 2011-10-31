@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"fmt"
 )
 
 type (
@@ -17,6 +18,16 @@ type (
 		evaluated   int
 	}
 )
+
+func (gm *GroupMove)String() string {
+	var u string
+	if gm.updated {
+		u="U"
+	} else {
+		u = "u"
+	}
+	return fmt.Sprintf("GM{ %v %s %d/%d after %d}", gm.dst, u, gm.worst, gm.best, gm.evaluated)
+}
 
 var (
 	DEAD_ENEMY_WEIGHT    = 11
@@ -177,8 +188,12 @@ func legal2(m *Map, orig, dst []Point, pos int, ch chan GroupMove) {
 
 func (gm *GroupMove) update(om GroupMove) {
 	gm.evaluated += om.evaluated
-	if om.worst > gm.worst || (om.worst == gm.worst && om.best > gm.best) {
-		*gm = om
+	if !gm.updated || om.worst > gm.worst || (om.worst == gm.worst && om.best > gm.best) {
+		gm.worst = om.worst
+		gm.best = om.best
+		gm.updated = true
+		gm.evaluated += om.evaluated
+		gm.dst = om.dst
 	}
 }
 
@@ -226,4 +241,5 @@ func (gm *GroupMove) score(em GroupMove) {
 		gm.best = max(score, gm.best)
 	}
 	gm.evaluated += 1
+	log.Printf("%s.score(%s) => %d", gm, &em, score)
 }
