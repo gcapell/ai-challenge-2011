@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-func (m *Map) InitFromString(s string, viewRadius2 int) os.Error {
+func (m *Map) InitFromString(viewRadius2 int, s string) os.Error {
 	lines := strings.Fields(s)
 	rows := len(lines)
 	var cols int
@@ -54,7 +54,7 @@ func TestInitFromString(t *testing.T) {
 		#%#
 		a#b
 	`
-	m.InitFromString(s, 0)
+	m.InitFromString(0, s)
 	checkMap(t, &m, "InitFromString", s)
 }
 
@@ -70,12 +70,12 @@ func TestPrint(t *testing.T) {
 
 func TestShortestPath(t *testing.T) {
 	var m Map
-	m.InitFromString(`
+	m.InitFromString(0, `
 		..%..%..
 		a.%.b%..
 		..%.....
 		..%.....
-	`, 0)
+	`)
 	src := Point{1, 0} // a
 	dst := Point{1, 4} // b
 	path, err := m.ShortestPath(src, dst)
