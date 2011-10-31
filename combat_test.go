@@ -6,8 +6,22 @@ import (
 
 func TestGroupCombat(t *testing.T) {
 	ATTACKRADIUS2 = 5
-	DEAD_ENEMY_WEIGHT    = 11
+	DEAD_ENEMY_WEIGHT    = 9
 	DEAD_FRIENDLY_WEIGHT = -10
+
+	verifyGroupCombat(t,
+		"support a friend",
+		`
+		....a....
+		.........
+		....a...b
+		`, 
+		`
+		.........
+		....a....
+		....a...b
+		`,
+	)
 
 	verifyGroupCombat(t,
 		"run away when outnumbered",
