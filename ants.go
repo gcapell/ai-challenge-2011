@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"math"
 )
 
 type Turn uint
 
 var (
 	ATTACKRADIUS2    int
-	INFLUENCERADIUS2 int
 )
 
 //Game keeps track of everything we need to know about the state of the game
@@ -49,8 +47,7 @@ func (s *Game) Load() {
 			s.ViewRadius2 = param
 		case "attackradius2":
 			ATTACKRADIUS2 = param
-			INFLUENCERADIUS2 = int(math.Sqrt(float64(ATTACKRADIUS2))+1) * 2
-			INFLUENCERADIUS2 = INFLUENCERADIUS2 * INFLUENCERADIUS2
+			log.Printf("ATTACKRADIUS2: %d", param)
 		case "spawnradius2":
 			s.SpawnRadius2 = param
 		case "player_seed":

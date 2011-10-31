@@ -18,7 +18,7 @@ type (
 	}
 )
 
-const (
+var (
 	DEAD_ENEMY_WEIGHT    = 11
 	DEAD_FRIENDLY_WEIGHT = -10
 )
@@ -180,7 +180,6 @@ func (gm *GroupMove) update(om GroupMove) {
 }
 
 func (gm *GroupMove) score(em GroupMove) {
-	// log.Printf("scoring %v -> %v", gm, em)
 	enemyFocus := make([]int, len(em.dst))
 	friendlyFocus := make([]int, len(gm.dst))
 
