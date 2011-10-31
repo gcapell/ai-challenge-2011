@@ -24,7 +24,7 @@ func (m *Map) InitFromString(viewRadius2 int, s string) os.Error {
 		for col, letter := range line {
 			p := Point{row, col}
 			switch letter {
-			case '#':
+			case '.':
 				// Unknown territory
 			case '%':
 				m.MarkWater(p)
@@ -34,6 +34,8 @@ func (m *Map) InitFromString(viewRadius2 int, s string) os.Error {
 				m.AddAnt(p, 0)
 			case 'b':
 				m.AddAnt(p, 1)
+			default:
+				log.Panicf("unknown letter: %v", letter)
 			}
 		}
 	}
@@ -50,9 +52,9 @@ func loadMap() Map {
 func TestInitFromString(t *testing.T) {
 	var m Map
 	s := `
-		###
-		#%#
-		a#b
+		...
+		.%.
+		a.b
 	`
 	m.InitFromString(0, s)
 	checkMap(t, &m, "InitFromString", s)
@@ -61,10 +63,10 @@ func TestInitFromString(t *testing.T) {
 func TestPrint(t *testing.T) {
 	m := loadMap()
 	checkMap(t, &m, "map loads/prints wrong size", `
-		###
-		###
-		###
-		###
+		...
+		...
+		...
+		...
 	`)
 }
 
@@ -100,10 +102,10 @@ func TestMap(t *testing.T) {
 	m.AddAnt(Point{0, 2}, MY_ANT)
 
 	checkMap(t, &m, "ants in wrong place", `
-		##a
-		###
-		##a
-		###
+		..a
+		...
+		..a
+		...
 	`)
 }
 

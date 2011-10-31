@@ -7,14 +7,12 @@ import (
 //Symbol returns the symbol for the ascii diagram
 func (o Item) Symbol() byte {
 	switch o {
-	case UNKNOWN:
-		return '#'
+	case UNKNOWN, LAND:
+		return '.'
 	case WATER:
 		return '%'
 	case FOOD:
 		return '*'
-	case LAND:
-		return '.'
 	case DEAD:
 		return '!'
 	}
