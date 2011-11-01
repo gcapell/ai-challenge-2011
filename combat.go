@@ -172,14 +172,18 @@ func legal2(m *Map, orig, dst []Point, pos int, ch chan GroupMove) {
 		Point{src.r, src.c + 1},
 		Point{src.r, src.c - 1},
 	}
+	// log.Printf("allNeighbours: %v", allNeighbours)
 	for _, p := range allNeighbours {
 		p.sanitise()
 		if m.isWet(p) || p.In(dst) {
 			continue
 		}
 		dst[pos] = p
+		// log.Printf("dst: %v, pos:%v, p:%v", dst, pos, p)
 		if len(orig) == 0 {
-			ch <- GroupMove{dst: dst}
+			dstCopy := make([]Point, len(dst))
+			copy(dstCopy, dst)
+			ch <- GroupMove{dst: dstCopy}
 		} else {
 			legal2(m, orig, dst, pos+1, ch)
 		}
@@ -241,5 +245,5 @@ func (gm *GroupMove) score(em GroupMove) {
 		gm.best = max(score, gm.best)
 	}
 	gm.evaluated += 1
-	// log.Printf("%s.score(%s) => %d", gm, &em, score)
+	log.Printf("%s.score(%s) => %d", gm, &em, score)
 }

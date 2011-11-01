@@ -113,7 +113,7 @@ func checkMap(t *testing.T, m *Map, msg string, expected string) {
 	ms := canon(m.String())
 	expected  = canon(expected)
 	if ms != expected {
-		t.Errorf("%s, expected:\n%s,\ngot:\n%s\n", msg, expected, ms)
+		t.Fatalf("%s, expected:\n%s,\ngot:\n%s\n", msg, expected, ms)
 	}
 }
 
