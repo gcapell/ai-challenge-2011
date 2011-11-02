@@ -14,7 +14,8 @@ type (
 	GroupMove struct {
 		dst         []Point
 		updated     bool
-		worst, best int
+		worst, total int
+		average	float64
 		evaluated   int
 	}
 )
@@ -26,12 +27,13 @@ func (gm *GroupMove)String() string {
 	} else {
 		u = "u"
 	}
-	return fmt.Sprintf("GM{ %v %s %d/%d after %d}", gm.dst, u, gm.worst, gm.best, gm.evaluated)
+	return fmt.Sprintf("GM{ %v %s %d/%.1f after %d}", 
+		gm.dst, u, gm.worst, gm.average, gm.evaluated)
 }
 
 var (
-	DEAD_ENEMY_WEIGHT    = 11
-	DEAD_FRIENDLY_WEIGHT = -10
+	DEAD_ENEMY_WEIGHT    = 100
+	DEAD_FRIENDLY_WEIGHT = -110
 )
 
 // Minimax for close combat
@@ -192,9 +194,9 @@ func legal2(m *Map, orig, dst []Point, pos int, ch chan GroupMove) {
 
 func (gm *GroupMove) update(om GroupMove) {
 	gm.evaluated += om.evaluated
-	if !gm.updated || om.worst > gm.worst || (om.worst == gm.worst && om.best > gm.best) {
+	if !gm.updated || om.worst > gm.worst || (om.worst == gm.worst && om.average > gm.average) {
 		gm.worst = om.worst
-		gm.best = om.best
+		gm.average = om.average
 		gm.updated = true
 		gm.evaluated += om.evaluated
 		gm.dst = om.dst
@@ -236,14 +238,14 @@ func (gm *GroupMove) score(em GroupMove) {
 	nEnemyDead, nFriendlyDead := countBool(enemyDead), countBool(friendlyDead)
 
 	score := nEnemyDead*DEAD_ENEMY_WEIGHT + nFriendlyDead*DEAD_FRIENDLY_WEIGHT
+	gm.evaluated += 1
+	gm.total += score
+	gm.average = float64(gm.total) / float64(gm.evaluated)
 	if !gm.updated {
 		gm.updated = true
 		gm.worst = score
-		gm.best = score
 	} else {
 		gm.worst = min(score, gm.worst)
-		gm.best = max(score, gm.best)
 	}
-	gm.evaluated += 1
-	log.Printf("%s.score(%s) => %d", gm, &em, score)
+	// log.Printf("%s.score(%s) => %d", gm, &em, score)
 }

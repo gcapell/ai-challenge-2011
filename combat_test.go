@@ -6,21 +6,25 @@ import (
 
 func TestGroupCombat(t *testing.T) {
 	ATTACKRADIUS2 = 5
-	DEAD_ENEMY_WEIGHT    = 9
-	DEAD_FRIENDLY_WEIGHT = -10
+	DEAD_ENEMY_WEIGHT    = 100
+	DEAD_FRIENDLY_WEIGHT = -110
 
 	verifyGroupCombat(t,
 		"support a friend",
 		`
-		....a....
 		.........
+		...a.....
 		....a..b.
+		.........
+		.........
 		.........
 		`, 
 		`
 		.........
 		....a....
 		....a..b.
+		.........
+		.........
 		.........
 		`,
 	)
@@ -42,10 +46,10 @@ func TestGroupCombat(t *testing.T) {
  	)
 
 	verifyGroupCombat(t,
-		"Accept a swap",
+		"Reject a swap",
 		`....b..a
 		 ........`, 
-		`....b.a.
+		`a...b...
 		 ........`, 
  	)
 }
@@ -59,7 +63,7 @@ func (m *Map) MovesFromMap() (gm, em GroupMove) {
 	return gm, em
 }
 
-func ScoreFromMap(t *testing.T, s string, expected int) {
+func ScoreFromMap(t *testing.T, s string, expected float64) {
 	
 	m := new(Map)
 	m.InitFromString(0,  s)
@@ -70,8 +74,8 @@ func ScoreFromMap(t *testing.T, s string, expected int) {
 		t.Error("gm.evaluated", gm.evaluated, "!=1")
 	}
 
-	if gm.best != expected {
-		t.Errorf("got %d, expected %d from map:\n%s\n", gm.best, expected, m)
+	if gm.average != expected {
+		t.Errorf("got %f, expected %f from map:\n%s\n", gm.average, expected, m)
 	}
 }
 
@@ -82,7 +86,7 @@ func TestScore(t *testing.T) {
 
 	tests := []struct{
 		s string
-		score int
+		score float64
 	}{
 		{`...b.a
 		  ...b.a
