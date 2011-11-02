@@ -18,6 +18,9 @@ type (
 		average	float64
 		evaluated   int
 	}
+	ScoringHeuristic struct {
+		deadEnemy, deadFriendly int
+	}
 )
 
 func (gm *GroupMove)String() string {
@@ -32,8 +35,8 @@ func (gm *GroupMove)String() string {
 }
 
 var (
-	DEAD_ENEMY_WEIGHT    = 100
-	DEAD_FRIENDLY_WEIGHT = -110
+	NEAR_OUR_HILL_SCORING = ScoringHeuristic {deadEnemy: 100, deadFriendly: -90}
+	SCOUTING_SCORING = ScoringHeuristic {deadEnemy: 100, deadFriendly: -110}
 )
 
 // Minimax for close combat
@@ -106,6 +109,17 @@ func (m *Map) FindCombatZones() []*CombatZone {
 	return reply
 }
 
+func (cz *CombatZone) GetScoringHeuristic(m *Map) ScoringHeuristic {
+	for _, p := range cz.enemy {
+		for _, h := range m.myHills {
+			if p.CrowDistance2(h) <= VIEWRADIUS2 {
+				return NEAR_OUR_HILL_SCORING
+			}
+		}
+	}
+	return SCOUTING_SCORING
+}
+
 func (m *Map) FriendliesInRangeOf(p Point) []Point {
 	reply := make([]Point, 0)
 	for _, a := range m.myAnts {
@@ -146,10 +160,10 @@ func (cz *CombatZone) GroupCombat(m *Map) * GroupMove {
 	// For each of my possible moves, what could enemies do?
 
 	bestMove := new(GroupMove)
-
+	sh := cz.GetScoringHeuristic(m)
 	for friendMove := range m.legalMoves(cz.friendly) {
 		for enemyMove := range m.legalMoves(cz.enemy) {
-			friendMove.score(enemyMove)
+			friendMove.score(enemyMove, sh)
 		}
 		bestMove.update(friendMove)
 	}
@@ -203,7 +217,7 @@ func (gm *GroupMove) update(om GroupMove) {
 	}
 }
 
-func (gm *GroupMove) score(em GroupMove) {
+func (gm *GroupMove) score(em GroupMove, sh ScoringHeuristic) {
 	enemyFocus := make([]int, len(em.dst))
 	friendlyFocus := make([]int, len(gm.dst))
 
@@ -237,7 +251,7 @@ func (gm *GroupMove) score(em GroupMove) {
 	// Count bodies
 	nEnemyDead, nFriendlyDead := countBool(enemyDead), countBool(friendlyDead)
 
-	score := nEnemyDead*DEAD_ENEMY_WEIGHT + nFriendlyDead*DEAD_FRIENDLY_WEIGHT
+	score := nEnemyDead*sh.deadEnemy + nFriendlyDead*sh.deadFriendly
 	gm.evaluated += 1
 	gm.total += score
 	gm.average = float64(gm.total) / float64(gm.evaluated)

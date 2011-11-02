@@ -6,8 +6,6 @@ import (
 
 func TestGroupCombat(t *testing.T) {
 	ATTACKRADIUS2 = 5
-	DEAD_ENEMY_WEIGHT    = 100
-	DEAD_FRIENDLY_WEIGHT = -110
 
 	verifyGroupCombat(t,
 		"support a friend",
@@ -69,7 +67,7 @@ func ScoreFromMap(t *testing.T, s string, expected float64) {
 	m.InitFromString(0,  s)
 
 	gm, em := m.MovesFromMap()
-	gm.score(em)
+	gm.score(em, NEAR_OUR_HILL_SCORING)
 	if gm.evaluated != 1 {
 		t.Error("gm.evaluated", gm.evaluated, "!=1")
 	}
@@ -81,8 +79,6 @@ func ScoreFromMap(t *testing.T, s string, expected float64) {
 
 func TestScore(t *testing.T) {
 	ATTACKRADIUS2 = 5
-	DEAD_ENEMY_WEIGHT    = 11
-	DEAD_FRIENDLY_WEIGHT = -10
 
 	tests := []struct{
 		s string
@@ -91,19 +87,19 @@ func TestScore(t *testing.T) {
 		{`...b.a
 		  ...b.a
 		  ...b..
-		  ......`, 2},
+		  ......`, 20},
 
 		{`..a..b
 		  .....b`, 0},
 
 		{`...a.b
-		  .....b`, -10},
+		  .....b`, -90},
 
 		{`...b.a
-		  .....a`, 11},
+		  .....a`, 100},
 
 		{`...b.a
-		  ......`, 1},
+		  ......`, 10},
 	}
 	for _, s := range tests {
 		ScoreFromMap(t, s.s, s.score)
