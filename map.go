@@ -34,7 +34,8 @@ type (
 		enemies Points
 		food    Points
 
-		targetHill *Point // Remember hill we're attacking
+		hasTargetHill	bool
+		targetHill Point // Remember hill we're attacking
 
 		// Places that we're sending ants to already
 		exploreTargets map[Location]bool
@@ -259,31 +260,30 @@ func (m *Map) UpdatesProcessed() {
 	}
 
 	// targetHill destroyed?
-	if m.targetHill != nil {
+	if m.hasTargetHill {
 		if m.squares[m.targetHill.r][m.targetHill.c].lastSeen == TURN {
 			found := false
 			for _, p := range m.enemyHills {
-				if p.Equals(*m.targetHill) {
+				if p.Equals(m.targetHill) {
 					found = true
 					break
 				}
 			}
 			if !found {
-				log.Printf("enemy hill at %v destroyed", *m.targetHill)
-				m.targetHill = nil
+				log.Printf("enemy hill at %v destroyed", m.targetHill)
+				m.hasTargetHill = false
 			}
 		} else {
-			log.Printf("Assuming enemy hill still at %v", *m.targetHill)
+			log.Printf("Assuming enemy hill still at %v", m.targetHill)
 		}
 	}
 
-	// Acquire target?
-	if m.targetHill == nil && len(m.enemyHills) != 0 {
-		p := m.enemyHills[0]
-		m.targetHill = &p
-		log.Printf("Acquired enemy hill at %v", p)
+	// Acquire target
+	if !m.hasTargetHill && len(m.enemyHills) != 0 {
+		m.hasTargetHill = true
+		m.targetHill = m.enemyHills[0]
+		log.Printf("Acquired enemy hill at %v", m.targetHill)
 	}
-
 }
 
 // Return slice of ants who aren't already assigned

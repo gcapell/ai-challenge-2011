@@ -83,7 +83,7 @@ func (t *Timer) Split(s string) {
 	delta := float64(now-t.start) / 1e9
 	t.split = now
 
-	if false {
+	if true {
 		log.Printf("%s: %.3f %.3f", s, deltaSplit, delta)
 	}
 }
