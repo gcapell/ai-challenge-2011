@@ -123,22 +123,25 @@ func assert(assertion bool, fmt string, fmtArgs ...interface{}) {
 }
 
 // Assign a to get to p
-func (a *Ant) moveTo(m *Map, p Point, reason string) {
+// Return true if we have re-assigned an ant to get to 'p',
+// false if we couldn't get ant there (or it was already en route)
+func (a *Ant) moveTo(m *Map, p Point, reason string) bool {
 	a.isTasked = true
 	a.reason = reason
 
 	// Do we already know how to get to p?
 	if len(a.plan) > 0 && a.plan[len(a.plan)-1].Equals(p) {
-		return
+		return false
 	}
 
 	path, error := m.ShortestPath(a.p, p)
 	if error != nil {
 		log.Printf("%v cannot get to %v (%s)\n", a, p, error)
 		a.isTasked = false
-		return
+		return false
 	}
 	a.plan = path
+	return true
 }
 
 func (a *Ant) moveToPoint(m *Map, p Point, reason string) {

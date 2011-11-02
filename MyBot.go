@@ -5,6 +5,12 @@ import (
 	"rand"
 )
 
+const (
+	// When we have lots of ants, directing them _all_ to start attacking in the one
+	// turn takes too long. Instead, direct HILL_ATTACKERS per turn.
+	HILL_ATTACKERS = 20
+)
+
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn(t *Timer) {
 	m.closeCombat()
@@ -60,11 +66,19 @@ func (m *Map) scout() {
 
 // Attack enemy hill
 func (m *Map) attackEnemyHill() {
-	if m.targetHill == nil {
+	if !m.hasTargetHill  {
 		return
 	}
+	log.Printf("atttacking enemy hill at %v, enemyHills:%v, myHills:%v", m.targetHill, m.enemyHills, m.myHills)
+
+	newAttackers := 0
 	for _, soldier := range m.FreeAnts(true) {
-		soldier.moveTo(m, *m.targetHill, "enemy hill")
+		if soldier.moveTo(m, m.targetHill, "enemy hill") {
+			newAttackers += 1
+			if newAttackers > HILL_ATTACKERS {
+				break
+			}
+		}
 	}
 }
 
