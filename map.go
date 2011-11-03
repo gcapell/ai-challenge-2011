@@ -272,6 +272,11 @@ func (m *Map) UpdatesProcessed() {
 			if !found {
 				log.Printf("enemy hill at %v destroyed", m.targetHill)
 				m.hasTargetHill = false
+				for _, a := range m.myAnts {
+					if len(a.plan) > 0 && m.targetHill.Equals(a.plan[len(a.plan)-1]) {
+						a.plan = a.plan[:0]
+					}
+				}
 			}
 		} else {
 			log.Printf("Assuming enemy hill still at %v", m.targetHill)
