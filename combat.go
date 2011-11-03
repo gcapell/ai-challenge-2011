@@ -42,7 +42,7 @@ var (
 // Minimax for close combat
 func (m *Map) closeCombat() {
 	for _, cz := range m.FindCombatZones() {
-		if m.deadlineExpired {
+		if m.deadlineExpired() {
 			break
 		}
 		bestMove := cz.GroupCombat(m)

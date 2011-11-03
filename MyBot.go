@@ -14,24 +14,24 @@ const (
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn(t *Timer) {
 
-	m.closeCombat()
-	t.Split("closeCombat")
-
-	m.defend()
-	t.Split("defend")
-
-	m.forage()
-	t.Split("forage")
-
-	m.attackEnemyHill()
-	t.Split("enemyHill")
-
-	m.scout()
-	t.Split("scout")
-
+	strategies := []struct {
+			fn func()
+			name string
+		} {
+		{func() {m.closeCombat()}, "closeCombat"},
+		{func() {m.defend()}, "defend"},
+		{func() {m.forage()}, "forage"},
+		{func() {m.attackEnemyHill()}, "enemyHill"},
+		{func() {m.scout()}, "scout"},
+	}
+	for _, s := range strategies {
+		if m.deadlineExpired(){
+			break
+		}
+		s.fn()
+		t.Split(s.name)
+	}
 	m.moveAll()
-	t.Split("moveAll")
-
 	t.Split("doneTurn")
 }
 
@@ -39,7 +39,7 @@ func (m *Map) DoTurn(t *Timer) {
 func (m *Map) forage() {
 	foragers := m.FreeAnts(true)
 	for _, assignment := range assign1(foragers, m.food) {
-		if m.deadlineExpired {
+		if m.deadlineExpired() {
 			break
 		}
 		assignment.ant.moveTo(m, assignment.p, "food")
@@ -50,7 +50,7 @@ func (m *Map) forage() {
 func (m *Map) defend() {
 	defenders := m.FreeAnts(true)
 	for _, assignment := range assign1(defenders, m.EnemiesNearOurHill(VIEWRADIUS2*2)) {
-		if m.deadlineExpired {
+		if m.deadlineExpired() {
 			break
 		}
 		a, enemy := assignment.ant, assignment.p
@@ -67,7 +67,7 @@ func (m *Map) scout() {
 	step := 5
 
 	for _, a := range scouts {
-		if m.deadlineExpired {
+		if m.deadlineExpired() {
 			break
 		}
 		a.Scout(m, step, size/2)
@@ -82,7 +82,7 @@ func (m *Map) attackEnemyHill() {
 	log.Printf("atttacking enemy hill at %v, enemyHills:%v, myHills:%v", m.targetHill, m.enemyHills, m.myHills)
 
 	for _, soldier := range m.FreeAnts(true) {
-		if m.deadlineExpired {
+		if m.deadlineExpired() {
 			break
 		}
 		soldier.moveTo(m, m.targetHill, "enemy hill")
@@ -90,7 +90,6 @@ func (m *Map) attackEnemyHill() {
 }
 
 func (a *Ant) Scout(m *Map, step, maxRadius int) {
-
 	targets := spiral(a.p, step, maxRadius)
 	for _, p := range targets {
 		if m.ShouldExplore(p) {
@@ -100,7 +99,6 @@ func (a *Ant) Scout(m *Map, step, maxRadius int) {
 		}
 	}
 	p := targets[rand.Intn(len(targets))]
-	log.Printf("%s randomly scouting %v", a, p)
 	a.Explore(m, p)
 }
 

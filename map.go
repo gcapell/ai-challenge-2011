@@ -42,17 +42,20 @@ type (
 		exploreTargets map[Location]bool
 
 		thinkTime       int64 // thinking time, in nanoseconds
-		deadlineExpired bool
-		deadlineTimer   *time.Timer
+		deadline 		int64	// deadline, ns since epoch
 	}
 )
 
 func (m *Map) setDeadline() {
-	if m.deadlineTimer != nil {
-		m.deadlineTimer.Stop()
+	m.deadline = time.Nanoseconds() + m.thinkTime
+}
+
+func (m *Map) deadlineExpired() bool {
+	if time.Nanoseconds() > m.deadline {
+		log.Printf("deadline expired")
+		return true
 	}
-	m.deadlineExpired = false
-	m.deadlineTimer = time.AfterFunc(m.thinkTime, func() { m.deadlineExpired = true })
+	return false
 }
 
 func (a *Ant) Distance(p Point) (int, int) {
@@ -285,6 +288,11 @@ func (m *Map) UpdatesProcessed() {
 			if !found {
 				log.Printf("enemy hill at %v destroyed", m.targetHill)
 				m.hasTargetHill = false
+				for _, a := range m.myAnts {
+					if len(a.plan) > 0 && m.targetHill.Equals(a.plan[len(a.plan)-1]) {
+						a.plan = a.plan[:0]
+					}
+				}
 			}
 		} else {
 			log.Printf("Assuming enemy hill still at %v", m.targetHill)
