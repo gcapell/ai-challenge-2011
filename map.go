@@ -42,17 +42,20 @@ type (
 		exploreTargets map[Location]bool
 
 		thinkTime       int64 // thinking time, in nanoseconds
-		deadlineExpired bool
-		deadlineTimer   *time.Timer
+		deadline 		int64	// deadline, ns since epoch
 	}
 )
 
 func (m *Map) setDeadline() {
-	if m.deadlineTimer != nil {
-		m.deadlineTimer.Stop()
+	m.deadline = time.Nanoseconds() + m.thinkTime
+}
+
+func (m *Map) deadlineExpired() bool {
+	if time.Nanoseconds() > m.deadline {
+		log.Printf("deadline expired")
+		return true
 	}
-	m.deadlineExpired = false
-	m.deadlineTimer = time.AfterFunc(m.thinkTime, func() { m.deadlineExpired = true })
+	return false
 }
 
 func (a *Ant) Distance(p Point) (int, int) {
