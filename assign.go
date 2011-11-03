@@ -10,18 +10,18 @@ type (
 	Assignment struct {
 		ant *Ant
 		p   Point
+		distance int
 	}
 	AssignmentSlice []Assignment
 )
 
 func (a Assignment) String() string {
-	return fmt.Sprintf("Assignment{ %v->%v}", a.ant.p, a.p)
+	return fmt.Sprintf("Assignment{ %v->%v (%v)}", a.ant.p, a.p, a.distance)
 }
 
 // Implement sort.Interface
-func (a Assignment) distance() int            { return a.ant.p.CrowDistance2(a.p) }
 func (as AssignmentSlice) Len() int           { return len(as) }
-func (as AssignmentSlice) Less(i, j int) bool { return as[i].distance() < as[j].distance() }
+func (as AssignmentSlice) Less(i, j int) bool { return as[i].distance < as[j].distance }
 func (as AssignmentSlice) Swap(i, j int)      { as[j], as[i] = as[i], as[j] }
 
 func (as *AssignmentSlice) add(a Assignment) {
@@ -40,7 +40,7 @@ func assign1(ants []*Ant, targets []Point) []Assignment {
 			log.Panicf("nil ant!")
 		}
 		for _, p := range targets {
-			as.add(Assignment{a, p})
+			as.add(Assignment{a, p, a.p.CrowDistance2(p)})
 		}
 	}
 	sort.Sort(as)
