@@ -12,6 +12,7 @@ GOFILES=\
 	point.go \
 	assign.go \
 	combat.go \
+	pattern_set.go \
 
 include $(GOROOT)/src/Make.cmd
 
