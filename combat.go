@@ -114,7 +114,7 @@ func (m *Map) FindCombatZones() []*CombatZone {
 func (cz *CombatZone) GetScoringHeuristic(m *Map) ScoringHeuristic {
 	for _, p := range cz.enemy {
 		for _, h := range m.myHills {
-			if p.CrowDistance2(h) <= VIEWRADIUS2 {
+			if p.CrowDistance2(h) <= 2*VIEWRADIUS2 {
 				return NEAR_OUR_HILL_SCORING
 			}
 		}
@@ -125,24 +125,34 @@ func (cz *CombatZone) GetScoringHeuristic(m *Map) ScoringHeuristic {
 func (m *Map) FriendliesInRangeOf(p Point) []Point {
 	reply := make([]Point, 0)
 	for _, a := range m.myAnts {
-		if p.CouldInfluence(a.p) {
+		if m.CouldInfluence(p, a.p) {
 			reply = append(reply, a.p)
 		}
 	}
 	return reply
 }
 
-func (a Point) CouldInfluence(b Point) bool {
-	dr, dc := a.Distance(b)
-	// Move two steps closer
-	for j := 0; j < 2; j++ {
-		if dr > dc {
-			dr -= 1
-		} else {
-			dc -= 1
+func sanitiseAll(points []Point) {
+	for j := range points {
+		(&points[j]).sanitise()
+	}
+}
+
+func (m *Map) CouldInfluence(a, b Point) bool {
+	isDry := func(p Point) bool {
+		return !m.isWet(p)
+	}
+	aNext := filterPoints(a.NeighboursAndSelf(), isDry)
+	bNext := filterPoints(b.NeighboursAndSelf(), isDry)
+
+	for _, aa := range aNext {
+		for _, bb := range bNext {
+			if aa.CrowDistance2(bb) <= ATTACKRADIUS2 {
+				return true
+			}
 		}
 	}
-	return dr*dr+dc*dc <= ATTACKRADIUS2
+	return false
 }
 
 var zoneNum int

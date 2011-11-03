@@ -8,8 +8,8 @@ import (
 
 type (
 	Assignment struct {
-		ant *Ant
-		p   Point
+		ant      *Ant
+		p        Point
 		distance int
 	}
 	AssignmentSlice []Assignment

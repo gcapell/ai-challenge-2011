@@ -22,6 +22,10 @@ func (loc Location) point() Point {
 	return Point{iLoc / COLS, iLoc % COLS}
 }
 
+func sanitisePoint(p *Point) {
+	p.sanitise()
+}
+
 func (p *Point) sanitise() {
 	if p.r < 0 {
 		p.r += ROWS
@@ -115,6 +119,40 @@ func (a Point) CrowDistance2(b Point) int {
 
 func (a Point) CrowDistance(b Point) float64 {
 	return math.Sqrt(float64(a.CrowDistance2(b)))
+}
+
+// Given slice of points, and predicate function,
+// return slice of points where predicate is true.
+func filterPoints(points []Point, fn func(Point) bool) []Point {
+	success := 0
+
+	reply := make([]Point, len(points))
+	for j, p := range points {
+		if fn(p) {
+			reply[success] = points[j]
+			success += 1
+		}
+	}
+	return reply[:success]
+}
+
+// Apply (modifying) function to points in slice
+func applyToPoints(points []Point, fn func(*Point)) {
+	for j := range points {
+		fn(&points[j])
+	}
+}
+
+func (p Point) NeighboursAndSelf() []Point {
+	reply := []Point{
+		p,
+		{p.r + 1, p.c},
+		{p.r - 1, p.c},
+		{p.r, p.c + 1},
+		{p.r, p.c - 1},
+	}
+	applyToPoints(reply, sanitisePoint)
+	return reply
 }
 
 func (p Point) Neighbours(rad2 int) []Point {

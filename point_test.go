@@ -13,6 +13,50 @@ func checkDistance(t *testing.T, a, b Point, expected int) {
 	}
 }
 
+func TestFilterPoints(t *testing.T) {
+
+	testPoints := []Point{
+		{1, 2}, {3, 4}, {4, 3}, {4, 4},
+	}
+
+	filtered := filterPoints(testPoints, func(p Point) bool {
+		return p.c != 4
+	})
+
+	checkSamePoints(t, filtered, []Point{{1, 2}, {4, 3}})
+
+	filtered = filterPoints(testPoints, func(p Point) bool {
+		return p.r == 4 || p.c == 4
+	})
+	checkSamePoints(t, filtered, []Point{{3, 4}, {4, 3}, {4, 4}})
+
+	// original unchanged
+	checkSamePoints(t, testPoints, []Point{{1, 2}, {3, 4}, {4, 3}, {4, 4}})
+}
+
+func TestApplyToPoints(t *testing.T) {
+	testPoints := []Point{
+		{1, 2}, {3, 4}, {4, 3}, {4, 4},
+	}
+	applyToPoints(testPoints, func(p *Point) {
+		p.r = p.c * 2
+	})
+	checkSamePoints(t, testPoints, []Point{{4, 2}, {8, 4}, {6, 3}, {8, 4}})
+}
+
+func checkSamePoints(t *testing.T, a, b []Point) {
+	if len(a) != len(b) {
+		t.Errorf("Expected %v and %v to be the same, but different lengths", a, b)
+		return
+	}
+	for j, ap := range a {
+		if !ap.Equals(b[j]) {
+			t.Errorf("Expected %v and %v to be the same, but %v != %v", a, b, ap, b[j])
+			return
+		}
+	}
+}
+
 func TestDistance(t *testing.T) {
 	ROWS = 3
 	COLS = 4

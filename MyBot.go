@@ -15,17 +15,17 @@ const (
 func (m *Map) DoTurn(t *Timer) {
 
 	strategies := []struct {
-			fn func()
-			name string
-		} {
-		{func() {m.closeCombat()}, "closeCombat"},
-		{func() {m.defend()}, "defend"},
-		{func() {m.forage()}, "forage"},
-		{func() {m.attackEnemyHill()}, "enemyHill"},
-		{func() {m.scout()}, "scout"},
+		fn   func()
+		name string
+	}{
+		{func() { m.closeCombat() }, "closeCombat"},
+		{func() { m.defend() }, "defend"},
+		{func() { m.forage() }, "forage"},
+		{func() { m.attackEnemyHill() }, "enemyHill"},
+		{func() { m.scout() }, "scout"},
 	}
 	for _, s := range strategies {
-		if m.deadlineExpired(){
+		if m.deadlineExpired() {
 			break
 		}
 		s.fn()

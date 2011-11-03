@@ -41,8 +41,8 @@ type (
 		// Places that we're sending ants to already
 		exploreTargets map[Location]bool
 
-		thinkTime       int64 // thinking time, in nanoseconds
-		deadline 		int64	// deadline, ns since epoch
+		thinkTime int64 // thinking time, in nanoseconds
+		deadline  int64 // deadline, ns since epoch
 	}
 )
 
