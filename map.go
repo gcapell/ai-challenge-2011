@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"fmt"
+	"time"
 )
 
 type (
@@ -34,13 +35,25 @@ type (
 		enemies Points
 		food    Points
 
-		hasTargetHill	bool
-		targetHill Point // Remember hill we're attacking
+		hasTargetHill bool
+		targetHill    Point // Remember hill we're attacking
 
 		// Places that we're sending ants to already
 		exploreTargets map[Location]bool
+
+		thinkTime       int64 // thinking time, in nanoseconds
+		deadlineExpired bool
+		deadlineTimer   *time.Timer
 	}
 )
+
+func (m *Map) setDeadline() {
+	if m.deadlineTimer != nil {
+		m.deadlineTimer.Stop()
+	}
+	m.deadlineExpired = false
+	m.deadlineTimer = time.AfterFunc(m.thinkTime, func() { m.deadlineExpired = true })
+}
 
 func (a *Ant) Distance(p Point) (int, int) {
 	return a.p.Distance(p)
@@ -88,7 +101,7 @@ const (
 	FOOD
 	LAND
 	DEAD
-	MY_ANT = 0
+	MY_ANT    = 0
 	ENEMY_ANT = 1
 
 	MAXPLAYER = 24

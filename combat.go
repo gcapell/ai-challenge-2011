@@ -12,36 +12,39 @@ type (
 		enemy    []Point
 	}
 	GroupMove struct {
-		dst         []Point
-		updated     bool
+		dst          []Point
+		updated      bool
 		worst, total int
-		average	float64
-		evaluated   int
+		average      float64
+		evaluated    int
 	}
 	ScoringHeuristic struct {
 		deadEnemy, deadFriendly int
 	}
 )
 
-func (gm *GroupMove)String() string {
+func (gm *GroupMove) String() string {
 	var u string
 	if gm.updated {
-		u="U"
+		u = "U"
 	} else {
 		u = "u"
 	}
-	return fmt.Sprintf("GM{ %v %s %d/%.1f after %d}", 
+	return fmt.Sprintf("GM{ %v %s %d/%.1f after %d}",
 		gm.dst, u, gm.worst, gm.average, gm.evaluated)
 }
 
 var (
-	NEAR_OUR_HILL_SCORING = ScoringHeuristic {deadEnemy: 100, deadFriendly: -90}
-	SCOUTING_SCORING = ScoringHeuristic {deadEnemy: 100, deadFriendly: -110}
+	NEAR_OUR_HILL_SCORING = ScoringHeuristic{deadEnemy: 100, deadFriendly: -90}
+	SCOUTING_SCORING      = ScoringHeuristic{deadEnemy: 100, deadFriendly: -110}
 )
 
 // Minimax for close combat
 func (m *Map) closeCombat() {
 	for _, cz := range m.FindCombatZones() {
+		if m.deadlineExpired {
+			break
+		}
 		bestMove := cz.GroupCombat(m)
 		if bestMove != nil {
 			cz.MakeMove(m, bestMove)
@@ -49,14 +52,13 @@ func (m *Map) closeCombat() {
 	}
 }
 
-func (cz *CombatZone) MakeMove(m *Map, bestMove *GroupMove ) {
-		// log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
-	
-		for i, p := range cz.friendly {
-			dst := bestMove.dst[i]
-			ant := m.myAnts[p.loc()]
-			ant.moveToPoint(m, dst, "combat")
-		}
+func (cz *CombatZone) MakeMove(m *Map, bestMove *GroupMove) {
+	// log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
+	for i, p := range cz.friendly {
+		dst := bestMove.dst[i]
+		ant := m.myAnts[p.loc()]
+		ant.moveToPoint(m, dst, "combat")
+	}
 }
 
 func (m *Map) FindCombatZones() []*CombatZone {
@@ -133,14 +135,14 @@ func (m *Map) FriendliesInRangeOf(p Point) []Point {
 func (a Point) CouldInfluence(b Point) bool {
 	dr, dc := a.Distance(b)
 	// Move two steps closer
-	for j:=0; j<2; j++ {
-		if dr>dc {
+	for j := 0; j < 2; j++ {
+		if dr > dc {
 			dr -= 1
 		} else {
 			dc -= 1
 		}
 	}
-	return dr*dr + dc*dc <= ATTACKRADIUS2
+	return dr*dr+dc*dc <= ATTACKRADIUS2
 }
 
 var zoneNum int
@@ -150,7 +152,7 @@ func NewZone(e Point) *CombatZone {
 	return &CombatZone{zone: zoneNum, enemy: []Point{e}}
 }
 
-func (cz *CombatZone) GroupCombat(m *Map) * GroupMove {
+func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 
 	if len(cz.friendly)+len(cz.enemy) > 7 {
 		log.Printf("group combat too hard, giving up")

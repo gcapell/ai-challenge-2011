@@ -13,6 +13,7 @@ const (
 
 //DoTurn is where you should do your bot's actual work.
 func (m *Map) DoTurn(t *Timer) {
+
 	m.closeCombat()
 	t.Split("closeCombat")
 
@@ -38,6 +39,9 @@ func (m *Map) DoTurn(t *Timer) {
 func (m *Map) forage() {
 	foragers := m.FreeAnts(true)
 	for _, assignment := range assign1(foragers, m.food) {
+		if m.deadlineExpired {
+			break
+		}
 		assignment.ant.moveTo(m, assignment.p, "food")
 	}
 }
@@ -46,6 +50,9 @@ func (m *Map) forage() {
 func (m *Map) defend() {
 	defenders := m.FreeAnts(true)
 	for _, assignment := range assign1(defenders, m.EnemiesNearOurHill(VIEWRADIUS2*2)) {
+		if m.deadlineExpired {
+			break
+		}
 		a, enemy := assignment.ant, assignment.p
 		hill := m.nearestHillToDefend(enemy)
 		dst := intercept(a.p, enemy, hill)
@@ -60,25 +67,25 @@ func (m *Map) scout() {
 	step := 5
 
 	for _, a := range scouts {
+		if m.deadlineExpired {
+			break
+		}
 		a.Scout(m, step, size/2)
 	}
 }
 
 // Attack enemy hill
 func (m *Map) attackEnemyHill() {
-	if !m.hasTargetHill  {
+	if !m.hasTargetHill {
 		return
 	}
 	log.Printf("atttacking enemy hill at %v, enemyHills:%v, myHills:%v", m.targetHill, m.enemyHills, m.myHills)
 
-	newAttackers := 0
 	for _, soldier := range m.FreeAnts(true) {
-		if soldier.moveTo(m, m.targetHill, "enemy hill") {
-			newAttackers += 1
-			if newAttackers > HILL_ATTACKERS {
-				break
-			}
+		if m.deadlineExpired {
+			break
 		}
+		soldier.moveTo(m, m.targetHill, "enemy hill")
 	}
 }
 
