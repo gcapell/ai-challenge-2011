@@ -5,7 +5,7 @@ type PatternSet struct {
 	seen map[uint]bool
 }
 
-func NewPatternSet (points []Point) PatternSet {
+func NewPatternSet (points []Point) *PatternSet {
 	point2bit := make(map[Location]uint)
 	var nextBit uint
 	
@@ -18,7 +18,7 @@ func NewPatternSet (points []Point) PatternSet {
 			}
 		}
 	}
-	return PatternSet{point2bit, make(map[uint]bool)}
+	return &PatternSet{point2bit, make(map[uint]bool)}
 }
 
 // Map slice of points to bitmask

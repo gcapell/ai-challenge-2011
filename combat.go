@@ -175,13 +175,15 @@ func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 func (m *Map) legalMoves(orig []Point) chan GroupMove {
 	ch := make(chan GroupMove)
 	go func() {
-		legal2(m, orig, make([]Point, len(orig)), 0, ch)
+		dst := make([]Point, len(orig))
+		ps := NewPatternSet(orig)
+		legal2(m, orig, dst, ps, 0, ch)
 		close(ch)
 	}()
 	return ch
 }
 
-func legal2(m *Map, orig, dst []Point, pos int, ch chan GroupMove) {
+func legal2(m *Map, orig, dst []Point, patternSet *PatternSet, pos int, ch chan GroupMove) {
 	src, orig := orig[0], orig[1:]
 	allNeighbours := []Point{
 		src,
@@ -193,17 +195,20 @@ func legal2(m *Map, orig, dst []Point, pos int, ch chan GroupMove) {
 	// log.Printf("allNeighbours: %v", allNeighbours)
 	for _, p := range allNeighbours {
 		p.sanitise()
-		if m.isWet(p) || p.In(dst) {
+		if m.isWet(p) {
 			continue
 		}
 		dst[pos] = p
+		if patternSet.Seen(dst[:pos+1]) {
+			continue
+		}
 		// log.Printf("dst: %v, pos:%v, p:%v", dst, pos, p)
 		if len(orig) == 0 {
 			dstCopy := make([]Point, len(dst))
 			copy(dstCopy, dst)
 			ch <- GroupMove{dst: dstCopy}
 		} else {
-			legal2(m, orig, dst, pos+1, ch)
+			legal2(m, orig, dst, patternSet, pos+1, ch)
 		}
 	}
 }
