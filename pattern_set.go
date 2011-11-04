@@ -2,7 +2,7 @@ package main
 
 type PatternSet struct {
 	point2bit map[Location]uint
-	seen map[int]bool
+	seen map[uint]bool
 }
 
 func NewPatternSet (points []Point) PatternSet {
@@ -18,11 +18,11 @@ func NewPatternSet (points []Point) PatternSet {
 			}
 		}
 	}
-	return PatternSet{point2bit:point2bit}
+	return PatternSet{point2bit, make(map[uint]bool)}
 }
 
 // Map slice of points to bitmask
-func (ps *PatternSet) pointsToMask (points [] Point) (mask int) {
+func (ps *PatternSet) pointsToMask (points [] Point) (mask uint) {
 	for _, p := range points {
 		b := ps.point2bit[p.loc()]
 		mask |= 1<< b
