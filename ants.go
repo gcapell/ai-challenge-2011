@@ -10,7 +10,7 @@ import (
 type Turn uint
 
 var (
-	ATTACKRADIUS2    int
+	ATTACKRADIUS2 int
 )
 
 //Game keeps track of everything we need to know about the state of the game
@@ -97,12 +97,17 @@ func main() {
 	g.Load()
 	m.Init(g.Rows, g.Cols, g.ViewRadius2)
 
+	// Think time is fraction of turn time
+	// (and converting milliseconds to nanoseconds)
+	m.thinkTime = int64(float64(g.TurnTime) * 0.9e6)
+
 	//indicate we're ready
 	fmt.Println("go")
 
 	var t Timer
 	for line := range getLinesUntil("end") {
 		if line == "go" {
+			m.setDeadline()
 			t.Reset()
 			m.UpdatesProcessed()
 			t.Split("updates")

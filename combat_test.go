@@ -16,7 +16,7 @@ func TestGroupCombat(t *testing.T) {
 		.........
 		.........
 		.........
-		`, 
+		`,
 		`
 		.........
 		....a....
@@ -30,26 +30,26 @@ func TestGroupCombat(t *testing.T) {
 	verifyGroupCombat(t,
 		"run away when outnumbered",
 		`....a..b
-		 .......b`, 
+		 .......b`,
 		`...a...b
-		 .......b`, 
- 	)
+		 .......b`,
+	)
 
 	verifyGroupCombat(t,
 		"Attack when we outnumber",
 		`....b..a
-		 .......a`, 
+		 .......a`,
 		`....b.a.
-		 ......a.`, 
- 	)
+		 ......a.`,
+	)
 
 	verifyGroupCombat(t,
 		"Reject a swap",
 		`....b..a
-		 ........`, 
+		 ........`,
 		`a...b...
-		 ........`, 
- 	)
+		 ........`,
+	)
 }
 func (m *Map) MovesFromMap() (gm, em GroupMove) {
 	for _, a := range m.myAnts {
@@ -62,9 +62,9 @@ func (m *Map) MovesFromMap() (gm, em GroupMove) {
 }
 
 func ScoreFromMap(t *testing.T, s string, expected float64) {
-	
+
 	m := new(Map)
-	m.InitFromString(0,  s)
+	m.InitFromString(0, s)
 
 	gm, em := m.MovesFromMap()
 	gm.score(em, NEAR_OUR_HILL_SCORING)
@@ -80,8 +80,8 @@ func ScoreFromMap(t *testing.T, s string, expected float64) {
 func TestScore(t *testing.T) {
 	ATTACKRADIUS2 = 5
 
-	tests := []struct{
-		s string
+	tests := []struct {
+		s     string
 		score float64
 	}{
 		{`...b.a
@@ -111,7 +111,7 @@ func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	m.InitFromString(0, initial)
 
 	combatZones := m.FindCombatZones()
-	assert (len(combatZones) == 1, "%v", combatZones)
+	assert(len(combatZones) == 1, "%v", combatZones)
 	cz := combatZones[0]
 	bestMove := cz.GroupCombat(m)
 
@@ -120,4 +120,3 @@ func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 
 	checkMap(t, m, reason, final)
 }
-

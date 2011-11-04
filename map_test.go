@@ -111,7 +111,7 @@ func TestMap(t *testing.T) {
 
 func checkMap(t *testing.T, m *Map, msg string, expected string) {
 	ms := canon(m.String())
-	expected  = canon(expected)
+	expected = canon(expected)
 	if ms != expected {
 		t.Fatalf("%s, expected:\n%s,\ngot:\n%s\n", msg, expected, ms)
 	}

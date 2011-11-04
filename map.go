@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"fmt"
+	"time"
 )
 
 type (
@@ -34,13 +35,28 @@ type (
 		enemies Points
 		food    Points
 
-		hasTargetHill	bool
-		targetHill Point // Remember hill we're attacking
+		hasTargetHill bool
+		targetHill    Point // Remember hill we're attacking
 
 		// Places that we're sending ants to already
 		exploreTargets map[Location]bool
+
+		thinkTime       int64 // thinking time, in nanoseconds
+		deadline 		int64	// deadline, ns since epoch
 	}
 )
+
+func (m *Map) setDeadline() {
+	m.deadline = time.Nanoseconds() + m.thinkTime
+}
+
+func (m *Map) deadlineExpired() bool {
+	if time.Nanoseconds() > m.deadline {
+		log.Printf("deadline expired")
+		return true
+	}
+	return false
+}
 
 func (a *Ant) Distance(p Point) (int, int) {
 	return a.p.Distance(p)
@@ -88,7 +104,7 @@ const (
 	FOOD
 	LAND
 	DEAD
-	MY_ANT = 0
+	MY_ANT    = 0
 	ENEMY_ANT = 1
 
 	MAXPLAYER = 24
@@ -272,6 +288,11 @@ func (m *Map) UpdatesProcessed() {
 			if !found {
 				log.Printf("enemy hill at %v destroyed", m.targetHill)
 				m.hasTargetHill = false
+				for _, a := range m.myAnts {
+					if len(a.plan) > 0 && m.targetHill.Equals(a.plan[len(a.plan)-1]) {
+						a.plan = a.plan[:0]
+					}
+				}
 			}
 		} else {
 			log.Printf("Assuming enemy hill still at %v", m.targetHill)
