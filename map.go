@@ -59,7 +59,7 @@ const (
 )
 
 var (
-	ROWS, COLS, VIEWRADIUS2 int
+	ROWS, COLS, VIEWRADIUS2, ATTACKRADIUS2 int
 	TURN                    Turn
 )
 

@@ -9,10 +9,6 @@ import (
 
 type Turn uint
 
-var (
-	ATTACKRADIUS2 int
-)
-
 //Game keeps track of everything we need to know about the state of the game
 type Game struct {
 	LoadTime     int   //in milliseconds
