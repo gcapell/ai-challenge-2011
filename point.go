@@ -41,16 +41,6 @@ func (p *Point) sanitise() {
 	}
 }
 
-func countBool(slice []bool) int {
-	count := 0
-	for _, b := range slice {
-		if b {
-			count += 1
-		}
-	}
-	return count
-}
-
 func (p Point) In(other []Point) bool {
 	for _, o := range other {
 		if p.Equals(o) {

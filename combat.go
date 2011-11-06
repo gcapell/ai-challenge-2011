@@ -281,3 +281,14 @@ func (gm *GroupMove) score(em GroupMove, sh ScoringHeuristic) {
 	}
 	// log.Printf("%s.score(%s) => %d", gm, &em, score)
 }
+
+func countBool(slice []bool) int {
+	count := 0
+	for _, b := range slice {
+		if b {
+			count += 1
+		}
+	}
+	return count
+}
+
