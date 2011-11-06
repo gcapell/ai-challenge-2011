@@ -58,14 +58,8 @@ func wrapDelta(a, b, wrap int) int {
 	return min(delta, wrap-delta)
 }
 
-// Return (Manhattan) distance between two points,
-// allowing for warping across edges
-func (a Point) Distance(b Point) (int, int) {
-	return wrapDelta(a.r, b.r, ROWS), wrapDelta(a.c, b.c, COLS)
-}
-
 func (a Point) CrowDistance2(b Point) int {
-	dx, dy := a.Distance(b)
+	dx, dy := wrapDelta(a.r, b.r, ROWS), wrapDelta(a.c, b.c, COLS)
 	return dx*dx + dy*dy
 }
 

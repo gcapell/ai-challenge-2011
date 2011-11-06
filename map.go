@@ -76,10 +76,6 @@ func (m *Map) deadlineExpired() bool {
 	return false
 }
 
-func (a *Ant) Distance(p Point) (int, int) {
-	return a.p.Distance(p)
-}
-
 func (m *Map) nearestHillToDefend(p Point) Point {
 	var closest Point
 	for i, hill := range m.myHills {
