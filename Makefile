@@ -2,7 +2,7 @@ include $(GOROOT)/src/Make.inc
 
 TARG=MyBot
 GOFILES=\
-	ants.go\
+	game.go\
 	map.go\
 	MyBot.go\
 	io.go \
