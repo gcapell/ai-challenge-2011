@@ -10,12 +10,7 @@ type (
 	Location uint
 
 	Point  struct{ r, c int } // rows, columns
-	Points []Point
 )
-
-func (s *Points) add(p Point) {
-	*s = append(*s, p)
-}
 
 func (loc Location) point() Point {
 	iLoc := int(loc)
@@ -117,25 +112,41 @@ func (p Point) NeighboursAndSelf() []Point {
 	return reply
 }
 
+type PointQueue struct  {
+	pos int
+	points []Point
+}
+
+func (pq *PointQueue) Add (p Point) {
+	pq.points[pq.pos] = p
+	pq.pos += 1
+}
+
+func (pq *PointQueue) Export () []Point {
+	return pq.points[:pq.pos]
+}
+
 func (p Point) Neighbours(rad2 int) []Point {
-	reply := Points(make([]Point, rad2))
 	if rad2 < 1 {
-		return reply
+		return make([]Point,0)
 	}
+	pq := PointQueue{0, make([]Point, 4*rad2 +1)}
 	for dr := 0; dr*dr <= rad2; dr++ {
 		for dc := 0; dc*dc+dr*dr <= rad2; dc++ {
-			reply.add(Point{p.r + dr, p.c + dc}.sanitised())
+			pq.Add(Point{p.r + dr, p.c + dc})
 			if dr != 0 {
-				reply.add(Point{p.r - dr, p.c + dc}.sanitised())
+				pq.Add(Point{p.r - dr, p.c + dc})
 			}
 			if dc != 0 {
-				reply.add(Point{p.r + dr, p.c - dc}.sanitised())
+				pq.Add(Point{p.r + dr, p.c - dc})
 			}
 			if dr != 0 && dc != 0 {
-				reply.add(Point{p.r - dr, p.c - dc}.sanitised())
+				pq.Add(Point{p.r - dr, p.c - dc})
 			}
 		}
 	}
+	reply := pq.Export()
+	applyToPoints(reply, sanitisePoint)
 	return reply
 }
 

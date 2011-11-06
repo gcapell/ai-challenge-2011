@@ -27,11 +27,11 @@ func reverse(points []Point) {
 	}
 }
 
-func unravelPath(back []Location, src, dst Point, pathLength int) Points {
+func unravelPath(back []Location, src, dst Point, pathLength int) []Point {
 	// Follow breadcrumbs from 'dst' to 'src'
-	reply := Points(make([]Point, 0, pathLength))
+	reply := make([]Point, 0, pathLength)
 	for p := dst; !p.Equals(src); p = back[p.loc()].point() {
-		reply.add(p)
+		reply = append(reply, p)
 	}
 	reverse(reply)
 	return reply

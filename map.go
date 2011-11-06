@@ -34,7 +34,7 @@ type (
 		enemyHills []Point
 
 		enemies []Point
-		food    Points
+		food    []Point
 
 		hasTargetHill bool
 		targetHill    Point // Remember hill we're attacking
@@ -195,7 +195,7 @@ func (m *Map) MarkWater(p Point) {
 }
 
 func (m *Map) MarkFood(p Point) {
-	(&m.food).add(p)
+	m.food = append(m.food, p)
 	m.squares[p.r][p.c].hasFood = true
 }
 
