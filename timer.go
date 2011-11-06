@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 )
 
 type Timer struct {
@@ -25,5 +26,10 @@ func (t *Timer) Split(s string) {
 	if true {
 		log.Printf("%s: %.3f %.3f", s, deltaSplit, delta)
 	}
+}
+
+func nsec() int64 {
+	s, ns, _ := os.Time()
+	return s*1e9 + ns
 }
 

@@ -4,7 +4,6 @@ import (
 	"strings"
 	"fmt"
 	"log"
-	"os"
 )
 
 //Game keeps track of everything we need to know about the state of the game
@@ -52,11 +51,6 @@ func (s *Game) Load() {
 		}
 	}
 	log.Printf("Game stats: %+v", *s)
-}
-
-func nsec() int64 {
-	s, ns, _ := os.Time()
-	return s*1e9 + ns
 }
 
 //main initializes the state and starts the processing loop
