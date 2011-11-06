@@ -20,7 +20,7 @@ type (
 
 	Ant struct {
 		p        Point  // Where are we now?
-		plan     Points // Where will we be?
+		plan     []Point // Where will we be?
 		seen     Turn
 		isTasked bool   // Has this ant been given an order this turn?
 		reason   string // why are we moving?
@@ -30,10 +30,10 @@ type (
 		squares [][]Square
 
 		myAnts     map[Location]*Ant
-		myHills    Points
-		enemyHills Points
+		myHills    []Point
+		enemyHills []Point
 
-		enemies Points
+		enemies []Point
 		food    Points
 
 		hasTargetHill bool
@@ -201,9 +201,9 @@ func (m *Map) MarkFood(p Point) {
 
 func (m *Map) MarkHill(p Point, ant Item) {
 	if ant == MY_ANT {
-		(&m.myHills).add(p)
+		m.myHills = append(m.myHills, p)
 	} else {
-		(&m.enemyHills).add(p)
+		m.enemyHills = append(m.enemyHills, p)
 	}
 }
 
