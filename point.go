@@ -45,11 +45,6 @@ func (p Point) In(other []Point) bool {
 	return false
 }
 
-func (p Point) sanitised() Point {
-	p.sanitise()
-	return p
-}
-
 func (p Point) loc() Location {
 	return Location(p.r*COLS + p.c)
 }
@@ -117,20 +112,28 @@ type PointQueue struct  {
 	points []Point
 }
 
-func (pq *PointQueue) Add (p Point) {
-	pq.points[pq.pos] = p
-	pq.pos += 1
+func NewPointQueue(n int) PointQueue {
+	return PointQueue{0, make([]Point, n)}
 }
 
-func (pq *PointQueue) Export () []Point {
-	return pq.points[:pq.pos]
+func (pq *PointQueue) Add (points... Point) {
+	for _, p := range points {
+		pq.points[pq.pos] = p
+		pq.pos += 1
+	}
+}
+
+func (pq *PointQueue) SanitiseAndExport () []Point {
+	exported := pq.points[:pq.pos]
+	applyToPoints(exported, sanitisePoint)
+	return exported
 }
 
 func (p Point) Neighbours(rad2 int) []Point {
 	if rad2 < 1 {
 		return make([]Point,0)
 	}
-	pq := PointQueue{0, make([]Point, 4*rad2 +1)}
+	pq := NewPointQueue(4*rad2 +1)
 	for dr := 0; dr*dr <= rad2; dr++ {
 		for dc := 0; dc*dc+dr*dr <= rad2; dc++ {
 			pq.Add(Point{p.r + dr, p.c + dc})
@@ -145,22 +148,21 @@ func (p Point) Neighbours(rad2 int) []Point {
 			}
 		}
 	}
-	reply := pq.Export()
-	applyToPoints(reply, sanitisePoint)
-	return reply
+	return pq.SanitiseAndExport()
 }
 
 func spiral(p Point, step, maxDistance int) []Point {
-	r := make([]Point, 0, maxDistance/step*maxDistance/step)
+	pointsAcross := (2*maxDistance/step) + 1
+	pq := NewPointQueue(pointsAcross*pointsAcross)
 	for radius := step; radius < maxDistance; radius += step {
 		for off := 0; off < radius; off += step {
-			r1 := Point{p.r + radius - off, p.c - radius}.sanitised()
-			r2 := Point{p.r - radius, p.c - radius + off}.sanitised()
-			r3 := Point{p.r - radius + off, p.c + radius}.sanitised()
-			r4 := Point{p.r + radius, p.c + radius - step}.sanitised()
-
-			r = append(r, r1, r2, r3, r4)
+			pq.Add(
+				Point{p.r + radius - off, p.c - radius},
+				Point{p.r - radius, p.c - radius + off},
+				Point{p.r - radius + off, p.c + radius},
+				Point{p.r + radius, p.c + radius - step},
+			)
 		}
 	}
-	return r
+	return pq.SanitiseAndExport()
 }
