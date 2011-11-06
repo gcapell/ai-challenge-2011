@@ -14,6 +14,7 @@ GOFILES=\
 	combat.go \
 	pattern_set.go \
 	timer.go \
+	math.go \
 
 include $(GOROOT)/src/Make.cmd
 
