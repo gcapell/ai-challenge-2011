@@ -2,6 +2,8 @@ package main
 
 import (
 	"math"
+	"log"
+	"fmt"
 )
 
 type (
@@ -145,7 +147,7 @@ func (p Point) Neighbours(rad2 int) []Point {
 	return pq.SanitiseAndExport()
 }
 
-func spiral(p Point, step, maxDistance int) []Point {
+func (p Point) spiral(step, maxDistance int) []Point {
 	pointsAcross := (2*maxDistance/step) + 1
 	pq := NewPointQueue(pointsAcross*pointsAcross)
 	for radius := step; radius < maxDistance; radius += step {
@@ -159,4 +161,28 @@ func spiral(p Point, step, maxDistance int) []Point {
 		}
 	}
 	return pq.SanitiseAndExport()
+}
+
+func direction(src, dst Point) string {
+	if !((src.r == dst.r) || (src.c == dst.c)) {
+		log.Panicf("Cannot move from %v to %v\n", src, dst)
+	}
+	if dst.r == src.r+1 || (dst.r == 0 && src.r == ROWS-1) {
+		return "s"
+	}
+	if dst.r == src.r-1 || (src.r == 0 && dst.r == ROWS-1) {
+		return "n"
+	}
+	if dst.c == src.c+1 || (dst.c == 0 && src.c == COLS-1) {
+		return "e"
+	}
+	if dst.c == src.c-1 || (src.c == 0 && dst.c == COLS-1) {
+		return "w"
+	}
+	log.Panicf("Cannot move from %v to %v\n", src, dst)
+	return ""
+}
+
+func (src Point) OutputMove(dst Point) {
+	fmt.Println("o", src.r, src.c, direction(src, dst))
 }

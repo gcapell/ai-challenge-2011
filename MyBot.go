@@ -55,7 +55,7 @@ func (m *Map) defend() {
 		}
 		a, enemy := assignment.ant, assignment.p
 		hill := m.nearestHillToDefend(enemy)
-		dst := intercept(a.p, enemy, hill)
+		dst := a.intercept(enemy, hill)
 		assignment.ant.moveTo(m, dst, "intercept")
 	}
 }
@@ -90,7 +90,7 @@ func (m *Map) attackEnemyHill() {
 }
 
 func (a *Ant) Scout(m *Map, step, maxRadius int) {
-	targets := spiral(a.p, step, maxRadius)
+	targets := a.spiral(step, maxRadius)
 	for _, p := range targets {
 		if m.ShouldExplore(p) {
 			a.Explore(m, p)

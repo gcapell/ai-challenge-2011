@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-func intercept(defender, enemy, victim Point) Point {
+func (defender Point) intercept(enemy, victim Point) Point {
 	if defender.intercepts(victim, enemy) {
 		return enemy
 	}

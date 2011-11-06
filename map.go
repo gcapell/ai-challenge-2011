@@ -19,7 +19,7 @@ type (
 	}
 
 	Ant struct {
-		p        Point  // Where are we now?
+		Point  // Where are we now?
 		plan     []Point // Where will we be?
 		seen     Turn
 		isTasked bool   // Has this ant been given an order this turn?
@@ -107,9 +107,9 @@ enemyLoop:
 
 func (a *Ant) String() string {
 	if len(a.plan) > 0 {
-		return fmt.Sprintf("Ant@%v->%v(%s)", a.p, a.plan[len(a.plan)-1], a.reason)
+		return fmt.Sprintf("Ant@%v->%v(%s)", a.Point, a.plan[len(a.plan)-1], a.reason)
 	}
-	return fmt.Sprintf("Ant@%v", a.p)
+	return fmt.Sprintf("Ant@%v", a.Point)
 }
 
 func (m *Map) Init(rows, cols, viewRadius2 int) {
@@ -243,7 +243,7 @@ func (m *Map) AddAnt(p Point, ant Item) {
 		if found { // existing ant?
 			antp.seen = TURN
 		} else { // new ant?
-			m.myAnts[p.loc()] = &Ant{p: p, seen: TURN}
+			m.myAnts[p.loc()] = &Ant{Point: p, seen: TURN}
 		}
 	} else {
 		m.enemies = append(m.enemies, p)

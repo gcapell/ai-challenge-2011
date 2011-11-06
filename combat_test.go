@@ -83,7 +83,7 @@ func TestGroupCombat(t *testing.T) {
 }
 func (m *Map) MovesFromMap() (gm, em GroupMove) {
 	for _, a := range m.myAnts {
-		gm.dst = append(gm.dst, a.p)
+		gm.dst = append(gm.dst, a.Point)
 	}
 	for _, e := range m.enemies {
 		em.dst = append(em.dst, e)

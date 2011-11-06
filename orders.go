@@ -12,7 +12,7 @@ func (m *Map) moveAll() {
 	nextMove := make([]*Ant, 0, len(toMove)/4)
 
 	for _, a := range m.myAnts {
-		occupied[a.p.loc()] = true
+		occupied[a.loc()] = true
 		toMove = append(toMove, a)
 		// log.Printf("Moving %s\n", a)
 	}
@@ -34,14 +34,14 @@ func (m *Map) moveAll() {
 				continue
 			}
 			if occupied[dst.loc()] {
-				if dst.Equals(a.p) {
+				if a.Equals(dst) {
 					a.Pause()
 				} else {
 					nextMove = append(nextMove, a)
 				}
 				continue
 			}
-			src := a.p
+			src := a.Point
 			a.Move(dst)
 			occupied[dst.loc()] = true
 			occupied[src.loc()] = false
@@ -71,26 +71,6 @@ func (m *Map) moveAll() {
 	log.Println(report)
 }
 
-func direction(src, dst Point) string {
-	if !((src.r == dst.r) || (src.c == dst.c)) {
-		log.Panicf("Cannot move from %v to %v\n", src, dst)
-	}
-	if dst.r == src.r+1 || (dst.r == 0 && src.r == ROWS-1) {
-		return "s"
-	}
-	if dst.r == src.r-1 || (src.r == 0 && dst.r == ROWS-1) {
-		return "n"
-	}
-	if dst.c == src.c+1 || (dst.c == 0 && src.c == COLS-1) {
-		return "e"
-	}
-	if dst.c == src.c-1 || (src.c == 0 && dst.c == COLS-1) {
-		return "w"
-	}
-	log.Panicf("Cannot move from %v to %v\n", src, dst)
-	return ""
-}
-
 // We weren't able to move.  Give up
 func (a *Ant) AbortMove() {
 	a.plan = a.plan[:0]
@@ -99,7 +79,7 @@ func (a *Ant) AbortMove() {
 // Does a want to move? where to?
 func (a *Ant) WantsMove() (bool, Point) {
 	if len(a.plan) == 0 {
-		return false, a.p
+		return false, a.Point
 	}
 	return true, a.plan[0]
 }
@@ -108,14 +88,13 @@ func (a *Ant) WantsMove() (bool, Point) {
 func (a *Ant) Move(dst Point) {
 	assert(dst.Equals(a.plan[0]), "dst: %v, a.plan: %v", dst, a.plan)
 
-	fmt.Println("o", a.p.r, a.p.c, direction(a.p, dst))
-
+	a.OutputMove(dst)
 	a.plan = a.plan[1:]
-	a.p = dst
+	a.Point = dst
 }
 
 func (a *Ant) Pause() {
-	assert (a.plan[0].Equals(a.p), "a.Pause: %v == %v", a.plan[0], a.p)
+	assert (a.Equals(a.plan[0]), "a.Pause: %v == %v", a.plan[0], a.Point)
 	a.plan = a.plan[1:]
 }
 
@@ -145,7 +124,7 @@ func (a *Ant) moveTo(m *Map, p Point, reason string) bool {
 		return false
 	}
 
-	path, error := m.ShortestPath(a.p, p)
+	path, error := a.ShortestPath(p, m)
 	if error != nil {
 		log.Printf("%v cannot get to %v (%s)\n", a, p, error)
 		a.isTasked = false

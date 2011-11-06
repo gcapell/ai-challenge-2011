@@ -80,7 +80,7 @@ func TestShortestPath(t *testing.T) {
 	`)
 	src := Point{1, 0} // a
 	dst := Point{1, 4} // b
-	path, err := m.ShortestPath(src, dst)
+	path, err := src.ShortestPath(dst, &m)
 	if err != nil {
 		t.Error(err)
 	}

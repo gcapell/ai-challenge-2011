@@ -125,8 +125,8 @@ func (cz *CombatZone) GetScoringHeuristic(m *Map) ScoringHeuristic {
 func (m *Map) FriendliesInRangeOf(p Point) []Point {
 	reply := make([]Point, 0)
 	for _, a := range m.myAnts {
-		if m.CouldInfluence(p, a.p) {
-			reply = append(reply, a.p)
+		if a.CouldInfluence(p, m) {
+			reply = append(reply, a.Point)
 		}
 	}
 	return reply
@@ -138,7 +138,7 @@ func sanitiseAll(points []Point) {
 	}
 }
 
-func (m *Map) CouldInfluence(a, b Point) bool {
+func (a Point ) CouldInfluence(b Point, m *Map) bool {
 	isDry := func(p Point) bool {
 		return !m.isWet(p)
 	}

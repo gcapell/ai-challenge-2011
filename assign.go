@@ -16,7 +16,7 @@ type (
 )
 
 func (a Assignment) String() string {
-	return fmt.Sprintf("Assignment{ %v->%v (%v)}", a.ant.p, a.p, a.distance)
+	return fmt.Sprintf("Assignment{ %v->%v (%v)}", a.ant.Point, a.p, a.distance)
 }
 
 // Implement sort.Interface
@@ -40,7 +40,7 @@ func assign1(ants []*Ant, targets []Point) []Assignment {
 			log.Panicf("nil ant!")
 		}
 		for _, p := range targets {
-			as.add(Assignment{a, p, a.p.CrowDistance2(p)})
+			as.add(Assignment{a, p, a.CrowDistance2(p)})
 		}
 	}
 	sort.Sort(as)
@@ -50,11 +50,11 @@ func assign1(ants []*Ant, targets []Point) []Assignment {
 	assigned := make(map[Location]bool)
 
 	for _, a := range as {
-		if assigned[a.p.loc()] || assigned[a.ant.p.loc()] {
+		if assigned[a.p.loc()] || assigned[a.ant.loc()] {
 			continue
 		}
 		assigned[a.p.loc()] = true
-		assigned[a.ant.p.loc()] = true
+		assigned[a.ant.loc()] = true
 		reply = append(reply, a)
 	}
 	return reply

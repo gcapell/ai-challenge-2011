@@ -23,7 +23,7 @@ func TestAssign1(t *testing.T) {
 func assign1Helper(t *testing.T, antLocations []Point, targets []Point, expected []Pairing) {
 	ants := make([]*Ant, len(antLocations))
 	for i, p := range antLocations {
-		ants[i] = &Ant{p: p}
+		ants[i] = &Ant{Point: p}
 	}
 	reply := assign1(ants, targets)
 	if len(reply) != len(expected) {
@@ -31,7 +31,7 @@ func assign1Helper(t *testing.T, antLocations []Point, targets []Point, expected
 	}
 	for i, r := range reply {
 		e := expected[i]
-		if !(e.p.Equals(r.ant.p) && e.q.Equals(r.p)) {
+		if !(e.p.Equals(r.ant.Point) && e.q.Equals(r.p)) {
 			t.Errorf("%v != %v in %s\n", r, e, reply)
 		}
 	}
