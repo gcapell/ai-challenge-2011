@@ -9,6 +9,7 @@ import (
 type (
 	//Item represents all the various items that may be on the map
 	Item int8
+	Turn uint
 
 	Square struct {
 		isWater  bool

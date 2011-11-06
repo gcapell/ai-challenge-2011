@@ -7,8 +7,6 @@ import (
 	"os"
 )
 
-type Turn uint
-
 //Game keeps track of everything we need to know about the state of the game
 type Game struct {
 	LoadTime     int   //in milliseconds
