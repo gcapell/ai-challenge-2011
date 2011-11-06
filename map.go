@@ -46,6 +46,23 @@ type (
 	}
 )
 
+const (
+	UNKNOWN Item = iota - 5
+	WATER
+	FOOD
+	LAND
+	DEAD
+	MY_ANT    = 0
+	ENEMY_ANT = 1
+
+	MAXPLAYER = 24
+)
+
+var (
+	ROWS, COLS, VIEWRADIUS2 int
+	TURN                    Turn
+)
+
 func (m *Map) setDeadline() {
 	m.deadline = time.Nanoseconds() + m.thinkTime
 }
@@ -97,23 +114,6 @@ func (a *Ant) String() string {
 	}
 	return fmt.Sprintf("Ant@%v", a.p)
 }
-
-const (
-	UNKNOWN Item = iota - 5
-	WATER
-	FOOD
-	LAND
-	DEAD
-	MY_ANT    = 0
-	ENEMY_ANT = 1
-
-	MAXPLAYER = 24
-)
-
-var (
-	ROWS, COLS, VIEWRADIUS2 int
-	TURN                    Turn
-)
 
 func (m *Map) Init(rows, cols, viewRadius2 int) {
 	ROWS = rows
