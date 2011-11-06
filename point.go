@@ -7,7 +7,7 @@ import (
 type (
 	//Location combines (Row, Col) coordinate pairs 
 	// for use as keys in maps (and in a 1d array)
-	Location int
+	Location uint
 
 	Point  struct{ r, c int } // rows, columns
 	Points []Point

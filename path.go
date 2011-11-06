@@ -47,8 +47,10 @@ func (m *Map) ShortestPath(src, dst Point) ([]Point, os.Error) {
 	// Each entry points to previous point in path
 	back := make([]Location, ROWS*COLS)
 
+	INVALID_LOC := Location(ROWS * COLS + 1)
+
 	for j := 0; j < len(back); j++ {
-		back[j] = -1
+		back[j] = INVALID_LOC
 	}
 
 	for h.Len() != 0 {
@@ -56,7 +58,7 @@ func (m *Map) ShortestPath(src, dst Point) ([]Point, os.Error) {
 		pathLength := n.length + 1
 		for _, p := range m.AccessibleNeighbours(n.p) {
 			// Have we already seen this point?
-			if back[p.loc()] != -1 {
+			if back[p.loc()] != INVALID_LOC {
 				continue
 			}
 			newNode := Node{p.CrowDistance(dst) + float64(pathLength), pathLength, p}
