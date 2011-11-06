@@ -139,3 +139,17 @@ func (p Point) Neighbours(rad2 int) []Point {
 	return reply
 }
 
+func spiral(p Point, step, maxDistance int) []Point {
+	r := make([]Point, 0, maxDistance/step*maxDistance/step)
+	for radius := step; radius < maxDistance; radius += step {
+		for off := 0; off < radius; off += step {
+			r1 := Point{p.r + radius - off, p.c - radius}.sanitised()
+			r2 := Point{p.r - radius, p.c - radius + off}.sanitised()
+			r3 := Point{p.r - radius + off, p.c + radius}.sanitised()
+			r4 := Point{p.r + radius, p.c + radius - step}.sanitised()
+
+			r = append(r, r1, r2, r3, r4)
+		}
+	}
+	return r
+}
