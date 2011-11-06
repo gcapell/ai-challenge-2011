@@ -13,6 +13,7 @@ GOFILES=\
 	assign.go \
 	combat.go \
 	pattern_set.go \
+	timer.go \
 
 include $(GOROOT)/src/Make.cmd
 
