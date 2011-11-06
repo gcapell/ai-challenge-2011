@@ -164,8 +164,9 @@ func NewZone(e Point) *CombatZone {
 
 func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 
+	log.Printf("group combat: %d friendly, %d enemy", len(cz.friendly), len(cz.enemy))
 	if len(cz.friendly)+len(cz.enemy) > 7 {
-		log.Printf("group combat too hard, giving up")
+		log.Printf("too hard, giving up")
 		return nil
 	}
 

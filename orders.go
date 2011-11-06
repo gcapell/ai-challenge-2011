@@ -26,6 +26,7 @@ func (m *Map) moveAll() {
 			if !wantsMove {
 				continue
 			}
+
 			if m.isBlocked(dst) {
 				log.Printf("%v blocked", dst)
 				a.AbortMove()
@@ -33,7 +34,11 @@ func (m *Map) moveAll() {
 				continue
 			}
 			if occupied[dst.loc()] {
-				nextMove = append(nextMove, a)
+				if dst.Equals(a.p) {
+					a.Pause()
+				} else {
+					nextMove = append(nextMove, a)
+				}
 				continue
 			}
 			src := a.p
@@ -47,6 +52,7 @@ func (m *Map) moveAll() {
 		// If we couldn't move any ants at all, we're deadlocked
 		if len(toMove) == len(nextMove) {
 			// deadlock
+			log.Printf("deadlocked moves: %v", toMove)
 			for _, a := range toMove {
 				a.AbortMove()
 				deadlocked += 1
@@ -106,6 +112,11 @@ func (a *Ant) Move(dst Point) {
 
 	a.plan = a.plan[1:]
 	a.p = dst
+}
+
+func (a *Ant) Pause() {
+	assert (a.plan[0].Equals(a.p), "a.Pause: %v == %v", a.plan[0], a.p)
+	a.plan = a.plan[1:]
 }
 
 func (m *Map) Moved(a *Ant, src, dst Point) {
