@@ -132,12 +132,6 @@ func (m *Map) FriendliesInRangeOf(p Point) []Point {
 	return reply
 }
 
-func sanitiseAll(points []Point) {
-	for j := range points {
-		(&points[j]).sanitise()
-	}
-}
-
 func (a Point ) CouldInfluence(b Point, m *Map) bool {
 	isDry := func(p Point) bool {
 		return !m.isWet(p)
