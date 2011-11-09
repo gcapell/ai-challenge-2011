@@ -186,3 +186,15 @@ func direction(src, dst Point) string {
 func (src Point) OutputMove(dst Point) {
 	fmt.Println("o", src.r, src.c, direction(src, dst))
 }
+
+
+func  minDistance2(src Point, other []Point ) int {
+	var minD int
+	for i, p := range other {
+		d := src.CrowDistance2(p)
+		if i== 0 || d<minD {
+			minD = d
+		}
+	}
+	return minD
+}

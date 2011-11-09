@@ -53,8 +53,6 @@ func (m *Map) closeCombat() {
 }
 
 func MakeMove(src, dst []Point, m *Map) {
-	// log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
-	
 	for i, srcP := range src {
 		dstP := dst[i]
 		ant := m.myAnts[srcP.loc()]
@@ -184,10 +182,20 @@ func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 //  * assuming enemy ants stay still
 
 func (cz *CombatZone) SimpleGroupCombat(m *Map) *GroupMove {
-	bestMove := new(GroupMove)
 	occupied := occupiedMap(cz.friendly)
 	dst := make([]Point, len(cz.friendly))
 	var evalFn func(Point)int
+	if len(cz.friendly) >= len(cz.enemy) {
+		evalFn = func(p Point) int {
+			// We outnumber them. Closer is better
+			return - minDistance2(p, cz.enemy)
+		}
+	} else {
+		// outnumbered: further away is better
+		evalFn = func(p Point) int {
+			return minDistance2(p, cz.enemy)
+		}
+	}
 	
 	for i, a := range cz.friendly {
 		possibilities := nextMoves(a, m, occupied)
@@ -197,8 +205,9 @@ func (cz *CombatZone) SimpleGroupCombat(m *Map) *GroupMove {
 		occupied[next.loc()] = true
 	}
 	
-	return bestMove
-	// Avoid charging into certain death
+	// FIXME: check expected K/D ratio, back out if this
+	// move is crazy
+	return &GroupMove{dst:dst}
 }
 
 func bestStep(alt []Point, evalFn func(Point)int) Point {
