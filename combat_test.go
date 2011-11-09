@@ -140,7 +140,7 @@ func (m *Map) MovesFromMap() (gm, em GroupMove) {
 func ScoreFromMap(t *testing.T, s string, expected float64) {
 
 	m := new(Map)
-	m.InitFromString(0, s)
+	m.InitFromString(s)
 
 	gm, em := m.MovesFromMap()
 	gm.score(em, NEAR_OUR_HILL_SCORING)
@@ -184,7 +184,7 @@ func TestScore(t *testing.T) {
 
 func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	m := new(Map)
-	m.InitFromString(0, initial)
+	m.InitFromString( initial)
 
 	combatZones := m.FindCombatZones()
 	assert(len(combatZones) == 1, "%v", combatZones)
