@@ -47,17 +47,18 @@ func (m *Map) closeCombat() {
 		}
 		bestMove := cz.GroupCombat(m)
 		if bestMove != nil {
-			cz.MakeMove(m, bestMove)
+			MakeMove(cz.friendly, bestMove.dst, m)
 		}
 	}
 }
 
-func (cz *CombatZone) MakeMove(m *Map, bestMove *GroupMove) {
+func MakeMove(src, dst []Point, m *Map) {
 	// log.Printf("groupCombat friends: %v, enemies: %v, best: %v", cz.friendly, cz.enemy, bestMove)
-	for i, p := range cz.friendly {
-		dst := bestMove.dst[i]
-		ant := m.myAnts[p.loc()]
-		ant.moveToPoint(m, dst, "combat")
+	
+	for i, srcP := range src {
+		dstP := dst[i]
+		ant := m.myAnts[srcP.loc()]
+		ant.moveToPoint(m, dstP, "combat")
 	}
 }
 

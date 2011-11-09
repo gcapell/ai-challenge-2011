@@ -145,7 +145,7 @@ func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	cz := combatZones[0]
 	bestMove := cz.GroupCombat(m)
 
-	cz.MakeMove(m, bestMove)
+	MakeMove(cz.friendly, bestMove.dst, m)
 	m.moveAll()
 
 	checkMap(t, m, reason, final)
