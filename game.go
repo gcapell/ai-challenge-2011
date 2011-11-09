@@ -60,7 +60,7 @@ func main() {
 		m Map
 	)
 	g.Load()
-	m.Init(g.Rows, g.Cols, g.ViewRadius2)
+	m.Init(g.Rows, g.Cols, g.ViewRadius2, false)
 
 	// Think time is fraction of turn time
 	// (and converting milliseconds to nanoseconds)

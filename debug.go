@@ -47,8 +47,14 @@ func (m *Map) ItemAt(p Point) Item {
 //String returns an ascii diagram of the map.
 func (m *Map) String() string {
 	str := ""
-	for row := 0; row < ROWS; row++ {
-		for col := 0; col < COLS; col++ {
+	rows := ROWS
+	cols := COLS
+	if m.hasBorder {
+		rows -= BORDER
+		cols -= BORDER
+	}
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
 			s := m.ItemAt(Point{row, col}).Symbol()
 			str += string([]byte{s})
 		}

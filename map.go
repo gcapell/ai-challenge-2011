@@ -44,6 +44,9 @@ type (
 
 		thinkTime int64 // thinking time, in nanoseconds
 		deadline  int64 // deadline, ns since epoch
+		
+		// For testing, add a border that we don't draw
+		hasBorder bool
 	}
 )
 
@@ -57,6 +60,8 @@ const (
 	ENEMY_ANT = 1
 
 	MAXPLAYER = 24
+	
+	BORDER = 4
 )
 
 var (
@@ -112,7 +117,11 @@ func (a *Ant) String() string {
 	return fmt.Sprintf("Ant@%v", a.Point)
 }
 
-func (m *Map) Init(rows, cols, viewRadius2 int) {
+func (m *Map) Init(rows, cols, viewRadius2 int, hasBorder bool) {
+	if hasBorder {
+		rows += BORDER
+		cols += BORDER
+	}
 	ROWS = rows
 	COLS = cols
 	VIEWRADIUS2 = viewRadius2
@@ -123,6 +132,7 @@ func (m *Map) Init(rows, cols, viewRadius2 int) {
 	m.enemyHills = make([]Point, 0)
 	m.food = make([]Point, 0)
 	m.exploreTargets = make(map[Location]bool)
+	m.hasBorder = hasBorder
 
 	m.squares = make([][]Square, rows)
 	for row := 0; row < rows; row++ {

@@ -13,7 +13,7 @@ func (m *Map) InitFromString( s string) {
 	for row, line := range lines {
 		if row == 0 {
 			cols = len(line)
-			m.Init(rows, cols, 0)
+			m.Init(rows, cols, 0, false)
 		} else {
 			if cols != len(line) {
 				log.Panicf("different-length lines in %v", lines)
@@ -41,7 +41,7 @@ func (m *Map) InitFromString( s string) {
 
 func loadMap() Map {
 	var m Map
-	m.Init(4, 3, 0)
+	m.Init(4, 3, 0, false)
 	return m
 }
 
