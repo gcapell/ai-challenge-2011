@@ -160,10 +160,9 @@ func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 
 	log.Printf("group combat: %d friendly, %d enemy", len(cz.friendly), len(cz.enemy))
 	if len(cz.friendly)+len(cz.enemy) > 7 {
-		log.Printf("too hard, giving up")
-		return nil
+		return cz.SimpleGroupCombat(m)
 	}
-
+	
 	// For each of my possible moves, what could enemies do?
 
 	bestMove := new(GroupMove)
@@ -176,6 +175,58 @@ func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 	}
 	return bestMove
 }
+
+// There are too many ants in close proximity to try
+// all combinations of moves.
+// Simplify by:
+//  * moving each of our ants independently
+//  * assuming enemy ants stay still
+
+func (cz *CombatZone) SimpleGroupCombat(m *Map) *GroupMove {
+	bestMove := new(GroupMove)
+	occupied := occupiedMap(cz.friendly)
+	dst := make([]Point, len(cz.friendly))
+	var evalFn func(Point)int
+	
+	for i, a := range cz.friendly {
+		possibilities := nextMoves(a, m, occupied)
+		next := bestStep(possibilities, evalFn)
+		dst[i] = next
+		occupied[a.loc()] = false
+		occupied[next.loc()] = true
+	}
+	
+	return bestMove
+	// Avoid charging into certain death
+}
+
+func bestStep(alt []Point, evalFn func(Point)int) Point {
+	bestScore := 0
+	bestP := Point{}
+	for i,p := range alt {
+		score := evalFn(p)
+		if i==0 || score > bestScore {
+			bestP = p
+			bestScore = score
+		}
+	}
+	return bestP
+}
+func nextMoves(p Point, m *Map, occupied map[Location] bool)[]Point {
+	start := p.NeighboursAndSelf()
+	return filterPoints(start, func(p Point) bool {
+		return !occupied[p.loc()] && !m.isWet(p)
+	})
+}
+
+func occupiedMap(points []Point) map[Location]bool {
+	reply := make(map[Location]bool)
+	for _, p := range points {
+		reply[p.loc()] = true
+	}
+	return reply
+}
+
 
 func (m *Map) legalMoves(orig []Point) chan GroupMove {
 	ch := make(chan GroupMove)
