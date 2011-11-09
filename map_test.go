@@ -4,11 +4,9 @@ import (
 	"testing"
 	"strings"
 	"log"
-	"os"
-	"fmt"
 )
 
-func (m *Map) InitFromString(viewRadius2 int, s string) os.Error {
+func (m *Map) InitFromString(viewRadius2 int, s string) {
 	lines := strings.Fields(s)
 	rows := len(lines)
 	var cols int
@@ -18,7 +16,7 @@ func (m *Map) InitFromString(viewRadius2 int, s string) os.Error {
 			m.Init(rows, cols, viewRadius2)
 		} else {
 			if cols != len(line) {
-				return fmt.Errorf("different-length lines in %v", lines)
+				log.Panicf("different-length lines in %v", lines)
 			}
 		}
 		for col, letter := range line {
@@ -39,8 +37,6 @@ func (m *Map) InitFromString(viewRadius2 int, s string) os.Error {
 			}
 		}
 	}
-
-	return nil
 }
 
 func loadMap() Map {
