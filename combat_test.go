@@ -67,10 +67,8 @@ func TestFindCombatZones(t *testing.T) {
 	.....
 	.bbb.
 	`, 5, 3)
-	
-	
-	
 }
+
 func TestLargeGroupCombat(t *testing.T) {
 	ATTACKRADIUS2 = 5
 	
@@ -99,6 +97,25 @@ func TestLargeGroupCombat(t *testing.T) {
 	.....
 	.....
 	.aaa.
+	`)
+	
+	verifyGroupCombat(t, "charge when surrounding",
+	`
+	aaaa
+	....
+	....
+	.bb.
+	....
+	....
+	aaaa
+	`,`
+	....
+	aaaa
+	....
+	.bb.
+	....
+	aaaa
+	....
 	`)
 }
 
