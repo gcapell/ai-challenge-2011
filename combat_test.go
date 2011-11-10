@@ -2,10 +2,11 @@ package main
 
 import (
 	"testing"
+	"log"
 )
 
 
-func TestGroupCombatSpeed(t *testing.T) {
+func TestSpeedGroupCombat(t *testing.T) {
 	ATTACKRADIUS2 = 5
 
 	verifyGroupCombat(t,
@@ -35,96 +36,116 @@ func TestGroupCombatSpeed(t *testing.T) {
 	)
 }
 
+func checkCombatZones(t *testing.T, s string, friendly, enemy int) {
+	m := new(Map)
+	m.InitFromString( s, true)
+	zones := m.FindCombatZones()
+	if len(zones) != 1 {
+		log.Fatalf("Expected 1 combat zone got %d in \n%s", len(zones), m)
+	}
+	z := zones[0]
+	if len(z.friendly) != friendly {
+		log.Fatalf("expected %d friendlies, got %d", friendly, len(z.friendly))
+	}
+	if len(z.enemy) != enemy {
+		log.Fatalf("expected %d ememies, got %d", enemy, len(z.enemy))
+	}
+	
+}
+func TestFindCombatZones(t *testing.T) {
+	ATTACKRADIUS2 = 5
+	checkCombatZones(t, `
+	bbbbb
+	.....
+	.....
+	.aaa.
+	`, 3,5 )
+
+	checkCombatZones(t, `
+	aaaaa
+	.....
+	.....
+	.bbb.
+	`, 5, 3)
+	
+	
+	
+}
 func TestLargeGroupCombat(t *testing.T) {
 	ATTACKRADIUS2 = 5
 	
 	verifyGroupCombat(t, "charge", 
 	`
-	aaaaa.....
-	..........
-	..........
-	.bbb......
-	..........
-	..........
-	..........
-	..........
+	aaaaa
+	.....
+	.....
+	.bbb.
 	`,`
-	..........
-	aaaaa.....
-	..........
-	.bbb......
-	..........
-	..........
-	..........
-	..........
+	.....
+	aaaaa
+	.....
+	.bbb.
 	`)
 	verifyGroupCombat(t, "flee", 
 	`
-	bbbbb.....
-	..........
-	..........
-	.aaa......
-	..........
-	..........
-	..........
-	..........
+	bbbbb
+	.....
+	.....
+	.aaa.
+	.....
 	`,`
-	bbbbb.....
-	..........
-	..........
-	..........
-	.aaa......
-	..........
-	..........
-	..........
+	bbbbb
+	.....
+	.....
+	.....
+	.aaa.
 	`)
 }
 
 func TestGroupCombat(t *testing.T) {
 	ATTACKRADIUS2 = 5
 
+	log.Printf("hello\n")
+	verifyGroupCombat(t,
+		"Attack when we outnumber",
+		`
+		 ...a
+		 b..a
+		 ...a`,
+		`
+		 ..a.
+		 b.a.
+		 ..a.`,
+	)
+	log.Printf("goodbye\n")
+
+
 	verifyGroupCombat(t,
 		"support a friend",
 		`
-		.........
-		...a.....
-		....a..b.
-		.........
-		.........
-		.........
+		a....
+		.a..b
 		`,
 		`
-		.........
-		....a....
-		....a..b.
-		.........
-		.........
-		.........
+		.a...
+		.a..b
 		`,
 	)
 
 	verifyGroupCombat(t,
 		"run away when outnumbered",
-		`....a..b
-		 .......b`,
-		`...a...b
-		 .......b`,
-	)
-
-	verifyGroupCombat(t,
-		"Attack when we outnumber",
-		`....b..a
-		 .......a`,
-		`....b.a.
-		 ......a.`,
+		`.a..b
+		 ....b`,
+		`a...b
+		 ....b`,
 	)
 
 	verifyGroupCombat(t,
 		"Reject a swap",
-		`....b..a
-		 ........`,
-		`a...b...
-		 ........`,
+		`b..a.
+		`,
+		`b...a
+		 `,
 	)
 }
 func (m *Map) MovesFromMap() (gm, em GroupMove) {
@@ -140,7 +161,7 @@ func (m *Map) MovesFromMap() (gm, em GroupMove) {
 func ScoreFromMap(t *testing.T, s string, expected float64) {
 
 	m := new(Map)
-	m.InitFromString(s)
+	m.InitFromString(s, true)
 
 	gm, em := m.MovesFromMap()
 	gm.score(em, NEAR_OUR_HILL_SCORING)
@@ -184,7 +205,7 @@ func TestScore(t *testing.T) {
 
 func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	m := new(Map)
-	m.InitFromString( initial)
+	m.InitFromString( initial, true)
 
 	combatZones := m.FindCombatZones()
 	assert(len(combatZones) == 1, "%v", combatZones)

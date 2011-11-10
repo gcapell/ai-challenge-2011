@@ -68,6 +68,7 @@ func (m *Map) FindCombatZones() []*CombatZone {
 		myZone := NewZone(e)
 		merging := false
 		for _, a := range m.FriendliesInRangeOf(e) {
+			// log.Printf("%v in range of %v", a, e)
 			found := false
 			// Is this friendly part of an existing zone?
 			for _, z := range zones {
@@ -77,6 +78,7 @@ func (m *Map) FindCombatZones() []*CombatZone {
 						merging = true
 						z.enemy = append(z.enemy, e)
 						z.friendly = append(z.friendly, myZone.friendly...)
+						myZone = z
 					} else {
 						z.zone = myZone.zone
 					}
@@ -85,10 +87,15 @@ func (m *Map) FindCombatZones() []*CombatZone {
 			if !found {
 				myZone.friendly = append(myZone.friendly, a)
 			}
-
 		}
 		if !merging && len(myZone.friendly) != 0 {
 			zones = append(zones, myZone)
+		}
+		if false {
+			log.Printf("zones")
+			for _, z := range zones {
+				log.Printf("zone: %+v", z)
+			}
 		}
 	}
 	// Final merge
@@ -334,7 +341,7 @@ func (gm *GroupMove) score(em GroupMove, sh ScoringHeuristic) {
 	} else {
 		gm.worst = min(score, gm.worst)
 	}
-	// log.Printf("%s.score(%s) => %d", gm, &em, score)
+	//log.Printf("%s.score(%s) => %d", gm, &em, score)
 }
 
 func countBool(slice []bool) int {

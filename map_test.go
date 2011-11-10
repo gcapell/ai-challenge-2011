@@ -6,14 +6,14 @@ import (
 	"log"
 )
 
-func (m *Map) InitFromString( s string) {
+func (m *Map) InitFromString( s string, hasBorder bool) {
 	lines := strings.Fields(s)
 	rows := len(lines)
 	var cols int
 	for row, line := range lines {
 		if row == 0 {
 			cols = len(line)
-			m.Init(rows, cols, 0, false)
+			m.Init(rows, cols, 0, hasBorder)
 		} else {
 			if cols != len(line) {
 				log.Panicf("different-length lines in %v", lines)
@@ -52,7 +52,7 @@ func TestInitFromString(t *testing.T) {
 		.%.
 		a.b
 	`
-	m.InitFromString(s)
+	m.InitFromString(s, false)
 	checkMap(t, &m, "InitFromString", s)
 }
 
@@ -73,7 +73,7 @@ func TestShortestPath(t *testing.T) {
 		a.%.b%..
 		..%.....
 		..%.....
-	`)
+	`, false)
 	src := Point{1, 0} // a
 	dst := Point{1, 4} // b
 	path, err := src.ShortestPath(dst, &m)
