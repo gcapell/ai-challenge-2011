@@ -61,6 +61,7 @@ func main() {
 	)
 	g.Load()
 	m.Init(g.Rows, g.Cols, g.ViewRadius2, false)
+	log.SetPrefix("xxx")
 
 	// Think time is fraction of turn time
 	// (and converting milliseconds to nanoseconds)

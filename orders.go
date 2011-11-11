@@ -17,6 +17,7 @@ func (m *Map) moveAll() {
 		// log.Printf("Moving %s\n", a)
 	}
 
+	movedTo := make(map[Location]bool)
 	iterations, nMoved, deadlocked, blocked := 0, 0, 0, 0
 
 	for len(toMove) > 0 {
@@ -27,9 +28,10 @@ func (m *Map) moveAll() {
 				continue
 			}
 
-			if m.isBlocked(dst) {
+			if m.isBlocked(dst) || movedTo[dst.loc()] {
 				log.Printf("%v blocked", dst)
 				a.AbortMove()
+				movedTo[a.loc()] = true
 				blocked += 1
 				continue
 			}
@@ -44,6 +46,7 @@ func (m *Map) moveAll() {
 			src := a.Point
 			a.Move(dst)
 			occupied[dst.loc()] = true
+			movedTo[dst.loc()] = true
 			occupied[src.loc()] = false
 			m.Moved(a, src, dst)
 			nMoved += 1
