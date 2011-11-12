@@ -4,6 +4,7 @@ import (
 	"strings"
 	"fmt"
 	"log"
+	"flag"
 )
 
 //Game keeps track of everything we need to know about the state of the game
@@ -17,6 +18,8 @@ type Game struct {
 	SpawnRadius2 int   //spawn radius squared
 	PlayerSeed   int64 //random player seed
 }
+
+var logPrefix *string = flag.String("logPrefix", "MyBot", "default logging prefix")
 
 func (s *Game) Load() {
 	for words := range getPairs() {
@@ -58,6 +61,7 @@ func main() {
 		g Game
 		m Map
 	)
+	flag.Parse()
 	g.Load()
 	m.Init(g.Rows, g.Cols, g.ViewRadius2, false)
 	log.SetFlags(log.Lmicroseconds)

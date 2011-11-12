@@ -251,6 +251,7 @@ func (m *Map) Update(words []string) {
 			log.Panicf("Turn number out of sync, expected %v got %v", TURN+1, turn)
 		}
 		TURN = turn
+		log.SetPrefix(fmt.Sprintf("%s %d ", *logPrefix, turn))
 		return
 	}
 
