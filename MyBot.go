@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 	"rand"
+	"strings"
+	"time"
+	"fmt"
 )
 
 const (
@@ -25,15 +28,20 @@ func (m *Map) DoTurn() {
 		{func() { m.attackEnemyHill() }, "enemyHill"},
 		{func() { m.scout() }, "scout"},
 	}
+	times := make([]string, 0, len(strategies))
+
 	for _, s := range strategies {
 		if m.deadlineExpired() {
 			break
 		}
+		start := time.Nanoseconds()
 		s.fn()
-		log.Print(s.name)
+		delta_ms := float64(time.Nanoseconds() - start) / 1e6 
+		times = append(times, fmt.Sprintf("%s %.2f", s.name, delta_ms))
 	}
 	m.moveAll()
-	log.Print("doneTurn")
+	
+	log.Print(strings.Join(times, ", "))
 }
 
 // Grab any food we know about
