@@ -12,7 +12,7 @@ const (
 )
 
 //DoTurn is where you should do your bot's actual work.
-func (m *Map) DoTurn(t Timer) {
+func (m *Map) DoTurn() {
 
 	strategies := []struct {
 		fn   func()
@@ -30,10 +30,10 @@ func (m *Map) DoTurn(t Timer) {
 			break
 		}
 		s.fn()
-		t.Split(s.name)
+		log.Print(s.name)
 	}
 	m.moveAll()
-	t.Split("doneTurn")
+	log.Print("doneTurn")
 }
 
 // Grab any food we know about

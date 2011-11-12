@@ -73,21 +73,16 @@ func main() {
 	//indicate we're ready
 	fmt.Println("go")
 
-	t := NewTimer()
 	for line := range getLinesUntil("end") {
 		if line == "go" {
 			m.setDeadline()
-			t.Reset()
 			m.UpdatesProcessed()
-			t.Split("updates")
-			m.DoTurn(t)
-			t.Split("turn")
+			m.DoTurn()
 
 			//end turn
 			fmt.Println("go")
 
 			m.Reset()
-			t.Split("reset")
 			continue
 		}
 

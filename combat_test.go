@@ -69,7 +69,7 @@ func TestReinforce(t *testing.T) {
 	}
 	checkZone(t, zones[0], 2, 1)
 
-	m.DoTurn(NewNullTimer())
+	m.DoTurn()
 	checkMap(t, m, "reinforce", `
 	..a.b.
 	......

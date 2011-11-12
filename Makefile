@@ -13,7 +13,6 @@ GOFILES=\
 	assign.go \
 	combat.go \
 	pattern_set.go \
-	timer.go \
 	math.go \
 	intercept.go \
 
