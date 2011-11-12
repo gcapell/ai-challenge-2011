@@ -34,7 +34,7 @@ type (
 		enemyHills []Point
 
 		enemies []Point
-		enemyCombatants []Point
+		enemyCombatants []Point	// enemies close to one of our ants
 		food    []Point
 
 		hasTargetHill bool
@@ -296,6 +296,8 @@ func (m *Map) DeadAnt(p Point, ant Item) {
 	if ant != MY_ANT {
 		return
 	}
+	// FIXME - mark that whatever this ant was trying to do
+	// still needs to be done.
 	m.myAnts[p.loc()] = nil, false
 }
 
