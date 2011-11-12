@@ -12,7 +12,7 @@ const (
 )
 
 //DoTurn is where you should do your bot's actual work.
-func (m *Map) DoTurn(t *Timer) {
+func (m *Map) DoTurn(t Timer) {
 
 	strategies := []struct {
 		fn   func()
@@ -20,6 +20,7 @@ func (m *Map) DoTurn(t *Timer) {
 	}{
 		{func() { m.closeCombat() }, "closeCombat"},
 		{func() { m.defend() }, "defend"},
+		{func() { m.reinforce() }, "reinforce"},
 		{func() { m.forage() }, "forage"},
 		{func() { m.attackEnemyHill() }, "enemyHill"},
 		{func() { m.scout() }, "scout"},
@@ -46,6 +47,20 @@ func (m *Map) forage() {
 	}
 }
 
+// If there is a combat zone near us, move towards it
+func (m *Map) reinforce() {
+	reinforcers := m.FreeAnts(true)
+	for _, assignment := range assignNearbyCrow2(reinforcers, m.enemyCombatants, ATTACKRADIUS2 *4) {
+		if m.deadlineExpired() {
+			break
+		}
+		next, ok := m.CloserSquare(assignment.ant.Point, assignment.p)
+		if ok {
+			assignment.ant.moveToPoint(m, next, "reinforce")
+		}
+	}
+}
+
 // If there are enemies near our hill, intercept them
 func (m *Map) defend() {
 	defenders := m.FreeAnts(true)
@@ -65,6 +80,11 @@ func (m *Map) scout() {
 	scouts := m.FreeAnts(false)
 	size := min(ROWS, COLS)
 	step := 5
+	
+	if size < 20 {
+		// tiny testing map
+		return
+	}
 
 	for _, a := range scouts {
 		if m.deadlineExpired() {

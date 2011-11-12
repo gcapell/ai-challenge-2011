@@ -7,6 +7,7 @@ import (
 )
 
 func (m *Map) InitFromString( s string, hasBorder bool) {
+	m.SetNullDeadline()
 	lines := strings.Fields(s)
 	rows := len(lines)
 	var cols int
@@ -37,6 +38,8 @@ func (m *Map) InitFromString( s string, hasBorder bool) {
 			}
 		}
 	}
+
+	SetAttackRadius2(5)	// default for testing
 }
 
 func loadMap() Map {

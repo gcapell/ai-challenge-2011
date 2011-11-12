@@ -135,6 +135,9 @@ func (m *Map) FriendliesInRangeOf(p Point) []Point {
 			reply = append(reply, a.Point)
 		}
 	}
+	if len(reply)>0 {
+		m.enemyCombatants = append(m.enemyCombatants, p)
+	}
 	return reply
 }
 
@@ -206,7 +209,12 @@ func (cz *CombatZone) SimpleGroupCombat(m *Map) *GroupMove {
 	
 	for i, a := range cz.friendly {
 		possibilities := nextMoves(a, m, occupied)
-		next := bestStep(possibilities, evalFn)
+		var next Point
+		if len(possibilities) == 0 {
+			next = a
+		} else {
+			next = bestStep(possibilities, evalFn)
+		}
 		dst[i] = next
 		occupied[a.loc()] = false
 		occupied[next.loc()] = true

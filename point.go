@@ -65,6 +65,11 @@ func (a Point) CrowDistance2(b Point) int {
 	return dx*dx + dy*dy
 }
 
+func (a Point) ManhattanDistance(b Point) int {
+	dx, dy := wrapDelta(a.r, b.r, ROWS), wrapDelta(a.c, b.c, COLS)
+	return abs(dx) + abs(dy)
+}
+
 func (a Point) CrowDistance(b Point) float64 {
 	return math.Sqrt(float64(a.CrowDistance2(b)))
 }

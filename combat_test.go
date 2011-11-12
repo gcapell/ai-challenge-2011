@@ -7,8 +7,6 @@ import (
 
 
 func TestSpeedGroupCombat(t *testing.T) {
-	ATTACKRADIUS2 = 5
-
 	verifyGroupCombat(t,
 		"many units",
 		`
@@ -36,24 +34,52 @@ func TestSpeedGroupCombat(t *testing.T) {
 	)
 }
 
+func checkZone(t *testing.T, z *CombatZone, friendly, enemy int) {
+	if len(z.friendly) != friendly {
+		t.Fatalf("expected %d friendlies, got %d", friendly, len(z.friendly))
+	}
+	if len(z.enemy) != enemy {
+		t.Fatalf("expected %d ememies, got %d", enemy, len(z.enemy))
+	}
+}
+
 func checkCombatZones(t *testing.T, s string, friendly, enemy int) {
 	m := new(Map)
 	m.InitFromString( s, true)
 	zones := m.FindCombatZones()
 	if len(zones) != 1 {
+		t.Fatalf("Expected 1 combat zone got %d in \n%s", len(zones), m)
+	}
+	checkZone(t, zones[0], friendly, enemy)
+}
+
+func TestReinforce(t *testing.T) {
+	map1 := `
+	.a..b.
+	......
+	a.....
+	....a.
+	......
+	`
+	m := new(Map)
+	m.InitFromString( map1, true)
+	zones := m.FindCombatZones()
+	if len(zones) != 1 {
 		log.Fatalf("Expected 1 combat zone got %d in \n%s", len(zones), m)
 	}
-	z := zones[0]
-	if len(z.friendly) != friendly {
-		log.Fatalf("expected %d friendlies, got %d", friendly, len(z.friendly))
-	}
-	if len(z.enemy) != enemy {
-		log.Fatalf("expected %d ememies, got %d", enemy, len(z.enemy))
-	}
-	
+	checkZone(t, zones[0], 2, 1)
+
+	m.DoTurn(NewNullTimer())
+	checkMap(t, m, "reinforce", `
+	..a.b.
+	......
+	.a..a.
+	......
+	......
+	`)
 }
+
 func TestFindCombatZones(t *testing.T) {
-	ATTACKRADIUS2 = 5
 	checkCombatZones(t, `
 	bbbbb
 	.....
@@ -70,8 +96,6 @@ func TestFindCombatZones(t *testing.T) {
 }
 
 func TestLargeGroupCombat(t *testing.T) {
-	ATTACKRADIUS2 = 5
-	
 	verifyGroupCombat(t, "charge", 
 	`
 	aaaaa
@@ -120,9 +144,6 @@ func TestLargeGroupCombat(t *testing.T) {
 }
 
 func TestGroupCombat(t *testing.T) {
-	ATTACKRADIUS2 = 5
-
-	log.Printf("hello\n")
 	verifyGroupCombat(t,
 		"Attack when we outnumber",
 		`
@@ -134,7 +155,6 @@ func TestGroupCombat(t *testing.T) {
 		 b.a.
 		 ..a.`,
 	)
-	log.Printf("goodbye\n")
 
 
 	verifyGroupCombat(t,
@@ -192,8 +212,6 @@ func ScoreFromMap(t *testing.T, s string, expected float64) {
 }
 
 func TestScore(t *testing.T) {
-	ATTACKRADIUS2 = 5
-
 	tests := []struct {
 		s     string
 		score float64

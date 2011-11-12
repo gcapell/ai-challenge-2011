@@ -34,6 +34,7 @@ type (
 		enemyHills []Point
 
 		enemies []Point
+		enemyCombatants []Point
 		food    []Point
 
 		hasTargetHill bool
@@ -73,8 +74,15 @@ func (m *Map) setDeadline() {
 	m.deadline = time.Nanoseconds() + m.thinkTime
 }
 
+func SetAttackRadius2(ar2 int) {
+	ATTACKRADIUS2 = ar2
+}
+
+func (m *Map) SetNullDeadline() {
+	m.deadline = 0
+}
 func (m *Map) deadlineExpired() bool {
-	if time.Nanoseconds() > m.deadline {
+	if m.deadline > 0 &&  time.Nanoseconds() > m.deadline {
 		log.Printf("deadline expired")
 		return true
 	}
@@ -146,6 +154,7 @@ func (m *Map) Reset() {
 	m.myHills = m.myHills[:0]
 	m.enemies = m.enemies[:0]
 	m.enemyHills = m.enemyHills[:0]
+	m.enemyCombatants = m.enemyCombatants[:0]
 	m.food = m.food[:0]
 
 	// reset squares
@@ -166,6 +175,26 @@ func (m *Map) isBlocked(p Point) bool {
 	return s.isWater || s.hasFood
 }
 
+// Find point one square from 'src' which is closer to 'dst' and ok to move to.
+func (m *Map) CloserSquare(src, dst Point) (next Point, found bool) {
+	neighbours := []Point{ {src.r + 1, src.c}, {src.r - 1, src.c}, {src.r, src.c + 1}, {src.r, src.c - 1}}
+	minDistance := src.CrowDistance2(dst)
+	found = false
+	for _, p := range neighbours {
+		p.sanitise()
+		if m.isBlocked(p) {
+			continue
+		}
+		distance := p.CrowDistance2(dst)
+		if  distance < minDistance {
+			found = true
+			minDistance = distance
+			next = p
+		}
+	}
+	return next, found
+}
+
 func (m *Map) AccessibleNeighbours(p Point) []Point {
 	allNeighbours := []Point{
 		Point{p.r + 1, p.c},
@@ -173,7 +202,8 @@ func (m *Map) AccessibleNeighbours(p Point) []Point {
 		Point{p.r, p.c + 1},
 		Point{p.r, p.c - 1},
 	}
-	reply := make([]Point, 0, 4)
+	reply := make([]Point, 4)
+	pos := 0
 	for _, n := range allNeighbours {
 		n.sanitise()
 		if m.isWet(n) {
@@ -182,9 +212,10 @@ func (m *Map) AccessibleNeighbours(p Point) []Point {
 		if _, ok := m.myAnts[n.loc()]; ok {
 			continue
 		}
-		reply = append(reply, n)
+		reply[pos] = n
+		pos += 1
 	}
-	return reply
+	return reply[:pos]
 }
 
 // A scout has reported from 'p'

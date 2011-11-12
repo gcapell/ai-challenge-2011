@@ -138,6 +138,9 @@ func (a *Ant) moveTo(m *Map, p Point, reason string) bool {
 }
 
 func (a *Ant) moveToPoint(m *Map, p Point, reason string) {
+	if !a.Equals(p) {
+		direction(a.Point, p)
+	}
 	a.isTasked = true
 	a.reason = reason
 	a.plan = []Point{p}

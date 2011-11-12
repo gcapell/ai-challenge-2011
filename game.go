@@ -39,8 +39,7 @@ func (s *Game) Load() {
 		case "viewradius2":
 			s.ViewRadius2 = param
 		case "attackradius2":
-			ATTACKRADIUS2 = param
-			log.Printf("ATTACKRADIUS2: %d", param)
+			SetAttackRadius2(param)
 		case "spawnradius2":
 			s.SpawnRadius2 = param
 		case "player_seed":
@@ -61,7 +60,7 @@ func main() {
 	)
 	g.Load()
 	m.Init(g.Rows, g.Cols, g.ViewRadius2, false)
-	log.SetPrefix("xxx")
+	log.SetFlags(log.Lmicroseconds)
 
 	// Think time is fraction of turn time
 	// (and converting milliseconds to nanoseconds)
@@ -70,14 +69,14 @@ func main() {
 	//indicate we're ready
 	fmt.Println("go")
 
-	var t Timer
+	t := NewTimer()
 	for line := range getLinesUntil("end") {
 		if line == "go" {
 			m.setDeadline()
 			t.Reset()
 			m.UpdatesProcessed()
 			t.Split("updates")
-			m.DoTurn(&t)
+			m.DoTurn(t)
 			t.Split("turn")
 
 			//end turn
