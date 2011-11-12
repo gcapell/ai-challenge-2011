@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"fmt"
+	"strings"
 )
 
 type (
@@ -41,15 +42,19 @@ var (
 
 // Minimax for close combat
 func (m *Map) closeCombat() {
-	for _, cz := range m.FindCombatZones() {
+	zones := m.FindCombatZones()
+	messages := make([]string,0,len(zones))
+	for _, cz := range zones {
 		if m.deadlineExpired() {
 			break
 		}
 		bestMove := cz.GroupCombat(m)
+		messages = append(messages, fmt.Sprintf("%d/%d", len(cz.friendly), len(cz.enemy)))
 		if bestMove != nil {
 			MakeMove(cz.friendly, bestMove.dst, m)
 		}
 	}
+	log.Printf("group combat %s", strings.Join(messages, ", "))
 }
 
 func MakeMove(src, dst []Point, m *Map) {
@@ -167,7 +172,6 @@ func NewZone(e Point) *CombatZone {
 
 func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 
-	log.Printf("group combat: %d friendly, %d enemy", len(cz.friendly), len(cz.enemy))
 	if len(cz.friendly)+len(cz.enemy) > 7 {
 		return cz.SimpleGroupCombat(m)
 	}
