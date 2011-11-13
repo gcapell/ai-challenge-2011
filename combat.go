@@ -42,15 +42,8 @@ var (
 
 // Check that 'points' are distinct and point to ants which haven't yet moved
 func noneMoved(m *Map, points []Point) bool {
-	seen := make(map[Location]bool)
 	for _, p := range points {
 		a := m.myAnts[p.loc()]
-		if seen[p.loc()] {
-			log.Printf("%s appears twice", p)
-			return false
-		} else {
-			seen[p.loc()] = true
-		}
 		if a.hasMoved {
 			log.Printf("%s %s already moved", a, p)
 			return false
@@ -237,7 +230,6 @@ func NewChargeEvaluator(m *Map, friendly, enemy []Point) *ChargeEvaluator{
 		}
 		enemyAttention[i] = attention
 	}
-	log.Printf("NewCharge: enemy %v, enemyAttention %v", enemy, enemyAttention)
 	return &ChargeEvaluator{m, enemy, enemyAttention}
 }
 
@@ -261,9 +253,7 @@ func(ce *ChargeEvaluator) evaluate(p Point) int {
 			death = 1
 		}
 	}
-	score :=  kill *10 - death * 9
-	log.Printf("eval(%s) -> distraction %v, kill %d, death %d, score %d", p, distraction, kill, death, score)
-	return score
+	return kill *10 - death * 9
 }
 
 // There are too many ants in close proximity to try
@@ -320,7 +310,7 @@ func bestStep(alt []Point, evalFn func(Point)int) Point {
 func nextMoves(p Point, m *Map, occupied map[Location] bool)[]Point {
 	start := p.NeighboursAndSelf()
 	return filterPoints(start, func(p Point) bool {
-		return !occupied[p.loc()] && !m.isWet(p)
+		return !occupied[p.loc()] && !m.isWet(p) && !m.hasFood(p)
 	})
 }
 
