@@ -51,7 +51,7 @@ func (m *Map) forage() {
 		if m.deadlineExpired() {
 			break
 		}
-		assignment.ant.moveTo(m, assignment.p, "food")
+		assignment.ant.SetPathFor(m, assignment.p, "food")
 	}
 }
 
@@ -64,7 +64,7 @@ func (m *Map) reinforce() {
 		}
 		next, ok := m.CloserSquare(assignment.ant.Point, assignment.p)
 		if ok {
-			assignment.ant.moveToPoint(m, next, "reinforce")
+			assignment.ant.OverridingMove(m, next, "reinforce")
 		}
 	}
 }
@@ -79,7 +79,7 @@ func (m *Map) defend() {
 		a, enemy := assignment.ant, assignment.p
 		hill := m.nearestHillToDefend(enemy)
 		dst := a.intercept(enemy, hill)
-		assignment.ant.moveTo(m, dst, "intercept")
+		assignment.ant.SetPathFor(m, dst, "intercept")
 	}
 }
 
@@ -113,7 +113,7 @@ func (m *Map) attackEnemyHill() {
 		if m.deadlineExpired() {
 			break
 		}
-		soldier.moveTo(m, m.targetHill, "enemy hill")
+		soldier.SetPathFor(m, m.targetHill, "enemy hill")
 	}
 }
 
@@ -131,7 +131,7 @@ func (a *Ant) Scout(m *Map, step, maxRadius int) {
 }
 
 func (a *Ant) Explore(m *Map, p Point) {
-	a.moveTo(m, p, "explore")
+	a.SetPathFor(m, p, "explore")
 	m.MarkExploreTarget(p)
 }
 

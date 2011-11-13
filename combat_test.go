@@ -71,11 +71,11 @@ func TestReinforce(t *testing.T) {
 
 	m.DoTurn()
 	checkMap(t, m, "reinforce", `
-	..a.b.
+	a...b.
 	......
-	.a..a.
+	.a....
 	......
-	......
+	....a.
 	`)
 }
 
@@ -247,7 +247,7 @@ func verifyGroupCombat(t *testing.T, reason, initial, final string) {
 	cz := combatZones[0]
 	bestMove := cz.GroupCombat(m)
 
-	MakeMove(cz.friendly, bestMove.dst, m)
+	SimultaneousOverridingMove(cz.friendly, bestMove.dst, m, "combat")
 	m.moveAll()
 
 	checkMap(t, m, reason, final)

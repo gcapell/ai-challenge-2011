@@ -65,8 +65,8 @@ func antAndPoint(a Assignment) []Point {
 	return []Point {a.ant.Point, a.p}
 }
 
-func pointOnly(a Assignment) []Point {
-	return []Point {a.p}
+func antOnly(a Assignment) []Point {
+	return []Point {a.ant.Point}
 }
 
 // Return optimal slice of ant->target assignments
@@ -92,5 +92,5 @@ func assignNearbyCrow2(ants []*Ant, targets [] Point, maxCrow2 int) []Assignment
 		return d
 	})
 	sort.Sort(as)
-	return filterAssignments(as, pointOnly)
+	return filterAssignments(as, antOnly)
 }

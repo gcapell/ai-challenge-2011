@@ -38,6 +38,10 @@ func (p *Point) sanitise() {
 	}
 }
 
+func (p Point) String() string {
+	return fmt.Sprintf("(%d,%d)", p.r, p.c)
+}
+
 func (p Point) In(other []Point) bool {
 	for _, o := range other {
 		if p.Equals(o) {
@@ -190,6 +194,7 @@ func direction(src, dst Point) string {
 
 func (src Point) OutputMove(dst Point) {
 	fmt.Println("o", src.r, src.c, direction(src, dst))
+	// log.Print("o", src.r, src.c, direction(src, dst))
 }
 
 

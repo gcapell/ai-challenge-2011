@@ -7,141 +7,130 @@ import (
 
 // Try to move all the ants
 func (m *Map) moveAll() {
-	occupied := make(map[Location]bool)
-	toMove := make([]*Ant, 0, len(m.myAnts))
-	nextMove := make([]*Ant, 0, len(toMove)/4)
+	iterations, nMoved, totalMoved := 0, 0, 0
 
-	for _, a := range m.myAnts {
-		occupied[a.loc()] = true
-		toMove = append(toMove, a)
-		// log.Printf("Moving %s\n", a)
-	}
-
-	movedTo := make(map[Location]bool)
-	iterations, nMoved, deadlocked, blocked := 0, 0, 0, 0
-
-	for len(toMove) > 0 {
+	for  {
 		iterations += 1
-		for _, a := range toMove {
-			wantsMove, dst := a.WantsMove()
-			if !wantsMove {
+		nMoved = 0
+		for _, a := range m.myAnts {
+			if a.hasMoved || len(a.plan) == 0{
+				continue
+			}
+			dst := a.plan[0]
+
+			if m.isBlocked(dst)  {
+				a.AbortMove(m, "blocked/food")
+				continue
+			}
+			other := m.myAnts[dst.loc()]
+			if other != nil {
+				if other.hasMoved {
+					a.AbortMove(m, "blocked/ant")
+				}
+				// Maybe this square will clear up later ...?
 				continue
 			}
 
-			if m.isBlocked(dst) || movedTo[dst.loc()] {
-				log.Printf("%v blocked", dst)
-				a.AbortMove()
-				movedTo[a.loc()] = true
-				blocked += 1
-				continue
-			}
-			if occupied[dst.loc()] {
-				if a.Equals(dst) {
-					a.Pause()
-				} else {
-					nextMove = append(nextMove, a)
-				}
-				continue
-			}
-			src := a.Point
-			a.Move(dst)
-			occupied[dst.loc()] = true
-			movedTo[dst.loc()] = true
-			occupied[src.loc()] = false
-			m.Moved(a, src, dst)
+			a.plan = a.plan[1:]
+			a.Move(m, dst, a.reason)
 			nMoved += 1
 		}
+		totalMoved += nMoved
 
-		// If we couldn't move any ants at all, we're deadlocked
-		if len(toMove) == len(nextMove) {
+		// If we couldn't move any ants at all, we're deadlocked (or finished)
+		if nMoved == 0 {
 			// deadlock
-			log.Printf("deadlocked moves: %v", toMove)
-			for _, a := range toMove {
-				a.AbortMove()
-				deadlocked += 1
+			for _, a := range m.myAnts {
+				if !(a.hasMoved || len(a.plan)==0) {
+					a.AbortMove(m, "deadlock")
+				}
 			}
-			nextMove = toMove[:0]
+			break
 		}
-		toMove, nextMove = nextMove[:], toMove[:0]
 	}
-	report := fmt.Sprintf("Moved %d in %d iterations", nMoved, iterations)
-	if deadlocked > 0 {
-		report += fmt.Sprintf(" %d deadlocked", deadlocked)
-	}
-	if blocked > 0 {
-		report += fmt.Sprintf(" %d blocked", blocked)
-	}
-	log.Println(report)
+	log.Println(fmt.Sprintf("Moved %d in %d iterations, %v", totalMoved, iterations, m.movesThisTurn))
 }
 
 // We weren't able to move.  Give up
-func (a *Ant) AbortMove() {
-	a.plan = a.plan[:0]
-}
-
-// Does a want to move? where to?
-func (a *Ant) WantsMove() (bool, Point) {
-	if len(a.plan) == 0 {
-		return false, a.Point
-	}
-	return true, a.plan[0]
-}
-
-// If we can, make our move (and report success, update occupied)
-func (a *Ant) Move(dst Point) {
-	assert(dst.Equals(a.plan[0]), "dst: %v, a.plan: %v", dst, a.plan)
-
-	a.OutputMove(dst)
-	a.plan = a.plan[1:]
-	a.Point = dst
-}
-
-func (a *Ant) Pause() {
-	assert (a.Equals(a.plan[0]), "a.Pause: %v == %v", a.plan[0], a.Point)
-	a.plan = a.plan[1:]
-}
-
-func (m *Map) Moved(a *Ant, src, dst Point) {
-	assert(m.myAnts[src.loc()] == a, "%v, %v", m.myAnts, src)
-	assert(m.myAnts[dst.loc()] == nil, "%v, %v", m.myAnts, dst)
-
-	m.myAnts[src.loc()] = nil, false
-	m.myAnts[dst.loc()] = a
+func (a *Ant) AbortMove(m *Map, reason string) {
+	a.CancelPlans()
+	a.Move(m, a.Point, reason)
 }
 
 func assert(assertion bool, fmt string, fmtArgs ...interface{}) {
 	if !assertion {
-		log.Printf(fmt, fmtArgs...)
+		log.Panicf(fmt, fmtArgs...)
 	}
 }
 
 // Assign a to get to p
-// Return true if we have re-assigned an ant to get to 'p',
-// false if we couldn't get ant there (or it was already en route)
-func (a *Ant) moveTo(m *Map, p Point, reason string) bool {
-	a.isTasked = true
+// Return true if a is now on path to p
+func (a *Ant) SetPathFor(m *Map, p Point, reason string) bool {
 	a.reason = reason
 
-	// Do we already know how to get to p?
+	// Are we already en-route?
 	if len(a.plan) > 0 && a.plan[len(a.plan)-1].Equals(p) {
-		return false
+		return true
 	}
 
 	path, error := a.ShortestPath(p, m)
 	if error != nil {
 		log.Printf("%v cannot get to %v (%s)\n", a, p, error)
-		a.isTasked = false
 		return false
 	}
 	a.plan = path
 	return true
 }
 
-func (a *Ant) moveToPoint(m *Map, p Point, reason string) {
-	if !a.Equals(p) {
-		direction(a.Point, p)
+// Simultaneously move ants from 'src' to 'dst',
+// overriding any other plans they may have had.
+func SimultaneousOverridingMove(src, dst []Point, m *Map, reason string) {
+	assert(noneMoved(m, src), "one of %v already moved", src)
+	ants := make([]*Ant, len(src))
+	for i, srcP := range src {
+		dstP := dst[i]
+		a := m.myAnts[srcP.loc()]
+		ants[i] = a
+
+		a.CancelPlans()
+		a.MarkMoved()
+		if !a.Equals(dstP) {
+			a.OutputMove(dstP)
+			a.Point = dstP
+		}
+		m.RecordMove(dstP, reason)
 	}
-	a.isTasked = true
-	a.reason = reason
-	a.plan = []Point{p}
+	for _, p := range src {
+		m.myAnts[p.loc()] = nil, false
+	}
+	for i, p := range dst {
+		m.myAnts[p.loc()] = ants[i]
+	}
+}
+
+func (a *Ant) MarkMoved() {
+	assert (!a.hasMoved, "%v already moved", a)
+	a.hasMoved = true
+}
+
+func (a *Ant) OverridingMove(m *Map, p Point, reason string) {
+	a.CancelPlans()
+	a.Move(m,p,reason)
+}
+
+func (a *Ant) Move(m *Map, p Point, reason string) {
+	a.MarkMoved()
+	if !a.Equals(p) {
+		a.OutputMove(p)
+		m.myAnts[a.loc()] = nil, false
+		a.Point = p
+		m.myAnts[p.loc()] = a
+	}
+	m.RecordMove(p, reason)
+}
+
+func (m *Map) RecordMove(dst Point, reason string) {
+	points := m.movesThisTurn[reason]
+	points = append(points, dst)
+	m.movesThisTurn[reason] = points
 }

@@ -22,8 +22,8 @@ type (
 		Point  // Where are we now?
 		plan     []Point // Where will we be?
 		seen     Turn
-		isTasked bool   // Has this ant been given an order this turn?
 		reason   string // why are we moving?
+		hasMoved	bool	// Has this ant moved this turn?
 	}
 
 	Map struct {
@@ -48,6 +48,8 @@ type (
 		
 		// For testing, add a border that we don't draw
 		hasBorder bool
+
+		movesThisTurn map[string] []Point
 	}
 )
 
@@ -156,6 +158,7 @@ func (m *Map) Reset() {
 	m.enemyHills = m.enemyHills[:0]
 	m.enemyCombatants = m.enemyCombatants[:0]
 	m.food = m.food[:0]
+	m.movesThisTurn = make(map[string] []Point)
 
 	// reset squares
 	for r := 0; r < ROWS; r++ {
@@ -164,35 +167,31 @@ func (m *Map) Reset() {
 			s.hasFood = false
 		}
 	}
+
+	// reset ants
+	for _, a := range m.myAnts {
+		a.hasMoved = false
+	}
 }
 
 func (m *Map) isWet(p Point) bool {
 	return m.squares[p.r][p.c].isWater
 }
 
+// Are we blocked from moving to 'p' ?
 func (m *Map) isBlocked(p Point) bool {
 	s := &m.squares[p.r][p.c]
 	return s.isWater || s.hasFood
 }
 
-// Find point one square from 'src' which is closer to 'dst' and ok to move to.
+// Find point one square from 'src' which gets us closer to 'dst' and ok to move to this turn.
 func (m *Map) CloserSquare(src, dst Point) (next Point, found bool) {
-	neighbours := []Point{ {src.r + 1, src.c}, {src.r - 1, src.c}, {src.r, src.c + 1}, {src.r, src.c - 1}}
-	minDistance := src.CrowDistance2(dst)
-	found = false
-	for _, p := range neighbours {
-		p.sanitise()
-		if m.isBlocked(p) {
-			continue
-		}
-		distance := p.CrowDistance2(dst)
-		if  distance < minDistance {
-			found = true
-			minDistance = distance
-			next = p
-		}
+	path, err := src.ShortestPath(dst, m)
+	if err != nil {
+		log.Printf("Could not find CloserSquare(%s,%s): %s", src,dst, err)
+		return next, false
 	}
-	return next, found
+	return path[0], true
 }
 
 func (m *Map) AccessibleNeighbours(p Point) []Point {
@@ -313,7 +312,6 @@ func (m *Map) UpdatesProcessed() {
 			log.Printf("ROWS: %d", ROWS)
 			log.Panicf("%v (@ %v) missed an update\n", ant, loc.point())
 		}
-		ant.isTasked = false // open for business!
 	}
 
 	// targetHill destroyed?
@@ -349,11 +347,11 @@ func (m *Map) UpdatesProcessed() {
 }
 
 // Return slice of ants who aren't already assigned
-// If interrupt, include ants who already are moving
+// If interrupt, include ants who already have a plan
 func (m *Map) FreeAnts(interrupt bool) []*Ant {
 	reply := make([]*Ant, 0, len(m.myAnts))
 	for _, ant := range m.myAnts {
-		if ant.isTasked {
+		if ant.hasMoved {
 			// Already assigned this turn
 			continue
 		}
@@ -364,4 +362,8 @@ func (m *Map) FreeAnts(interrupt bool) []*Ant {
 		reply = append(reply, ant)
 	}
 	return reply
+}
+
+func (a *Ant) CancelPlans() {
+	a.plan = a.plan[:0]
 }

@@ -40,29 +40,44 @@ var (
 	SCOUTING_SCORING      = ScoringHeuristic{deadEnemy: 100, deadFriendly: -110}
 )
 
+// Check that 'points' are distinct and point to ants which haven't yet moved
+func noneMoved(m *Map, points []Point) bool {
+	seen := make(map[Location]bool)
+	for _, p := range points {
+		a := m.myAnts[p.loc()]
+		if seen[p.loc()] {
+			log.Printf("%s appears twice", p)
+			return false
+		} else {
+			seen[p.loc()] = true
+		}
+		if a.hasMoved {
+			log.Printf("%s %s already moved", a, p)
+			return false
+		}
+	}
+	return true
+}
+
 // Minimax for close combat
 func (m *Map) closeCombat() {
 	zones := m.FindCombatZones()
+	if len(zones) == 0 {
+		return
+	}
 	messages := make([]string,0,len(zones))
 	for _, cz := range zones {
+		assert(noneMoved(m, cz.friendly), "one of %v already moved", cz.friendly)
 		if m.deadlineExpired() {
 			break
 		}
 		bestMove := cz.GroupCombat(m)
 		messages = append(messages, fmt.Sprintf("%d/%d", len(cz.friendly), len(cz.enemy)))
 		if bestMove != nil {
-			MakeMove(cz.friendly, bestMove.dst, m)
+			SimultaneousOverridingMove(cz.friendly, bestMove.dst, m, "combat")
 		}
 	}
 	log.Printf("group combat %s", strings.Join(messages, ", "))
-}
-
-func MakeMove(src, dst []Point, m *Map) {
-	for i, srcP := range src {
-		dstP := dst[i]
-		ant := m.myAnts[srcP.loc()]
-		ant.moveToPoint(m, dstP, "combat")
-	}
 }
 
 func (m *Map) FindCombatZones() []*CombatZone {
