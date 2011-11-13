@@ -161,6 +161,7 @@ func (m *Map) FriendliesInRangeOf(p Point) []Point {
 	return reply
 }
 
+// Could a and b both move such that they are in range of each other?
 func (a Point ) CouldInfluence(b Point, m *Map) bool {
 	isDry := func(p Point) bool {
 		return !m.isWet(p)
@@ -173,6 +174,19 @@ func (a Point ) CouldInfluence(b Point, m *Map) bool {
 			if aa.CrowDistance2(bb) <= ATTACKRADIUS2 {
 				return true
 			}
+		}
+	}
+	return false
+}
+// Could a move such that it is in range of b?
+func (a Point ) CouldReach(b Point, m *Map) bool {
+	isDry := func(p Point) bool {
+		return !m.isWet(p)
+	}
+	aNext := filterPoints(a.NeighboursAndSelf(), isDry)
+	for _, aa := range aNext {
+		if aa.CrowDistance2(b) <= ATTACKRADIUS2 {
+			return true
 		}
 	}
 	return false
@@ -204,6 +218,54 @@ func (cz *CombatZone) GroupCombat(m *Map) *GroupMove {
 	return bestMove
 }
 
+type ChargeEvaluator struct {
+	m *Map
+	enemy []Point
+	enemyAttention[]int
+}
+
+func NewChargeEvaluator(m *Map, friendly, enemy []Point) *ChargeEvaluator{
+
+	// How much is each enemy's attention (potentially) divided?
+	enemyAttention := make([]int, len(enemy))
+	for i, p := range enemy {
+		attention := 0
+		for _, fp := range friendly {
+			if p.CouldInfluence(fp, m) {
+				attention += 1
+			}
+		}
+		enemyAttention[i] = attention
+	}
+	log.Printf("NewCharge: enemy %v, enemyAttention %v", enemy, enemyAttention)
+	return &ChargeEvaluator{m, enemy, enemyAttention}
+}
+
+func(ce *ChargeEvaluator) evaluate(p Point) int {
+	// What are the attention dividers for enemies who could reach this spot?
+	distraction := make([]int,0, len(ce.enemy))
+	for i, ep := range ce.enemy {
+		if ep.CouldReach(p, ce.m) {
+			distraction = append(distraction, ce.enemyAttention[i])
+		}
+	}
+
+	myDistraction := len(distraction)
+	death := 0
+	kill := 0
+	for _, ed := range distraction {
+		if ed >= myDistraction {
+			kill += 1
+		}
+		if ed <= myDistraction {
+			death = 1
+		}
+	}
+	score :=  kill *10 - death * 9
+	log.Printf("eval(%s) -> distraction %v, kill %d, death %d, score %d", p, distraction, kill, death, score)
+	return score
+}
+
 // There are too many ants in close proximity to try
 // all combinations of moves.
 // Simplify by:
@@ -214,11 +276,10 @@ func (cz *CombatZone) SimpleGroupCombat(m *Map) *GroupMove {
 	occupied := occupiedMap(cz.friendly)
 	dst := make([]Point, len(cz.friendly))
 	var evalFn func(Point)int
-	if len(cz.friendly) >= len(cz.enemy) {
-		evalFn = func(p Point) int {
-			// We outnumber them. Closer is better
-			return - minDistance2(p, cz.enemy)
-		}
+	if len(cz.friendly) > len(cz.enemy) {
+		// charge!
+		evaluator := NewChargeEvaluator(m, cz.friendly, cz.enemy)
+		evalFn = func(p Point) int {return evaluator.evaluate(p)}
 	} else {
 		// outnumbered: further away is better
 		evalFn = func(p Point) int {
