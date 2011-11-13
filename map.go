@@ -178,6 +178,10 @@ func (m *Map) isWet(p Point) bool {
 	return m.squares[p.r][p.c].isWater
 }
 
+func (m *Map)  hasFood(p Point) bool {
+	return m.squares[p.r][p.c].hasFood
+}
+
 // Are we blocked from moving to 'p' ?
 func (m *Map) isBlocked(p Point) bool {
 	s := &m.squares[p.r][p.c]
@@ -189,6 +193,12 @@ func (m *Map) CloserSquare(src, dst Point) (next Point, found bool) {
 	path, err := src.ShortestPath(dst, m)
 	if err != nil {
 		log.Printf("Could not find CloserSquare(%s,%s): %s", src,dst, err)
+		return next, false
+	}
+	next = path[0]
+	
+	// If there's food there, just wait
+	if m.hasFood(next) {
 		return next, false
 	}
 	return path[0], true
