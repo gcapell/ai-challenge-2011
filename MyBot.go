@@ -37,11 +37,13 @@ func (m *Map) DoTurn() {
 		start := time.Nanoseconds()
 		s.fn()
 		delta_ms := float64(time.Nanoseconds() - start) / 1e6 
-		times = append(times, fmt.Sprintf("%s %.2f", s.name, delta_ms))
+		if delta_ms > 100 {
+			times = append(times, fmt.Sprintf("%s %.2f", s.name, delta_ms))
+		}
 	}
 	m.moveAll()
 	
-	log.Print(strings.Join(times, ", "))
+	log.Print("timings: %s", strings.Join(times, ", "))
 }
 
 // Grab any food we know about
@@ -122,7 +124,7 @@ func (a *Ant) Scout(m *Map, step, maxRadius int) {
 	for _, p := range targets {
 		if m.ShouldExplore(p) {
 			a.Explore(m, p)
-			log.Printf("%s scouting %v", a, p)
+			// log.Printf("%s scouting %v", a, p)
 			return
 		}
 	}

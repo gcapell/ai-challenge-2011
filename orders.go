@@ -48,7 +48,7 @@ func (m *Map) moveAll() {
 			break
 		}
 	}
-	log.Println(fmt.Sprintf("Moved %d in %d iterations, %v", totalMoved, iterations, m.movesThisTurn))
+	log.Println(fmt.Sprintf("Moved %d/%d %v", totalMoved, iterations, m.movesThisTurn))
 }
 
 // We weren't able to move.  Give up
