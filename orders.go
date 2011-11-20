@@ -7,7 +7,7 @@ import (
 
 // Try to move all the ants
 func (m *Map) moveAll() {
-	iterations, nMoved, totalMoved := 0, 0, 0
+	iterations, nMoved := 0, 0
 
 	for  {
 		iterations += 1
@@ -35,7 +35,6 @@ func (m *Map) moveAll() {
 			a.Move(m, dst, a.reason)
 			nMoved += 1
 		}
-		totalMoved += nMoved
 
 		// If we couldn't move any ants at all, we're deadlocked (or finished)
 		if nMoved == 0 {
@@ -48,7 +47,11 @@ func (m *Map) moveAll() {
 			break
 		}
 	}
-	log.Println(fmt.Sprintf("Moved %d/%d %v", totalMoved, iterations, m.movesThisTurn))
+	totalMoved := 0
+	for _, s := range m.movesThisTurn {
+		totalMoved += len(s)
+	}
+	log.Println(fmt.Sprintf("Moved %d/%d/%d %v", len(m.myAnts), totalMoved, iterations, m.movesThisTurn))
 }
 
 // We weren't able to move.  Give up

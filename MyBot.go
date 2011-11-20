@@ -43,7 +43,9 @@ func (m *Map) DoTurn() {
 	}
 	m.moveAll()
 	
-	log.Print("timings: %s", strings.Join(times, ", "))
+	if len(times) >0 {
+		log.Print("timings: %s", strings.Join(times, ", "))
+	}
 }
 
 // Grab any food we know about
