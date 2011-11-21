@@ -98,6 +98,14 @@ func isCorner(p Point, m *Map, left, back Direction) bool {
 
 func (h *myHeap2) Less(i, j int) bool { return h.At(i).(*Node2).estimate < h.At(j).(*Node2).estimate }
 
+func nodes2js(nodes []*Node2) string {
+	bits := make([]string, len(nodes))
+	for j, n := range nodes {
+		bits[j] = fmt.Sprintf("[%d,%d,%d,%.1f,'%s']", n.r, n.c, n.length, n.estimate, n.direction)
+	}
+	return strings.Join(bits, ",")
+}
+
 func (src Point) ShortestPath2(dst Point, m *Map) ([]Point, os.Error) {
 
 	h := &myHeap2{}
@@ -109,18 +117,19 @@ func (src Point) ShortestPath2(dst Point, m *Map) ([]Point, os.Error) {
 	seen := make(map[int]bool)
 
 	expansions := make([]Point, 0)
-	popped := make([]Point, 0)
+	popped := make([]*Node2, 0)
 	defer func() {
-		log.Printf("popped: [%s]", points2js(popped))
+		log.Printf("popped: [%s]", nodes2js(popped))
 		log.Printf("expansions: [%s]", points2js(expansions))
 	}()
 
 
+	
 	for h.Len() != 0 {
 		n := heap.Pop(h).(*Node2)
 		
 		log.Printf("Popped %s", n)
-		popped = append(popped, n.Point)
+		popped = append(popped, n)
 
 		for n2 := range n.expand(m, dst) {
 			hash := n2.hash()
