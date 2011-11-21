@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"io"
 )
 
 const (
@@ -101,12 +102,18 @@ func (h *myHeap2) Less(i, j int) bool { return h.At(i).(*Node2).estimate < h.At(
 func nodes2js(nodes []*Node2) string {
 	bits := make([]string, len(nodes))
 	for j, n := range nodes {
-		bits[j] = fmt.Sprintf("[%d,%d,%d,%.1f,'%s']", n.r, n.c, n.length, n.estimate, n.direction)
+		var pr, pc int
+		if n.prev != nil {
+			pr, pc = n.prev.Point.r, n.prev.Point.c
+		} else {
+			pr, pc = 0, 0
+		}
+		bits[j] = fmt.Sprintf("[%d,%d,%d,%.1f,'%s', %d, %d]", n.r, n.c, n.length, n.estimate, n.direction, pr, pc)
 	}
-	return strings.Join(bits, ",")
+	return fmt.Sprintf("[ %s ]", strings.Join(bits, ","))
 }
 
-func (src Point) ShortestPath2(dst Point, m *Map) ([]Point, os.Error) {
+func (src Point) ShortestPath2(dst Point, m *Map, fp io.Writer) ([]Point, os.Error) {
 
 	h := &myHeap2{}
 	heap.Init(h)
@@ -119,11 +126,9 @@ func (src Point) ShortestPath2(dst Point, m *Map) ([]Point, os.Error) {
 	expansions := make([]Point, 0)
 	popped := make([]*Node2, 0)
 	defer func() {
-		log.Printf("popped: [%s]", nodes2js(popped))
-		log.Printf("expansions: [%s]", points2js(expansions))
+		fmt.Fprintf(fp, "popped = %s;\n\n", nodes2js(popped))
+		fmt.Fprintf(fp, "expansions= %s;\n\n", points2js(expansions))
 	}()
-
-
 	
 	for h.Len() != 0 {
 		n := heap.Pop(h).(*Node2)
@@ -162,7 +167,7 @@ func points2js(points []Point)string {
 	for j, p := range(points) {
 		s[j] = fmt.Sprintf("[%d,%d]", p.r, p.c)
 	}
-	return strings.Join(s, ",")
+	return fmt.Sprintf("[ %s ]", strings.Join(s, ","))
 }
 
 
