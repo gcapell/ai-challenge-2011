@@ -114,7 +114,7 @@ func (src Point) ShortestPath2(dst Point, m *Map) ([]Point, os.Error) {
 	heap.Push(h, NewNode(src,dst))
 
 	// Each entry points to previous point in path
-	seen := make(map[int]bool)
+	seen := make(map[Location]bool)
 
 	expansions := make([]Point, 0)
 	popped := make([]*Node2, 0)
@@ -127,16 +127,10 @@ func (src Point) ShortestPath2(dst Point, m *Map) ([]Point, os.Error) {
 	
 	for h.Len() != 0 {
 		n := heap.Pop(h).(*Node2)
-		
-		log.Printf("Popped %s", n)
 		popped = append(popped, n)
 
-		for n2 := range n.expand(m, dst) {
-			hash := n2.hash()
-			if seen[hash] {
-				continue
-			}
-			seen[hash] = true
+		for n2 := range n.expand(m, dst, seen) {
+			log.Printf("%s -> %s", n, n2)
 			expansions = append(expansions, n2.Point)
 			if n2.Equals(dst) {
 				return n2.path(), nil
@@ -147,16 +141,16 @@ func (src Point) ShortestPath2(dst Point, m *Map) ([]Point, os.Error) {
 	return nil, fmt.Errorf("no path found")
 }
 
-func (n *Node2) expand(m *Map, dst Point) chan *Node2 {
+func (n *Node2) expand(m *Map, dst Point, seen map[Location] bool) chan *Node2 {
 	c := make(chan *Node2)
 	go func() {
 		if n.direction == NODIRECTION {
-			n.expandDir(c, m, dst, NORTH)
-			n.expandDir(c, m, dst, SOUTH)
-			n.expandDir(c, m, dst, EAST)
-			n.expandDir(c, m, dst, WEST)
+			n.expandDir(c, m, dst, NORTH, seen)
+			n.expandDir(c, m, dst, SOUTH, seen)
+			n.expandDir(c, m, dst, EAST, seen)
+			n.expandDir(c, m, dst, WEST, seen)
 		} else {
-			n.expandDir(c, m, dst, n.direction)
+			n.expandDir(c, m, dst, n.direction, seen)
 		}
 		close(c)
 	}()
@@ -172,7 +166,8 @@ func points2js(points []Point)string {
 }
 
 
-func (n *Node2) expandDir(c chan *Node2, m *Map, dst Point, d Direction) {
+func (n *Node2) expandDir(c chan *Node2, m *Map, dst Point, d Direction, seen map[Location]bool) {
+	log.Printf("expanding %s direction %s", n, d)
 	for p := n.Point; !m.isWet(p); p = d.Next(p) {
 		for _, d2 := range d.Orthogonal() {
 			back := d2.Opposite()
@@ -180,6 +175,11 @@ func (n *Node2) expandDir(c chan *Node2, m *Map, dst Point, d Direction) {
 			right := d2.Right()
 
 			for p2 := d2.Next(p); !m.isWet(p2) && !p2.Equals(p); p2 = d2.Next(p2){
+				if seen[p2.loc()] {
+					continue
+				} else {
+					seen[p2.loc()] = true
+				}
 				if p2.Equals(dst) {
 					c <- n.Child(p2, dst, d)
 					return

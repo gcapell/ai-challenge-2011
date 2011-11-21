@@ -14,7 +14,7 @@ function blah() {
 	
 	rects(svg, water, {fill: "blue", stroke: "midnightblue", });
 	rects(svg, path, {fill:"red", stroke: "red", opacity: 0.5});
-	rects(svg, path2, {fill:"green", stroke: "red", opacity: 0.3});
+	//rects(svg, path2, {fill:"green", stroke: "red", opacity: 0.3});
 	// rects(svg, expanded, {fill:"orange", stroke: "red", opacity: 0.3});
 	rects(svg, popped, {fill:"pink", stroke: "red", opacity: 0.2}, true);
 }
