@@ -25,7 +25,7 @@ func (m *Map) waterPoints() []Point {
 
 func TestShortestPath2(t *testing.T) {
 	m := readMap("../tools/maps/maze/maze_02p_01.map")
-	src, dst := Point{0,20}, Point{20,61}
+	src, dst := Point{15,23}, Point{33,58}
 	path, err := src.ShortestPath(dst, m)
 	if err != nil {
 		t.Fatal(err)

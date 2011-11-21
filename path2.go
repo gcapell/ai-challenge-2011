@@ -173,12 +173,14 @@ func points2js(points []Point)string {
 
 func (n *Node2) expandDir(c chan *Node2, m *Map, dst Point, d Direction, seen map[Location]bool) {
 	log.Printf("expanding %s direction %s", n, d)
+	dx := 0
 	for p := n.Point; !m.isWet(p); p = d.Next(p) {
 		for _, d2 := range d.Orthogonal() {
 			back := d2.Opposite()
 			left := d2.Left()
 			right := d2.Right()
 
+			dy := 0
 			for p2 := d2.Next(p); !m.isWet(p2) && !p2.Equals(p); p2 = d2.Next(p2){
 				if seen[p2.loc()] {
 					continue
@@ -186,17 +188,19 @@ func (n *Node2) expandDir(c chan *Node2, m *Map, dst Point, d Direction, seen ma
 					seen[p2.loc()] = true
 				}
 				if p2.Equals(dst) {
-					c <- n.Child(p2, dst, d)
+					c <- n.Child(p2, dst, d, dx + dy)
 					return
 				}
 				if isCorner(p2, m, left, back) {
-					c <- n.Child(p2, dst, left)
+					c <- n.Child(p2, dst, left, dx + dy)
 				}
 				if isCorner(p2, m, right, back) {
-					c <- n.Child(p2, dst, right)
+					c <- n.Child(p2, dst, right, dx + dy)
 				}
+				dy += 1
 			}
 		}
+		dx += 1
 	}
 }
 
@@ -213,8 +217,8 @@ func NewNode(src, dst Point) *Node2 {
 	return &Node2{src.CrowDistance(dst), 0, src, nil, NODIRECTION}
 }
 
-func (n *Node2) Child(p, dst Point, d Direction) *Node2 {
-	length := n.length + n.ManhattanDistance(p)
+func (n *Node2) Child(p, dst Point, d Direction, delta int) *Node2 {
+	length := n.length + delta
 	estimate := float64(length) + p.CrowDistance(dst)
 	return &Node2{ estimate,length, p, n, d}
 }
