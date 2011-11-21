@@ -7,7 +7,6 @@ import (
 	"strings"
 	"strconv"
 	"testing"
-	"fmt"
 )
 
 func (m *Map) waterPoints() []Point {
@@ -23,24 +22,22 @@ func (m *Map) waterPoints() []Point {
 	return points
 }
 
-func points2js(points []Point)string {
-	s := make([]string,len(points))
-	for j, p := range(points) {
-		s[j] = fmt.Sprintf("[%d,%d]", p.r, p.c)
-	}
-	return strings.Join(s, ",")
-}
-
-
 func TestShortestPath2(t *testing.T) {
 	m := readMap("../tools/maps/maze/maze_02p_01.map")
-	log.Printf("map: \n%s", points2js(m.waterPoints()))
+	// log.Printf("map: \n%s", points2js(m.waterPoints()))
 	src, dst := Point{0,20}, Point{20,61}
 	path, err := src.ShortestPath(dst, m)
 	if err != nil {
 		t.Fatal(err)
 	}
 	log.Printf("path: %s -> [%s] -> %s", src, points2js(path), dst)
+
+	path, err = src.ShortestPath2(dst, m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Printf("path2: %s -> [%s] -> %s", src, points2js(path), dst)
+
 }
 
 func readMap(filename string) *Map {

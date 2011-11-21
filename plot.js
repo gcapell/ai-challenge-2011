@@ -7,6 +7,10 @@ function blah() {
 	
 	rects(svg, water, {fill: "blue", stroke: "midnightblue"});
 	rects(svg, path, {fill:"red", stroke: "red", opacity: 0.5});
+	rects(svg, path2, {fill:"green", stroke: "red", opacity: 0.3});
+	rects(svg, expanded, {fill:"orange", stroke: "red", opacity: 0.3});
+	rects(svg, popped, {fill:"blue", stroke: "red", opacity: 0.5});
+
 }
 
 function rects(parent, points, attrs) {

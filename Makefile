@@ -15,6 +15,7 @@ GOFILES=\
 	pattern_set.go \
 	math.go \
 	intercept.go \
+	path2.go \
 
 include $(GOROOT)/src/Make.cmd
 
